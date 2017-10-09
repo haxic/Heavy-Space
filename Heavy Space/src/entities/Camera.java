@@ -1,4 +1,4 @@
-package test;
+package entities;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -6,10 +6,10 @@ import org.joml.Vector3f;
 public class Camera {
 	float hor = 3.14f;
 	float ver = 0.0f;
-	Vector3f position;
+	public Vector3f position;
 	Vector3f direction;
-	Vector3f right;
-	Vector3f up;
+	public Vector3f right;
+	public Vector3f up;
 	float fov, aspectRatio, near, far;
 	boolean lockUp;
 
@@ -127,5 +127,9 @@ public class Camera {
 
 	public void toggleLockUp() {
 		lockUp = !lockUp;
+	}
+
+	public float getAspectRatio() {
+		return aspectRatio;
 	}
 }

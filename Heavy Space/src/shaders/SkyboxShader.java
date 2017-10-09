@@ -1,8 +1,6 @@
-package renderers;
+package shaders;
 
 import org.joml.Matrix4f;
-
-import shaders.ShaderProgram;
 
 public class SkyboxShader extends ShaderProgram {
 
@@ -31,7 +29,9 @@ public class SkyboxShader extends ShaderProgram {
 		super.loadMatrixf(location_projectionMatrix, matrix);
 	}
 
+	Matrix4f tempMatrix = new Matrix4f();
 	public void loadViewMatrix(Matrix4f matrix) {
+		matrix = tempMatrix.set(matrix);
 		matrix.m30(0);
 		matrix.m31(0);
 		matrix.m32(0);

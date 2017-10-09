@@ -1,4 +1,4 @@
-package models;
+package utilities;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
@@ -24,9 +24,9 @@ import org.lwjgl.opengl.GL33;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
-import utilities.BufferStuff;
-import utilities.ModelData;
-import utilities.TextureData;
+import models.Mesh;
+import models.Model;
+import models.Texture;
 
 public class Loader {
 
@@ -37,6 +37,7 @@ public class Loader {
 	private List<Integer> textures = new ArrayList<Integer>();
 
 	public final static String[] CUBE_SIDES_ORDER = { "right", "left", "top", "bottom", "back", "front" };
+	private static final float[] QUAD_VERTICES = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f };
 
 	public Mesh loadToVAO(ModelData modelData) {
 		return loadToVAO(modelData.getVertices(), modelData.getUVs(), modelData.getNormals(), modelData.getIndices());
@@ -104,7 +105,9 @@ public class Loader {
 		return vaoID;
 	}
 
-	// Creates an empty VBO that can be used for instanced rendering
+	/**
+	 * Creates an empty VBO that can be used for instanced rendering
+	 */
 	public int createEmptyVBO(int floatCount) {
 		// Create VBO.
 		int vboID = GL15.glGenBuffers();
@@ -112,7 +115,7 @@ public class Loader {
 		vbos.add(vboID);
 		// Bind VBO.
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
-		// Allocate memory to the VBO and notify that this VBO is going to be updated often.
+		// Allocate memory to the VBO and notify that this VBO is going to be updated often. "floatCount * 4" is the size in bytes.
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, floatCount * 4, GL15.GL_STREAM_DRAW);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		return vboID;
@@ -122,14 +125,13 @@ public class Loader {
 		// Create a reference to the VBO for the VAO.
 		if (vboReferences.get(vaoID) == null)
 			vboReferences.put(vaoID, new ArrayList<Integer>());
-		if (!vboReferences.get(vaoID).contains(vboID)) {
+		if (!vboReferences.get(vaoID).contains(vboID))
 			vboReferences.get(vaoID).add(vboID);
-		}
 		// Bind VBO.
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
 		// Bind VAO.
 		GL30.glBindVertexArray(vaoID);
-		// Store VBO in a VAO attribute list.
+		// Store VBO in a VAO attribute list. "instancedDataLength * 4" and "offset * 4" are the sizes in bytes.
 		GL20.glVertexAttribPointer(attributeNumber, dataSize, GL11.GL_FLOAT, false, instancedDataLength * 4, offset * 4);
 		// Set VBO to be a per instance attribute.
 		GL33.glVertexAttribDivisor(attributeNumber, 1);
@@ -166,7 +168,7 @@ public class Loader {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
 
-	public Texture loadTexture(String fileName) {
+	public Texture loadTexture(String fileName, int atlasSize, int texturePages) {
 		int[] pixels = null;
 		int width = 0;
 		int height = 0;
@@ -199,7 +201,7 @@ public class Loader {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_SMOOTH);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_SMOOTH);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		return new Texture(textureID);
+		return new Texture(textureID, atlasSize, texturePages);
 	}
 
 	public Texture loadCubeMap(String folder) {
@@ -265,5 +267,19 @@ public class Loader {
 
 				-size, -size, -size, -size, -size, size, size, -size, -size, size, -size, -size, -size, -size, size, size, -size, size };
 
+	}
+
+	public void updateVBO(int vboID, float[] data, FloatBuffer buffer) {
+		buffer.clear();
+		buffer.put(data);
+		buffer.flip();
+		// Bind VBO.
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
+		// Reallocate memory to the VBO.
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer.capacity() * 4, GL15.GL_STREAM_DRAW);
+		// Store new data.
+		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, buffer);
+		// Unbind VBO.
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
 }

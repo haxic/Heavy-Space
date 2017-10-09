@@ -5,8 +5,9 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import entities.Camera;
 import models.Model;
-import test.Camera;
+import shaders.SkyboxShader;
 
 public class SkyboxRenderer {
 
@@ -29,8 +30,8 @@ public class SkyboxRenderer {
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, cube.getTexture().getTextureID());
 		// Draw model.
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getMesh().getIndicesSize());
-		// Unbind VAO attributes.
-		GL20.glDisableVertexAttribArray(0);
+		// Unbind VAO attributes. NOT NEEDED?
+		// GL20.glDisableVertexAttribArray(0);
 		// Unbind VAO.
 		GL30.glBindVertexArray(0);
 		shader.stop();

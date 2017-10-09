@@ -104,7 +104,6 @@ public class DisplayManager {
 		int height = h.get(0);
 		if (this.width == width && this.height == height)
 			return;
-		System.out.println("SCREEN SIZE CHANGED");
 		this.width = width;
 		this.height = height;
 		aspect = (double) this.width / (double) this.height;
@@ -129,6 +128,7 @@ public class DisplayManager {
 	public void enableCursor() {
 		cursorEnabled = true;
 		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		// TODO: Don't use syso!
 		System.out.println("ENABLE CURSOR " + cursorEnabled);
 	}
 
@@ -136,6 +136,7 @@ public class DisplayManager {
 		cursorEnabled = false;
 		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetCursorPos(windowID, getWidth() / 2, getHeight() / 2);
+		// TODO: Don't use syso!
 		System.out.println("DISABLE CURSOR " + cursorEnabled);
 	}
 

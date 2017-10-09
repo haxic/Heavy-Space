@@ -9,22 +9,26 @@ import org.lwjgl.opengl.GL11;
 
 import display.DisplayManager;
 import entities.Actor;
+import entities.Camera;
 import entities.Light;
 import models.Model;
-import test.Camera;
+import particles.ParticleManager;
+import utilities.Loader;
 
 public class RenderManager {
 	EntityRenderer entityRenderer;
 	SkyboxRenderer skyboxRenderer;
+	ParticleRenderer particleRenderer;
 	DisplayManager displayManager;
 	Map<Model, List<Actor>> actors;
 	Model skybox;
 
-	public RenderManager(DisplayManager displayManager, Model skybox) {
+	public RenderManager(DisplayManager displayManager, Model skybox, Loader loader) {
 		this.displayManager = displayManager;
 		this.skybox = skybox;
-		entityRenderer = new EntityRenderer(displayManager);
+		entityRenderer = new EntityRenderer();
 		skyboxRenderer = new SkyboxRenderer();
+		particleRenderer = new ParticleRenderer(loader);
 		actors = new HashMap<Model, List<Actor>>();
 		enableBackCulling();
 	}
@@ -37,6 +41,7 @@ public class RenderManager {
 		camera.updateViewMatrix();
 		entityRenderer.render(camera, light, actors);
 		skyboxRenderer.render(camera, skybox);
+		ParticleManager.renderParticles(camera);
 	}
 
 	public void cleanUp() {

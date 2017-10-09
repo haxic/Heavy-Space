@@ -8,13 +8,17 @@ import org.lwjgl.glfw.GLFW;
 
 import display.DisplayManager;
 import entities.Actor;
+import entities.Camera;
 import entities.Entity;
 import entities.Light;
+import gameData.GameModelLoader;
 import inputs.KeyboardHandler;
-import models.Loader;
 import models.Model;
+import models.Texture;
+import particles.ParticleManager;
+import particles.ParticleSystem;
 import renderers.RenderManager;
-import utilities.OBJFileLoader;
+import utilities.Loader;
 
 public class Main {
 
@@ -22,27 +26,29 @@ public class Main {
 		Loader loader = new Loader();
 		DisplayManager displayManager = new DisplayManager(1200, 800);
 		Model skybox = loader.loadSkybox("space", 500);
-		;
-		RenderManager renderManager = new RenderManager(displayManager, skybox);
+		GameModelLoader gameModelLoader = new GameModelLoader(loader);
+		RenderManager renderManager = new RenderManager(displayManager, skybox, loader);
 		Camera camera = new Camera();
 		Light light = new Light(new Vector3f(0, 50, 0), new Vector3f(1, 1, 1));
 
-		Model model = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("stall")), loader.loadTexture("stallTexture"));
-		Model model2 = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("dragon")), loader.loadTexture("dragon"));
-		Model model3 = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("fern")), loader.loadTexture("fern"));
-		model3.setHasTransparency(true);
-		model3.setAllowBackLighting(true);
-
+		
+		ParticleManager.init(loader);
+		ParticleSystem ps = new ParticleSystem(1, 2, 3, loader.loadTexture("cosmic", 2, 2), 3);
+		
 		List<Actor> actors = new ArrayList<Actor>();
-		actors.add(new Actor(new Entity(new Vector3f(0, 20, 0), new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f)), model));
+		// actors.add(new Actor(new Entity(new Vector3f(0, 20, 0), new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f)), gameModelLoader.stall));
+		// actors.add(new Actor(new Entity(new Vector3f(0, 0, -25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
+		// actors.add(new Actor(new Entity(new Vector3f(0, 0, 25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
+		// actors.add(new Actor(new Entity(new Vector3f(25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
+		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
+		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
 
-		actors.add(new Actor(new Entity(new Vector3f(0, 0, -25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model));
-		actors.add(new Actor(new Entity(new Vector3f(0, 0, 25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model));
-		actors.add(new Actor(new Entity(new Vector3f(25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model));
-		actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model));
-		actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model));
-		actors.add(new Actor(new Entity(new Vector3f(15, 0, -25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model2));
-		actors.add(new Actor(new Entity(new Vector3f(0, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), model3));
+		Actor dragonActor = new Actor(new Entity(new Vector3f(0, 0, -15), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
+		actors.add(dragonActor);
+		Actor fernActor = new Actor(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern);
+		actors.add(fernActor);
+		Actor fernActor2 = new Actor(new Entity(new Vector3f(-10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern, 3);
+		actors.add(fernActor2);
 
 		for (Actor actor : actors) {
 			renderManager.addActor(actor);
@@ -59,15 +65,11 @@ public class Main {
 		int invertX = 1;
 		int invertY = -1;
 		while (!displayManager.shouldClose()) {
+			float dt = displayManager.getDeltaTime();
 			currentTimeMillis = System.currentTimeMillis();
 			// Handle inputs
 
-			float bounceFactor = (float) Math.cos(((currentTimeMillis % 6100.0) / 1000.0));
-			if (bounceFactor < 0)
-				bounceFactor = -bounceFactor;
-			light.getPosition().set(0, bounceFactor * 20, 0);
 			displayManager.handleInputs();
-			float dt = displayManager.getDeltaTime();
 			float hor = invertX * mouseSpeed * dt * (float) (displayManager.getWidth() / 2 - displayManager.getMouseX());
 			float ver = invertY * mouseSpeed * dt * (float) (displayManager.getHeight() / 2 - displayManager.getMouseY());
 			if (!displayManager.isCursorEnabled()) {
@@ -99,8 +101,22 @@ public class Main {
 				camera.toggleLockUp();
 
 			// Logic
+			float bounceFactor = (float) Math.cos(((currentTimeMillis % 6100.0) / 1000.0));
+			if (bounceFactor < 0)
+				bounceFactor = -bounceFactor;
+			dragonActor.getEntity().getRotation().y += 0.5f;
+//			fernActor.getEntity().getRotation().y += 0.5f;
+			light.getPosition().set(0, bounceFactor * 20, 0);
+			
+			
+			ps.generateParticles(new Vector3f(0, 0, -10), dt);
+			ParticleManager.update(camera, dt);
+			
+			
+			
 			// Render scene
 			renderManager.render(camera, light);
+
 			// Update display (draw on display)s
 			displayManager.updateDisplay();
 
