@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 
 import models.Model;
 import models.ModelAttachmentPoint;
+import models.Texture;
 import utilities.Loader;
 import utilities.OBJFileLoader;
 
@@ -11,6 +12,7 @@ public class GameModelLoader {
 	public Model dragon;
 	public Model stall;
 	public Model fern;
+	public Texture particleAtlasTexture;
 
 	public GameModelLoader(Loader loader) {
 		dragon = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("dragon")), loader.loadTexture("dragon", 1, 1));
@@ -19,5 +21,6 @@ public class GameModelLoader {
 		fern = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("fern")), loader.loadTexture("fern", 2, 1));
 		fern.setHasTransparency(true);
 		fern.setAllowBackLighting(true);
+		particleAtlasTexture = loader.loadTexture("cosmic", 2, 2);
 	}
 }

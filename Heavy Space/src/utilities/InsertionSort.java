@@ -2,7 +2,7 @@ package utilities;
 
 import java.util.List;
 
-import particles.Particle;
+import entities.Particle;
 
 /**
  * A simple implementation of an insertion sort. I implemented this very quickly

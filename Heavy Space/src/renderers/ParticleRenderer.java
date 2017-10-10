@@ -2,10 +2,7 @@ package renderers;
 
 import java.nio.FloatBuffer;
 import java.util.List;
-import java.util.Map;
-
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -13,11 +10,10 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 
-import display.DisplayManager;
 import entities.Camera;
+import entities.Particle;
 import models.Mesh;
 import models.Texture;
-import particles.Particle;
 import shaders.ParticleShader;
 import utilities.Loader;
 
@@ -30,14 +26,16 @@ public class ParticleRenderer {
 	private static final FloatBuffer buffer = BufferUtils.createFloatBuffer(INSTANCE_DATA_LENGTH * MAX_INSTANCES);
 
 	private Mesh quad;
+	private Texture particleAtlasTexture;
 	private ParticleShader shader;
 
 	private Loader loader;
 	private int vboID;
 	private int pointer = 0;
 
-	public ParticleRenderer(Loader loader) {
+	public ParticleRenderer(Loader loader, Texture particleAtlasTexture) {
 		this.loader = loader;
+		this.particleAtlasTexture = particleAtlasTexture;
 		this.vboID = loader.createEmptyVBO(INSTANCE_DATA_LENGTH * MAX_INSTANCES);
 		quad = loader.loadToVAO(VERTICES, 2);
 		// Modelview matrix
@@ -53,30 +51,31 @@ public class ParticleRenderer {
 		shader = new ParticleShader();
 	}
 
-	public void render(Map<Texture, List<Particle>> particles, Camera camera) {
+	public void render(List<Particle> particles, Camera camera, boolean renderSolidParticles) {
 		prepare();
-		Matrix4f viewMatrix = camera.getViewMatrix();
 		shader.loadProjectionMatrix(camera.getProjectionMatrix());
-		for (Texture texture : particles.keySet()) {
-			bindTexture(texture);
-			List<Particle> particleList = particles.get(texture);
-			pointer = 0;
-			float[] vboData = new float[particleList.size() * INSTANCE_DATA_LENGTH];
-			for (Particle particle : particleList) {
-				updateModelViewMatrix(particle, viewMatrix, vboData);
-				updateTextureCoordinateData(particle, vboData);
-			}
-			// InsertionSort.sortHighToLow(particleList);
-			loader.updateVBO(vboID, vboData, buffer);
-			GL31.glDrawArraysInstanced(GL11.GL_TRIANGLE_STRIP, 0, quad.getIndicesSize(), particleList.size());
+		prepareTexture();
+		if (renderSolidParticles)
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA); // Render latest on top. Use sorting on this.
+		else
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // Additive blending. Good for fire etc, bad for solid particles.
+		Matrix4f viewMatrix = camera.getViewMatrix();
+		pointer = 0;
+		float[] vboData = new float[particles.size() * INSTANCE_DATA_LENGTH];
+		for (Particle particle : particles) {
+			updateModelViewMatrix(particle, viewMatrix, vboData);
+			updateTextureCoordinateData(particle, vboData);
 		}
+		loader.updateVBO(vboID, vboData, buffer);
+		GL31.glDrawArraysInstanced(GL11.GL_TRIANGLE_STRIP, 0, quad.getIndicesSize(), particles.size());
 		finishRendering();
 	}
 
-	private void bindTexture(Texture texture) {
+	private void prepareTexture() {
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
-		shader.loadAtlasSize(texture.getAtlasSize() * texture.getTexturPages());
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, particleAtlasTexture.getTextureID());
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		shader.loadAtlasSize(particleAtlasTexture.getAtlasSize() * particleAtlasTexture.getTexturePages());
 	}
 
 	private static Matrix4f tempMatrix = new Matrix4f();
@@ -142,10 +141,6 @@ public class ParticleRenderer {
 		GL20.glEnableVertexAttribArray(6);
 		// Enable transparency.
 		GL11.glEnable(GL11.GL_BLEND);
-		// Render latest on top. Use sorting on this.
-		// GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		// Additive blending. Good for fire etc, bad for solid particles.
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 		GL11.glDepthMask(false);
 	}
 

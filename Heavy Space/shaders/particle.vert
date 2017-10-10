@@ -3,11 +3,11 @@
 in vec2 position;
 in mat4 modelViewMatrix;
 in vec4 textureOffsets;
-in float blendFactor;
+in vec2 blendFactor;
 
 out vec2 textureCoordinate1;
 out vec2 textureCoordinate2;
-out float pass_blendFactor;
+out vec2 pass_blendFactor;
 
 uniform mat4 projectionMatrix;
 uniform float atlasSize;

@@ -12,11 +12,9 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import gameData.GameModelLoader;
+import gameData.ParticleSystem;
 import inputs.KeyboardHandler;
 import models.Model;
-import models.Texture;
-import particles.ParticleManager;
-import particles.ParticleSystem;
 import renderers.RenderManager;
 import utilities.Loader;
 
@@ -27,14 +25,16 @@ public class Main {
 		DisplayManager displayManager = new DisplayManager(1200, 800);
 		Model skybox = loader.loadSkybox("space", 500);
 		GameModelLoader gameModelLoader = new GameModelLoader(loader);
-		RenderManager renderManager = new RenderManager(displayManager, skybox, loader);
+		RenderManager renderManager = new RenderManager(displayManager, skybox, loader, gameModelLoader.particleAtlasTexture);
 		Camera camera = new Camera();
 		Light light = new Light(new Vector3f(0, 50, 0), new Vector3f(1, 1, 1));
 
-		
-		ParticleManager.init(loader);
-		ParticleSystem ps = new ParticleSystem(1, 2, 3, loader.loadTexture("cosmic", 2, 2), 3);
-		
+		// ParticleManager.init(loader);
+		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0));
+		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1));
+		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -20), 2));
+		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -20), 3));
+
 		List<Actor> actors = new ArrayList<Actor>();
 		// actors.add(new Actor(new Entity(new Vector3f(0, 20, 0), new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f)), gameModelLoader.stall));
 		// actors.add(new Actor(new Entity(new Vector3f(0, 0, -25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
@@ -105,15 +105,11 @@ public class Main {
 			if (bounceFactor < 0)
 				bounceFactor = -bounceFactor;
 			dragonActor.getEntity().getRotation().y += 0.5f;
-//			fernActor.getEntity().getRotation().y += 0.5f;
+			// fernActor.getEntity().getRotation().y += 0.5f;
 			light.getPosition().set(0, bounceFactor * 20, 0);
-			
-			
-			ps.generateParticles(new Vector3f(0, 0, -10), dt);
-			ParticleManager.update(camera, dt);
-			
-			
-			
+
+			renderManager.update(camera, dt);
+
 			// Render scene
 			renderManager.render(camera, light);
 
@@ -124,7 +120,7 @@ public class Main {
 			frames++;
 			if (System.currentTimeMillis() - timer >= 1000) {
 				timer += 1000;
-				System.out.println("Fps: " + frames + ".");
+				System.out.println("Fps: " + frames + "." + " " +renderManager.particleManager.size());
 				frames = 0;
 			}
 			// REMOVE ENTITIES PERIODICALLY - for testing purposes

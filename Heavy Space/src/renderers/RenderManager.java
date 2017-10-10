@@ -11,8 +11,9 @@ import display.DisplayManager;
 import entities.Actor;
 import entities.Camera;
 import entities.Light;
+import gameData.ParticleSystem;
 import models.Model;
-import particles.ParticleManager;
+import models.Texture;
 import utilities.Loader;
 
 public class RenderManager {
@@ -21,16 +22,22 @@ public class RenderManager {
 	ParticleRenderer particleRenderer;
 	DisplayManager displayManager;
 	Map<Model, List<Actor>> actors;
+	public ParticleManager particleManager;
 	Model skybox;
 
-	public RenderManager(DisplayManager displayManager, Model skybox, Loader loader) {
+	public RenderManager(DisplayManager displayManager, Model skybox, Loader loader, Texture particleAtlasTexture) {
 		this.displayManager = displayManager;
 		this.skybox = skybox;
 		entityRenderer = new EntityRenderer();
 		skyboxRenderer = new SkyboxRenderer();
-		particleRenderer = new ParticleRenderer(loader);
+		particleRenderer = new ParticleRenderer(loader, particleAtlasTexture);
+		particleManager = new ParticleManager();
 		actors = new HashMap<Model, List<Actor>>();
 		enableBackCulling();
+	}
+	
+	public void update(Camera camera, float delta) {
+		particleManager.update(camera, delta);
 	}
 
 	public void render(Camera camera, Light light) {
@@ -41,12 +48,13 @@ public class RenderManager {
 		camera.updateViewMatrix();
 		entityRenderer.render(camera, light, actors);
 		skyboxRenderer.render(camera, skybox);
-		ParticleManager.renderParticles(camera);
+		particleRenderer.render(particleManager.getParticles(), camera, particleManager.isRenderSolidParticles());
 	}
 
 	public void cleanUp() {
 		entityRenderer.cleanUp();
 		skyboxRenderer.cleanUp();
+		particleRenderer.cleanUp();
 	}
 
 	protected static void enableBackCulling() {
@@ -58,6 +66,14 @@ public class RenderManager {
 	protected static void disableBackCulling() {
 		// Disable back culling (Render the back side of polygons!)
 		GL11.glDisable(GL11.GL_CULL_FACE);
+	}
+
+	public void addParticleSystem(ParticleSystem particleSystem) {
+		particleManager.addParticleSystem(particleSystem);
+	}
+	
+	public void removeParticleSystem(ParticleSystem particleSystem) {
+		particleManager.removeParticleSystem(particleSystem);
 	}
 
 	public void addActor(Actor actor) {
@@ -83,5 +99,7 @@ public class RenderManager {
 		if (batch.isEmpty())
 			actors.remove(model);
 	}
+
+
 
 }
