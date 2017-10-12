@@ -3,6 +3,8 @@ package models;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Vector3f;
+
 import gameData.ModelAttachementTag;
 
 public class Model {
@@ -12,6 +14,8 @@ public class Model {
 	private boolean allowBackLighting;
 
 	private Map<ModelAttachementTag, ModelAttachmentPoint> modelAttachmentPoints = new HashMap<ModelAttachementTag, ModelAttachmentPoint>();
+	private float materialShininess = 5f;
+	private Vector3f materialSpecularColor = new Vector3f(0.5f, 0.5f, 0.5f);
 
 	public Model(Mesh mesh, Texture texture) {
 		this.mesh = mesh;
@@ -48,5 +52,13 @@ public class Model {
 
 	public void putAttachmentPoint(ModelAttachementTag tag, ModelAttachmentPoint modelAttachmentPoint) {
 		modelAttachmentPoints.put(tag, modelAttachmentPoint);
+	}
+
+	public float getShininess() {
+		return materialShininess;
+	}
+
+	public Vector3f getSpecularColor() {
+		return materialSpecularColor;
 	}
 }

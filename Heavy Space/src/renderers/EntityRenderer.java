@@ -31,8 +31,8 @@ public class EntityRenderer {
 		entityShader = new EntityShader();
 	}
 
-	public void render(Camera camera, Light light, Map<Model, List<Actor>> actors) {
-		prepareShader(camera, light);
+	public void render(Camera camera, List<Light> lights, Map<Model, List<Actor>> actors) {
+		prepareShader(camera, lights);
 		for (Model model : actors.keySet()) {
 			prepareModel(model);
 			List<Actor> batch = actors.get(model);
@@ -46,12 +46,13 @@ public class EntityRenderer {
 		entityShader.stop();
 	}
 
-	private void prepareShader(Camera camera, Light light) {
+	private void prepareShader(Camera camera, List<Light> lights) {
 		entityShader.start();
 		entityShader.loadCameraPosition(camera);
 		entityShader.loadProjectionMatrix(camera.getProjectionMatrix());
 		entityShader.loadViewMatrix(camera.getViewMatrix());
-		entityShader.loadLight(light);
+		entityShader.loadAmbientLight(0);
+		entityShader.loadLights(lights);
 	}
 
 	private void prepareInstance(Actor actor, Camera camera) {
@@ -103,15 +104,16 @@ public class EntityRenderer {
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
 
-		// Bind textures.
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
-		entityShader.loadAtlasSize(model.getTexture().getAtlasSize());
 		// Enable back culling for entities that has transparency.
 		if (model.hasTransparency())
 			RenderManager.disableBackCulling();
 		// Enable lighting for back side of polygons (opposite side of normals)
 		entityShader.loadAllowBackLighting(model.isBackLightingAllowed());
+		entityShader.loadSpecularLighting(model);
+		// Bind textures.
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
+		entityShader.loadAtlasSize(model.getTexture().getAtlasSize());
 	}
 
 	public void cleanUp() {

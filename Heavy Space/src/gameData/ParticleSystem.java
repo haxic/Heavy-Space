@@ -22,12 +22,12 @@ public class ParticleSystem {
 	private boolean removeThis;
 	private Texture texture;
 
-	public ParticleSystem(Texture texture, Vector3f position, int texturePage) {
+	public ParticleSystem(Texture texture, Vector3f position, int texturePage, float cooldown, float lifeLength) {
 		this.texture = texture;
 		this.position = position;
 		this.texturePage = texturePage;
-		lifeLength = 2;
-		cooldown = 0.1f;
+		this.lifeLength = lifeLength;
+		this.cooldown = cooldown;
 		texturePageOffset = new Vector2f(calculateTexturePageXOffset(), calculateTexturePageYOffset());
 	}
 
@@ -56,6 +56,10 @@ public class ParticleSystem {
 	}
 
 	private Vector3f tempVector = new Vector3f();
+	
+	public void setPosition(Vector3f position) {
+		this.position.set(position);
+	}
 
 	public boolean update(Particle particle, Camera camera, float delta) {
 		particle.getPosition().add(particle.getVelocity().mul(delta, tempVector));

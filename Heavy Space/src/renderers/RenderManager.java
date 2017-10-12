@@ -40,13 +40,13 @@ public class RenderManager {
 		particleManager.update(camera, delta);
 	}
 
-	public void render(Camera camera, Light light) {
+	public void render(Camera camera, List<Light> lights) {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.3f, 0, 0.3f, 1);
 		camera.updateProjectionMatrix(displayManager.getAspectRatio());
 		camera.updateViewMatrix();
-		entityRenderer.render(camera, light, actors);
+		entityRenderer.render(camera, lights, actors);
 		skyboxRenderer.render(camera, skybox);
 		particleRenderer.render(particleManager.getParticles(), camera, particleManager.isRenderSolidParticles());
 	}

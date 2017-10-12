@@ -36,8 +36,8 @@ public class ParticleShader extends ShaderProgram {
 		super.loadFloat(location_atlasSize, atlasSize);
 	}
 
-	public void loadProjectionMatrix(Matrix4f projectionMatrix) {
-		super.loadMatrixf(location_projectionMatrix, projectionMatrix);
+	public void loadProjectionMatrix(Matrix4f projection) {
+		super.loadMatrixf(location_projectionMatrix, projection);
 	}
 
 }

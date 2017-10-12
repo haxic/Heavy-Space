@@ -27,14 +27,23 @@ public class Main {
 		GameModelLoader gameModelLoader = new GameModelLoader(loader);
 		RenderManager renderManager = new RenderManager(displayManager, skybox, loader, gameModelLoader.particleAtlasTexture);
 		Camera camera = new Camera();
-		Light light = new Light(new Vector3f(0, 50, 0), new Vector3f(1, 1, 1));
+		
+		ParticleSystem plasmaParticleSystem = new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0, 0.01f, 1);
+		renderManager.addParticleSystem(plasmaParticleSystem);
+		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1, 0.1f, 3));
+		List<Light> lights = new ArrayList<Light>();
+		
+		Light sun = new Light(new Vector3f(0, 1000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
+		
+		Light plasma1 = new Light(new Vector3f(10, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
+		Light plasma2 = new Light(new Vector3f(20, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
+		lights.add(sun);
+		lights.add(plasma1);
+		lights.add(plasma2);
+		
+		
 
-		// ParticleManager.init(loader);
-		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0));
-		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1));
-		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -20), 2));
-		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -20), 3));
-
+		
 		List<Actor> actors = new ArrayList<Actor>();
 		// actors.add(new Actor(new Entity(new Vector3f(0, 20, 0), new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f)), gameModelLoader.stall));
 		// actors.add(new Actor(new Entity(new Vector3f(0, 0, -25), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
@@ -43,7 +52,7 @@ public class Main {
 		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
 		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
 
-		Actor dragonActor = new Actor(new Entity(new Vector3f(0, 0, -15), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
+		Actor dragonActor = new Actor(new Entity(new Vector3f(0, 0, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
 		actors.add(dragonActor);
 		Actor fernActor = new Actor(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern);
 		actors.add(fernActor);
@@ -104,14 +113,15 @@ public class Main {
 			float bounceFactor = (float) Math.cos(((currentTimeMillis % 6100.0) / 1000.0));
 			if (bounceFactor < 0)
 				bounceFactor = -bounceFactor;
-			dragonActor.getEntity().getRotation().y += 0.5f;
+//			dragonActor.getEntity().getRotation().y += 0.5f;
 			// fernActor.getEntity().getRotation().y += 0.5f;
-			light.getPosition().set(0, bounceFactor * 20, 0);
+			plasma1.getPosition().set(0, bounceFactor * 20, -20);
+			plasmaParticleSystem.setPosition(plasma1.getPosition());
 
 			renderManager.update(camera, dt);
 
 			// Render scene
-			renderManager.render(camera, light);
+			renderManager.render(camera, lights);
 
 			// Update display (draw on display)s
 			displayManager.updateDisplay();

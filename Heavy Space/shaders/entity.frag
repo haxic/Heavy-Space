@@ -2,14 +2,21 @@
 
 in vec2 pass_uv;
 in vec3 worldNormal;
-in vec3 toLightVector;
+in vec3 toLightVector[12];
 in vec3 toCameraVector;
 
-uniform sampler2D textureSampler;
-uniform vec3 lightColor;
-uniform vec3 reflectivity;
-uniform vec3 shininess;
+// Lighting
+uniform float ambientLight;
+// Lighting lights
+uniform int numberOfLights;
+uniform vec3 lightColor[12];
+uniform vec3 attenuation[12];
+// Lighting material
+uniform vec3 materialSpecularColor;
+uniform float materialShininess;
 uniform float allowBackLighting;
+
+uniform sampler2D textureSampler;
 
 out vec4 fragment;
 
@@ -26,19 +33,35 @@ void main(){
 	}
 	
 	vec3 unitWorldNormal = normalize(newWorldNormal);
-	vec3 unitToLightVector = normalize(toLightVector);
 	vec3 unitToCameraVector = normalize(toCameraVector);
-	vec3 unitLightDirection = -unitToLightVector;
-	vec3 reflectedLightDirection = reflect(unitLightDirection, unitWorldNormal);
 	
-	float brightness = max(dot(unitWorldNormal, unitToLightVector), 0.0);
-	vec3 diffuseColor = brightness * lightColor;
-	
-	float reflectionFactor = max(dot(reflectedLightDirection, unitToCameraVector), 0.0);
-	float dampenFactor = pow(reflectionFactor, 10);
-	vec3 specularColor = dampenFactor * 1 * lightColor;
+	// Lighting
+	vec3 totalDiffuse = vec3(0.0);
+	vec3 totalSpecular = vec3(0.0);
+	for (int i = 0; i < numberOfLights; i++) {
+		vec3 unitToLightVector = normalize(toLightVector[i]);
+		vec3 unitLightDirection = -unitToLightVector;
+		vec3 unitReflectedLightDirection = reflect(unitLightDirection, unitWorldNormal);
+		float distanceToLight = length(toLightVector[i]);
 		
-	fragment = vec4(diffuseColor, 1.0) * textureColor + vec4(specularColor, 1.0);
-//	fragment = vec4(diffuseColor, 1.0) * textureColor;
-//	fragment = vec4(specularColor, 1.0);
+		// Attenuation
+		float attenuation = 1.0 / (1.0 + attenuation[i].x * pow(distanceToLight, 2));
+		
+		// Diffuse lighting
+		float diffuseCoefficient = max(dot(unitWorldNormal, unitToLightVector), 0.0);
+		totalDiffuse = totalDiffuse + (diffuseCoefficient * lightColor[i] * attenuation);
+		
+		// Specular lighting
+		float specularCoefficient = 0.0;
+		float cosAngle = 0.0;
+		if(diffuseCoefficient > 0.0) {
+			cosAngle = max(dot(unitToCameraVector, unitReflectedLightDirection), 0.0);
+			specularCoefficient = pow(cosAngle, materialShininess);
+		}
+		totalSpecular = totalSpecular + (specularCoefficient * materialSpecularColor * lightColor[i] * attenuation);
+	}
+	totalDiffuse = max(totalDiffuse, ambientLight);
+	
+	fragment = vec4(totalDiffuse * textureColor.xyz + totalSpecular, textureColor.a);
+//	fragment = vec4(totalSpecular, 1.0);
 }
