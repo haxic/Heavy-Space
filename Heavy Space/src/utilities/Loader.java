@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
@@ -22,11 +23,12 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
+import client.models.Mesh;
+import client.models.Model;
+import client.models.ShadowMap;
+import client.models.Texture;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
-import models.Mesh;
-import models.Model;
-import models.Texture;
 
 public class Loader {
 
@@ -281,5 +283,31 @@ public class Loader {
 		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, buffer);
 		// Unbind VBO.
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+	}
+
+	public static ShadowMap createShadowMap(int width, int height) {
+		int framebufferID = GL30.glGenFramebuffers();
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, framebufferID);
+		// No color attachement.
+		GL11.glDrawBuffer(GL11.GL_NONE);
+		GL11.glReadBuffer(GL11.GL_NONE);
+		int textureID = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT16, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer) null);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, textureID, 0);
+		if (GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE) {
+			try {
+				throw new Exception("Could not create FrameBuffer");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		// Unbind
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		return new ShadowMap(framebufferID, textureID, width, height);
 	}
 }

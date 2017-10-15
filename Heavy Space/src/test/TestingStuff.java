@@ -3,7 +3,7 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
-import entities.Particle;
+import client.entities.Particle;
 import utilities.InsertionSort;
 
 public class TestingStuff {

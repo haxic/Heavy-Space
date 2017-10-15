@@ -1,8 +1,4 @@
-/gameData/
-/renderers/
+/loginServer/
+/dbos/
+/rmi/
 /test/
-/models/
-/shaders/
-/entities/
-/utilities/
-/particles/
