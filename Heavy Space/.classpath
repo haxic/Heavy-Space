@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LWJGL3"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/PNGDecoder"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/PG JDBC"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JBCrypt"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -9,4 +9,5 @@ public interface IAccountDAO {
 	public Account getAccount(int id);
 	public Account getAccount(String username);
 	public void updateAccount(int id);
+	public void createAccount(String username, String password);
 }
