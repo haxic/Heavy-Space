@@ -11,6 +11,7 @@ public class DataAccessLayer implements IDataAccessLayer {
 
 	Connection dbc;
 	IAccountDAO accountDAO;
+	IAuthenticationTokenDAO authenticationTokenDAO;
 
 	public DataAccessLayer() {
 		try {
@@ -31,17 +32,24 @@ public class DataAccessLayer implements IDataAccessLayer {
 			return;
 		}
 
-		try {
-			dbc.setAutoCommit(false);
-		} catch (SQLException e) {
-			System.out.println("Disabling database auto commit failed! " + e.getMessage());
-			return;
-		}
+		/*
+		 * try {
+		 * dbc.setAutoCommit(false);
+		 * } catch (SQLException e) {
+		 * System.out.println("Disabling database auto commit failed! " + e.getMessage());
+		 * return;
+		 * }
+		 */
 		accountDAO = new AccountDAO(dbc);
+		authenticationTokenDAO = new AuthenticationTokenDAO(dbc);
 	}
 
 	@Override
 	public IAccountDAO getAccountDAO() {
 		return accountDAO;
+	}
+
+	public IAuthenticationTokenDAO getAuthenticationTokenDAO() {
+		return authenticationTokenDAO;
 	}
 }

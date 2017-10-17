@@ -11,7 +11,7 @@ public class AuthenticateClientTester {
 	public static void main(String[] args) {
 		try {
 			ILoginServerRMI authentication = (ILoginServerRMI) Naming.lookup("rmi://localhost:5252/authenticate");
-			String token = authentication.authenticate("haxic", "hejsan123");
+			String token = authentication.authenticate("test", "test1234");
 			System.out.println(token);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();

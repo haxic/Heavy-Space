@@ -3,14 +3,15 @@ package loginServer.dbo;
 import java.sql.Date;
 
 public class Account {
+	public static final String ACCOUNT = "account";
 	public static final String ID = "id";
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
 	public static final String CREATED_DATE = "created_date";
-	int id;
-	String username;
-	String password;
-	Date createdDate;
+	private int id;
+	private String username;
+	private String password;
+	private Date createdDate;
 
 	public Account(int id, String username, String password, Date createdDate) {
 		super();

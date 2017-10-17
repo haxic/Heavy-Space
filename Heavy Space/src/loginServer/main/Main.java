@@ -20,6 +20,7 @@ public class Main {
 			loginServerRMI = new LoginServerRMI(PORT, dal);
 			Registry registry = LocateRegistry.createRegistry(PORT);
 			registry.bind("authenticate", loginServerRMI);
+			System.out.println("Login server RMI bound.");
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
@@ -27,7 +28,7 @@ public class Main {
 		
 		while (true) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
