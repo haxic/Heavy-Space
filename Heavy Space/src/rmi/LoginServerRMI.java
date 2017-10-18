@@ -31,6 +31,10 @@ public class LoginServerRMI extends UnicastRemoteObject implements ILoginServerR
 			e.printStackTrace();
 			return null;
 		}
+		
+		// Check that an account was retrieved
+		if (account == null)
+			return null;
 
 		// Check password
 		if (!Security.checkPassword(password, account.getPassword()))
@@ -73,9 +77,13 @@ public class LoginServerRMI extends UnicastRemoteObject implements ILoginServerR
 		// TODO: Get account id on when creating account.
 		String hashedPassword = Security.encryptPassword(password);
 		try {
+			System.out.println("create " + username);
 			dal.getAccountDAO().createAccount(username, hashedPassword);
+			System.out.println("get " + username);
 			Account account = dal.getAccountDAO().getAccount(username);
+			System.out.println("create " + username + " token");
 			dal.getAuthenticationTokenDAO().createAuthenticationToken(account.getId(), null, null);
+			System.out.println("done " + username);
 		} catch (SQLException e) {
 			String error = "A client tried to create an account. [Username: " + username + "] SQLException: " + e.getMessage();
 			System.out.println(error);

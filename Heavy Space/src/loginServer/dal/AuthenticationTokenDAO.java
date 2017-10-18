@@ -30,7 +30,6 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 		String sql = "INSERT INTO " + AuthenticationToken.AUTHENTICATION_TOKEN + " (" + AuthenticationToken.ACCOUNT_ID + ", " + AuthenticationToken.CLIENT_IP + ", "
 				+ AuthenticationToken.MASTER_SERVER_IP + ") " + "VALUES ('" + accountID + "','" + serverIP + "','" + serverIP + "');";
 		s.executeUpdate(sql);
-		dbc.commit();
 	}
 
 	@Override
