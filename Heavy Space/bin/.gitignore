@@ -1,3 +1,4 @@
-/loginServer/
-/rmi/
+/tests/
+/authenticationServer/
+/shared/
 /security/
