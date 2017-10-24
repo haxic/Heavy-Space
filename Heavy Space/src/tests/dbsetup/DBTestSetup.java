@@ -6,11 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import authenticationServer.dal.AccountDAO;
-import authenticationServer.dal.AuthenticationTokenDAO;
-import shared.dal.IAccountDAO;
-import shared.dal.IAuthenticationTokenDAO;
-import shared.dal.IDataAccessLayer;
+import shared.dal.AccountDAO;
+import shared.dal.AuthenticationTokenDAO;
+import shared.dal.GameServerDAO;
+import shared.idal.IAccountDAO;
+import shared.idal.IAuthenticationTokenDAO;
+import shared.idal.IDataAccessLayer;
+import shared.idal.IGameServerDAO;
 
 public class DBTestSetup implements IDataAccessLayer {
 	private static final String ENDPOINT = "jdbc:postgresql://127.0.0.1:5432/testdb";
@@ -20,6 +22,7 @@ public class DBTestSetup implements IDataAccessLayer {
 	private Connection dbc;
 	IAccountDAO accountDAO;
 	IAuthenticationTokenDAO authenticationTokenDAO;
+	IGameServerDAO gameServerDAO;
 
 	public DBTestSetup() {
 		connect();
@@ -27,6 +30,7 @@ public class DBTestSetup implements IDataAccessLayer {
 		setup();
 		this.accountDAO = new AccountDAO(dbc);
 		this.authenticationTokenDAO = new AuthenticationTokenDAO(dbc);
+		this.gameServerDAO = new GameServerDAO(dbc);
 	}
 
 	public void connect() {
@@ -58,7 +62,7 @@ public class DBTestSetup implements IDataAccessLayer {
 			Statement s = dbc.createStatement();
 			String sql = "DROP SCHEMA public CASCADE;";
 			s.executeUpdate(sql);
-//			System.out.println("Schema dropped.");
+			// System.out.println("Schema dropped.");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -66,28 +70,32 @@ public class DBTestSetup implements IDataAccessLayer {
 			Statement s = dbc.createStatement();
 			String sql = "CREATE SCHEMA public;";
 			s.executeUpdate(sql);
-//			System.out.println("Schema created.");
+			// System.out.println("Schema created.");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void setup() {
-		try {
-			Statement s = dbc.createStatement();
+		String sql = "";
+		{
 			String columns = "id SERIAL PRIMARY KEY," + "username VARCHAR(100) NOT NULL UNIQUE," + "password VARCHAR(100) NOT NULL," + "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-			String sql = "CREATE TABLE account (" + columns + ")";
-			s.executeUpdate(sql);
-//			System.out.println("Account table created.");
-		} catch (SQLException e) {
-			e.printStackTrace();
+			String table = "CREATE TABLE account (" + columns + ");";
+			sql += table;
+		}
+		{
+			String columns = "account_id integer REFERENCES account PRIMARY KEY, client_ip VARCHAR(50), master_server_ip VARCHAR(50), game_server_ip VARCHAR(50), authentication_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+			String table = "CREATE TABLE authentication_token (" + columns + ");";
+			sql += table;
+		}
+		{
+			String columns = "account_id integer REFERENCES account PRIMARY KEY, last_checked TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+			String table = "CREATE TABLE game_server (" + columns + ")";
+			sql += table;
 		}
 		try {
 			Statement s = dbc.createStatement();
-			String columns = "account_id integer REFERENCES account PRIMARY KEY, client_ip VARCHAR(50), master_server_ip VARCHAR(50),authentication_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-			String sql = "CREATE TABLE authentication_token (" + columns + ")";
 			s.executeUpdate(sql);
-//			System.out.println("AuthenticationToken table created.");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -101,5 +109,10 @@ public class DBTestSetup implements IDataAccessLayer {
 	@Override
 	public IAuthenticationTokenDAO getAuthenticationTokenDAO() {
 		return authenticationTokenDAO;
+	}
+
+	@Override
+	public IGameServerDAO getGameServerDAO() {
+		return gameServerDAO;
 	}
 }

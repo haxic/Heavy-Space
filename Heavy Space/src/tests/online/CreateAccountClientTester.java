@@ -1,10 +1,11 @@
-package authenticationServer.tests;
+package tests.online;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import shared.Config;
 import shared.rmi.IAuthenticationServerRMI;
 
 public class CreateAccountClientTester {
@@ -31,7 +32,7 @@ public class CreateAccountClientTester {
 		@Override
 		public void run() {
 			try {
-				IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:5252/authenticate");
+				IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
 				authenticationServerRMI.createAccount("test" + i, "test" + (i + i));
 				String token = authenticationServerRMI.authenticate("test" + i, "test" + (i + i));
 				System.out.println(token);

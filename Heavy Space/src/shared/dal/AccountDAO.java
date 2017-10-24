@@ -1,4 +1,4 @@
-package authenticationServer.dal;
+package shared.dal;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -8,8 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import shared.dal.IAccountDAO;
 import shared.dbo.Account;
+import shared.idal.IAccountDAO;
 
 public class AccountDAO implements IAccountDAO {
 	private Connection dbc;

@@ -1,18 +1,12 @@
 package shared.rmi;
 
 import java.rmi.RemoteException;
-import java.rmi.server.RemoteServer;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
-import security.Authenticater;
-import shared.Config;
-import shared.GameServerInfo;
-import shared.dal.IDataAccessLayer;
-import shared.dbo.Account;
+import masterServer.MasterServerRequestHandler;
+import shared.dbo.GameServer;
+import shared.idal.IDataAccessLayer;
 
 public class MasterServerRMI extends UnicastRemoteObject implements IMasterServerRMI {
 	MasterServerRequestHandler masterServerRequestHandler;
@@ -23,8 +17,8 @@ public class MasterServerRMI extends UnicastRemoteObject implements IMasterServe
 	}
 
 	@Override
-	public List<GameServerInfo> getGameServerList(String token) throws RemoteException {
-		return masterServerRequestHandler.getGameServerList(token);
+	public List<GameServerInfo> getGameServerList(String token, String username) throws RemoteException {
+		return masterServerRequestHandler.getGameServerListForClient(token, username);
 	}
 
 	@Override

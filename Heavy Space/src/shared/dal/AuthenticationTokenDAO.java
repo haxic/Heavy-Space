@@ -1,4 +1,4 @@
-package authenticationServer.dal;
+package shared.dal;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import shared.dal.IAuthenticationTokenDAO;
 import shared.dbo.AuthenticationToken;
+import shared.idal.IAuthenticationTokenDAO;
 
 public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 
@@ -47,10 +47,11 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 	private AuthenticationToken fillAuthenticationToken(ResultSet rs) throws SQLException {
 		while (rs.next()) {
 			int id = rs.getInt(AuthenticationToken.ACCOUNT_ID);
-			String username = rs.getString(AuthenticationToken.CLIENT_IP);
-			String password = rs.getString(AuthenticationToken.MASTER_SERVER_IP);
+			String clientIP = rs.getString(AuthenticationToken.CLIENT_IP);
+			String masterServerIP = rs.getString(AuthenticationToken.MASTER_SERVER_IP);
+			String gameServerIP = rs.getString(AuthenticationToken.GAME_SERVER_IP);
 			Date createdDate = rs.getDate(AuthenticationToken.AUTHENTICATION_DATE);
-			AuthenticationToken authenticationToken = new AuthenticationToken(id, username, password, createdDate);
+			AuthenticationToken authenticationToken = new AuthenticationToken(id, clientIP, masterServerIP, gameServerIP, createdDate);
 			return authenticationToken;
 		}
 		return null;

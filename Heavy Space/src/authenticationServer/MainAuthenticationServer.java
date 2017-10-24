@@ -1,4 +1,4 @@
-package authenticationServer.main;
+package authenticationServer;
 
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 import shared.Config;
 import shared.dal.DataAccessLayer;
-import shared.dal.IDataAccessLayer;
+import shared.idal.IDataAccessLayer;
 import shared.rmi.AuthenticationServerRMI;
 
 public class MainAuthenticationServer {

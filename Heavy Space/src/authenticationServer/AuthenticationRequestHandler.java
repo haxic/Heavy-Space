@@ -1,12 +1,12 @@
-package authenticationServer.main;
+package authenticationServer;
 
 import java.sql.SQLException;
 
 import security.Authenticater;
 import shared.Config;
-import shared.dal.IDataAccessLayer;
 import shared.dbo.Account;
 import shared.dbo.AuthenticationToken;
+import shared.idal.IDataAccessLayer;
 
 public class AuthenticationRequestHandler {
 	private IDataAccessLayer dal;

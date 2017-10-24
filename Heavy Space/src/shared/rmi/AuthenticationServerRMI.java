@@ -7,12 +7,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.Date;
 
-import authenticationServer.main.AuthenticationRequestHandler;
+import authenticationServer.AuthenticationRequestHandler;
 import security.Authenticater;
 import shared.Config;
-import shared.dal.IDataAccessLayer;
 import shared.dbo.Account;
 import shared.dbo.AuthenticationToken;
+import shared.idal.IDataAccessLayer;
 
 public class AuthenticationServerRMI extends UnicastRemoteObject implements IAuthenticationServerRMI {
 	AuthenticationRequestHandler authenticationRequestHandler;

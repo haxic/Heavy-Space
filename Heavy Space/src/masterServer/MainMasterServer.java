@@ -1,4 +1,4 @@
-package masterServer.main;
+package masterServer;
 
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
@@ -6,10 +6,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
 
-import authenticationServer.main.MainAuthenticationServer;
+import authenticationServer.MainAuthenticationServer;
 import shared.Config;
 import shared.dal.DataAccessLayer;
-import shared.dal.IDataAccessLayer;
+import shared.idal.IDataAccessLayer;
 import shared.rmi.MasterServerRMI;
 
 public class MainMasterServer {
@@ -40,7 +40,7 @@ public class MainMasterServer {
 
 	public static void main(String[] args) {
 		try {
-			new MainAuthenticationServer();
+			new MainMasterServer();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

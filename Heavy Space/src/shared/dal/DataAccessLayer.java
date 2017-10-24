@@ -7,8 +7,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import authenticationServer.dal.AccountDAO;
-import authenticationServer.dal.AuthenticationTokenDAO;
+import shared.idal.IAccountDAO;
+import shared.idal.IAuthenticationTokenDAO;
+import shared.idal.IDataAccessLayer;
+import shared.idal.IGameServerDAO;
 
 public class DataAccessLayer implements IDataAccessLayer {
 	private static final String ENDPOINT = "jdbc:postgresql://ec2-23-21-92-251.compute-1.amazonaws.com/d4jfrp7pjrtdjh";
@@ -18,6 +20,7 @@ public class DataAccessLayer implements IDataAccessLayer {
 	Connection dbc;
 	IAccountDAO accountDAO;
 	IAuthenticationTokenDAO authenticationTokenDAO;
+	IGameServerDAO gameServerDAO;
 
 	public DataAccessLayer() {
 		try {
@@ -53,6 +56,7 @@ public class DataAccessLayer implements IDataAccessLayer {
 		 */
 		accountDAO = new AccountDAO(dbc);
 		authenticationTokenDAO = new AuthenticationTokenDAO(dbc);
+		gameServerDAO = new GameServerDAO(dbc);
 	}
 
 	@Override
@@ -62,5 +66,10 @@ public class DataAccessLayer implements IDataAccessLayer {
 
 	public IAuthenticationTokenDAO getAuthenticationTokenDAO() {
 		return authenticationTokenDAO;
+	}
+
+	@Override
+	public IGameServerDAO getGameServerDAO() {
+		return gameServerDAO;
 	}
 }

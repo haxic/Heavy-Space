@@ -1,4 +1,4 @@
-package shared.dal;
+package shared.idal;
 
 import java.sql.SQLException;
 
