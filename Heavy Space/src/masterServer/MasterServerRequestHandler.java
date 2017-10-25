@@ -7,8 +7,8 @@ import security.Authenticater;
 import shared.dbo.Account;
 import shared.dbo.AuthenticationToken;
 import shared.dbo.GameServer;
+import shared.dbo.GameServerInfo;
 import shared.idal.IDataAccessLayer;
-import shared.rmi.GameServerInfo;
 
 public class MasterServerRequestHandler {
 
@@ -19,6 +19,7 @@ public class MasterServerRequestHandler {
 	}
 
 	public List<GameServerInfo> getGameServerListForClient(String token, String username) {
+		System.out.println("TEST");
 		Account account;
 		try {
 			account = dal.getAccountDAO().getAccount(username);
@@ -49,11 +50,40 @@ public class MasterServerRequestHandler {
 			e.printStackTrace();
 			return null;
 		}
-		System.out.println("MADE IT");
 		return gameServers;
 	}
 
-	public String joinGameServer(String token, String ip) {
+	public String joinGameServer(String token, String username, String ip) {
+		Account account;
+		try {
+			account = dal.getAccountDAO().getAccount(username);
+		} catch (SQLException e) {
+			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
+			System.out.println(error);
+			e.printStackTrace();
+			return null;
+		}
+		AuthenticationToken authenticationToken;
+		try {
+			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
+		} catch (SQLException e) {
+			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
+			System.out.println(error);
+			e.printStackTrace();
+			return null;
+		}
+		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
+		if (!authenticated)
+			return null;
+		
+		try {
+			dal.getAuthenticationTokenDAO().updateAuthenticationTokenField(account.getID(), AuthenticationToken.GAME_SERVER_IP, ip);
+		} catch (SQLException e) {
+			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
+			System.out.println(error);
+			e.printStackTrace();
+			return null;
+		}
 		return null;
 	}
 

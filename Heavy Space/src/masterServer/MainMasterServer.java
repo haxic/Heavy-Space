@@ -6,7 +6,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
 
-import authenticationServer.MainAuthenticationServer;
 import shared.Config;
 import shared.dal.DataAccessLayer;
 import shared.idal.IDataAccessLayer;

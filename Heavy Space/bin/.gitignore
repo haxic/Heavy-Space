@@ -1,6 +1,8 @@
-/tests/
 /authenticationServer/
-/shared/
-/security/
+/client/
+/demoStuff/
 /masterServer/
-/localtests/
+/security/
+/shared/
+/tests/
+/utilities/

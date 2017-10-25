@@ -1,6 +1,7 @@
-package shared.rmi;
+package shared.dbo;
 
 public class GameServerInfo {
+
 	String serverName = "unknown";
 	String serverIP;
 	int currentPlayers = -1;
@@ -11,8 +12,29 @@ public class GameServerInfo {
 		this.serverIP = serverIP;
 	}
 
+	public String getServerName() {
+		return serverName;
+	}
+
+	public String getServerIP() {
+		return serverIP;
+	}
+
+	public int getCurrentPlayers() {
+		return currentPlayers;
+	}
+
+	public int getMaxPlayers() {
+		return maxPlayers;
+	}
+
+	public int getPing() {
+		return ping;
+	}
+
 	@Override
 	public String toString() {
 		return "[" + serverName + ", " + serverIP + ", " + currentPlayers + "/" + maxPlayers + " " + ping + "]";
 	}
+
 }

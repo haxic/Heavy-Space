@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import authenticationServer.AuthenticationRequestHandler;
 import masterServer.MasterServerRequestHandler;
-import shared.rmi.GameServerInfo;
+import shared.dbo.GameServerInfo;
 import tests.dbsetup.DBTestSetup;
 
 public class HostGameServerTest {

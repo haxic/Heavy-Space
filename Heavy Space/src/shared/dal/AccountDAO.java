@@ -21,7 +21,7 @@ public class AccountDAO implements IAccountDAO {
 	@Override
 	public List<Account> getAccounts() throws SQLException {
 		Statement s = dbc.createStatement();
-		ResultSet rs = s.executeQuery("SELECT * FROM account;");
+		ResultSet rs = s.executeQuery("SELECT * FROM " + Account.ACCOUNT + ";");
 		List<Account> accounts = new ArrayList<Account>();
 		while (rs.next()) {
 			accounts.add(fillAccount(rs));
@@ -40,14 +40,14 @@ public class AccountDAO implements IAccountDAO {
 	@Override
 	public void createAccount(String username, String password) throws SQLException {
 		Statement s = dbc.createStatement();
-		String sql = "INSERT INTO account (" + Account.USERNAME + "," + Account.PASSWORD + ") " + "VALUES ('" + username + "','" + password + "');";
+		String sql = "INSERT INTO " + Account.ACCOUNT + " (" + Account.USERNAME + "," + Account.PASSWORD + ") " + "VALUES ('" + username + "','" + password + "');";
 		s.executeUpdate(sql);
 	}
 
 	@Override
 	public void updateAccountField(int id, String field, Object value) throws SQLException {
 		Statement s = dbc.createStatement();
-		s.executeUpdate("UPDATE account SET " + field + " = '" + value + "' WHERE id = " + id + ";");
+		s.executeUpdate("UPDATE " + Account.ACCOUNT + " SET " + field + " = '" + value + "' WHERE id = " + id + ";");
 	}
 
 	private Account fillAccount(ResultSet rs) throws SQLException {

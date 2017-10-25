@@ -8,18 +8,11 @@ import java.rmi.RemoteException;
 import shared.Config;
 import shared.rmi.IAuthenticationServerRMI;
 
-public class CreateAccountClientTester {
-	public CreateAccountClientTester() {
-
-		for (int i = 50; i < 100; i++) {
+public class ClientCreateMultipleAccountsTester {
+	public ClientCreateMultipleAccountsTester() {
+		// Spawn multiple threads that execute at the same time
+		for (int i = 50; i < 100; i++)
 			new Worker(i).start();
-
-		}
-
-	}
-
-	public static void main(String[] args) {
-		new CreateAccountClientTester();
 	}
 
 	class Worker extends Thread {
@@ -32,14 +25,20 @@ public class CreateAccountClientTester {
 		@Override
 		public void run() {
 			try {
+				// Connect to RMI
 				IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
+				// Create account
 				authenticationServerRMI.createAccount("test" + i, "test" + (i + i));
+				// Authenticate and fetch result
 				String token = authenticationServerRMI.authenticate("test" + i, "test" + (i + i));
 				System.out.println(token);
 			} catch (MalformedURLException | RemoteException | NotBoundException e) {
 				e.printStackTrace();
 			}
 		}
+	}
 
+	public static void main(String[] args) {
+		new ClientCreateMultipleAccountsTester();
 	}
 }

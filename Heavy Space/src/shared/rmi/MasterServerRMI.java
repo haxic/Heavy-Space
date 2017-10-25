@@ -6,6 +6,7 @@ import java.util.List;
 
 import masterServer.MasterServerRequestHandler;
 import shared.dbo.GameServer;
+import shared.dbo.GameServerInfo;
 import shared.idal.IDataAccessLayer;
 
 public class MasterServerRMI extends UnicastRemoteObject implements IMasterServerRMI {
@@ -18,12 +19,13 @@ public class MasterServerRMI extends UnicastRemoteObject implements IMasterServe
 
 	@Override
 	public List<GameServerInfo> getGameServerList(String token, String username) throws RemoteException {
+		System.out.println("TEST");
 		return masterServerRequestHandler.getGameServerListForClient(token, username);
 	}
 
 	@Override
-	public String joinGameServer(String token, String ip) throws RemoteException {
-		return masterServerRequestHandler.joinGameServer(token, ip);
+	public String joinGameServer(String token, String username, String ip) throws RemoteException {
+		return masterServerRequestHandler.joinGameServer(token, username, ip);
 	}
 
 	@Override

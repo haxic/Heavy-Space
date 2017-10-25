@@ -44,6 +44,12 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 		s.executeUpdate(sql);
 	}
 
+	@Override
+	public void updateAuthenticationTokenField(int id, String field, Object value) throws SQLException {
+		Statement s = dbc.createStatement();
+		s.executeUpdate("UPDATE " + AuthenticationToken.AUTHENTICATION_TOKEN + " SET " + field + " = '" + value + "' WHERE id = " + id + ";");
+	}
+
 	private AuthenticationToken fillAuthenticationToken(ResultSet rs) throws SQLException {
 		while (rs.next()) {
 			int id = rs.getInt(AuthenticationToken.ACCOUNT_ID);
