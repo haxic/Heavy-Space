@@ -5,10 +5,12 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import shared.dbo.Account;
+import shared.dbo.AuthenticationToken;
 import shared.idal.IAccountDAO;
 
 public class AccountDAO implements IAccountDAO {
@@ -46,8 +48,11 @@ public class AccountDAO implements IAccountDAO {
 
 	@Override
 	public void updateAccountField(int id, String field, Object value) throws SQLException {
+		if (value instanceof String)
+			if (!value.equals("DEFAULT"))
+				value = "'" + value + "'";
 		Statement s = dbc.createStatement();
-		s.executeUpdate("UPDATE " + Account.ACCOUNT + " SET " + field + " = '" + value + "' WHERE id = " + id + ";");
+		s.executeUpdate("UPDATE " + Account.ACCOUNT + " SET " + field + " = " + value + " WHERE " + Account.ID + " = " + id + ";");
 	}
 
 	private Account fillAccount(ResultSet rs) throws SQLException {
@@ -55,8 +60,8 @@ public class AccountDAO implements IAccountDAO {
 			int id = rs.getInt(Account.ID);
 			String username = rs.getString(Account.USERNAME);
 			String password = rs.getString(Account.PASSWORD);
-			Date createdDate = rs.getDate(Account.CREATED_DATE);
-			Account account = new Account(id, username, password, createdDate);
+			Timestamp createdDate = rs.getTimestamp(Account.CREATED_DATE);
+			Account account = new Account(id, username, password, createdDate != null ? createdDate.toLocalDateTime() : null);
 			return account;
 		}
 		return null;

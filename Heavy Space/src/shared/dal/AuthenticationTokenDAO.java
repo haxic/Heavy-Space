@@ -5,8 +5,10 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import shared.dbo.AuthenticationToken;
+import shared.dbo.GameServer;
 import shared.idal.IAuthenticationTokenDAO;
 
 public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
@@ -45,9 +47,11 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 	}
 
 	@Override
-	public void updateAuthenticationTokenField(int id, String field, Object value) throws SQLException {
+	public void updateAuthenticationTokenField(int accountID, String field, Object value) throws SQLException {
+		if (value instanceof String)
+			value = "'" + value + "'";
 		Statement s = dbc.createStatement();
-		s.executeUpdate("UPDATE " + AuthenticationToken.AUTHENTICATION_TOKEN + " SET " + field + " = '" + value + "' WHERE id = " + id + ";");
+		s.executeUpdate("UPDATE " + AuthenticationToken.AUTHENTICATION_TOKEN + " SET " + field + " = " + value + " WHERE " + AuthenticationToken.ACCOUNT_ID + " = " + accountID + ";");
 	}
 
 	private AuthenticationToken fillAuthenticationToken(ResultSet rs) throws SQLException {
@@ -56,8 +60,8 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 			String clientIP = rs.getString(AuthenticationToken.CLIENT_IP);
 			String masterServerIP = rs.getString(AuthenticationToken.MASTER_SERVER_IP);
 			String gameServerIP = rs.getString(AuthenticationToken.GAME_SERVER_IP);
-			Date createdDate = rs.getDate(AuthenticationToken.AUTHENTICATION_DATE);
-			AuthenticationToken authenticationToken = new AuthenticationToken(id, clientIP, masterServerIP, gameServerIP, createdDate);
+			Timestamp createdDate = rs.getTimestamp(AuthenticationToken.AUTHENTICATION_DATE);
+			AuthenticationToken authenticationToken = new AuthenticationToken(id, clientIP, masterServerIP, gameServerIP, createdDate != null ? createdDate.toLocalDateTime() : null);
 			return authenticationToken;
 		}
 		return null;

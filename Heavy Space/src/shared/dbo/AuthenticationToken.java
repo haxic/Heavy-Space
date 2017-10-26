@@ -1,6 +1,6 @@
 package shared.dbo;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class AuthenticationToken {
 	public static final String AUTHENTICATION_TOKEN = "authentication_token";
@@ -14,9 +14,9 @@ public class AuthenticationToken {
 	private String clientIP;
 	private String masterServerIP;
 	private String gameServerIP;
-	private Date authenticationDate;
+	private LocalDateTime authenticationDate;
 
-	public AuthenticationToken(int accountID, String clientIP, String masterServerIP, String gameServerIP, Date authenticationDate) {
+	public AuthenticationToken(int accountID, String clientIP, String masterServerIP, String gameServerIP, LocalDateTime authenticationDate) {
 		this.accountID = accountID;
 		this.clientIP = clientIP;
 		this.masterServerIP = masterServerIP;
@@ -40,7 +40,7 @@ public class AuthenticationToken {
 		return gameServerIP;
 	}
 
-	public Date getAuthenticationDate() {
+	public LocalDateTime getAuthenticationDate() {
 		return authenticationDate;
 	}
 

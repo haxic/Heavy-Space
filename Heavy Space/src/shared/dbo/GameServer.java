@@ -1,6 +1,6 @@
 package shared.dbo;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class GameServer {
 	public static final String GAME_SERVER = "game_server";
@@ -9,9 +9,9 @@ public class GameServer {
 	public static final String LAST_CHECKED = "last_checked";
 	private int accountID;
 	private String serverIP;
-	private Date lastChecked;
+	private LocalDateTime lastChecked;
 
-	public GameServer(int accountID, String serverIP, Date lastChecked) {
+	public GameServer(int accountID, String serverIP, LocalDateTime lastChecked) {
 		super();
 		this.accountID = accountID;
 		this.serverIP = serverIP;
@@ -26,7 +26,7 @@ public class GameServer {
 		return serverIP;
 	}
 	
-	public Date getLastChecked() {
+	public LocalDateTime getLastChecked() {
 		return lastChecked;
 	}
 

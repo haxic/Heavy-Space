@@ -1,8 +1,5 @@
-/authenticationServer/
-/client/
-/demoStuff/
-/masterServer/
-/security/
 /shared/
 /tests/
-/utilities/
+/security/
+/authenticationServer/
+/masterServer/

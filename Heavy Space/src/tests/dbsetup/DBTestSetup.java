@@ -54,7 +54,6 @@ public class DBTestSetup implements IDataAccessLayer {
 			System.out.println("Failed to make connection!");
 			return;
 		}
-		System.out.println("Connected to testdb!");
 	}
 
 	public void clean() {

@@ -28,9 +28,17 @@ public class MainMasterServer {
 		}
 		
 		
+		long timer = System.currentTimeMillis();
+		int intervals = 5000;
+//		int intervals = 60000;
+
 		while (true) {
 			try {
-				Thread.sleep(2000);
+				if (System.currentTimeMillis() - timer >= intervals) {
+					timer += intervals;
+					dal.getGameServerDAO().removeTimedOutGameServers();
+				}
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

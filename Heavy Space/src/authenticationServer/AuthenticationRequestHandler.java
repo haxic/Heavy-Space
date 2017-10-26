@@ -48,7 +48,7 @@ public class AuthenticationRequestHandler {
 
 		// Create authentication token
 		String token = Authenticater.getAuthenticationTokenAsHashedString(authenticationToken);
-		return Config.MASTER_SERVER_IP + " " + token;
+		return Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT + " " + token;
 	}
 
 	public void createAccount(String username, String password, String ip) {

@@ -18,8 +18,7 @@ public class MasterServerRequestHandler {
 		this.dal = dal;
 	}
 
-	public List<GameServerInfo> getGameServerListForClient(String token, String username) {
-		System.out.println("TEST");
+	public List<GameServerInfo> getGameServerList(String token, String username) {
 		Account account;
 		try {
 			account = dal.getAccountDAO().getAccount(username);
@@ -75,7 +74,7 @@ public class MasterServerRequestHandler {
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
-		
+
 		try {
 			dal.getAuthenticationTokenDAO().updateAuthenticationTokenField(account.getID(), AuthenticationToken.GAME_SERVER_IP, ip);
 		} catch (SQLException e) {
@@ -84,7 +83,7 @@ public class MasterServerRequestHandler {
 			e.printStackTrace();
 			return null;
 		}
-		return null;
+		return ip;
 	}
 
 	public String hostGameServer(String token, String username) {
@@ -109,14 +108,36 @@ public class MasterServerRequestHandler {
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
+		boolean isHosting;
 		try {
-			dal.getGameServerDAO().createGameServer(account.getID());
+			isHosting = dal.getGameServerDAO().getGameServer(account.getID()) != null;
 		} catch (SQLException e) {
 			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
 			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
+
+		if (isHosting) {
+			try {
+				dal.getGameServerDAO().updateGameServerField(account.getID(), GameServer.LAST_CHECKED, "DEFAULT");
+			} catch (SQLException e) {
+				String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
+				System.out.println(error);
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			try {
+				dal.getGameServerDAO().createGameServer(account.getID());
+			} catch (SQLException e) {
+				String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
+				System.out.println(error);
+				e.printStackTrace();
+				return null;
+			}
+		}
+
 		return null;
 	}
 

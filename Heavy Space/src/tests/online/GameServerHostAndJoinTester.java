@@ -25,11 +25,12 @@ public class GameServerHostAndJoinTester {
 			String token = splitResult[1];
 			
 			// Host game server through master server
-			IMasterServerRMI masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerIP + ":" + Config.MASTER_SERVER_PORT + "/master");
+			IMasterServerRMI masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerIP + "/master");
 			masterServerRMI.hostGameServer(token, OnlineUserData.USERNAME);
 			
 			List<GameServerInfo> serverList = masterServerRMI.getGameServerList(token, OnlineUserData.USERNAME);
-			masterServerRMI.joinGameServer(token, OnlineUserData.USERNAME, serverList.get(0).getServerIP());
+			String ip = masterServerRMI.joinGameServer(token, OnlineUserData.USERNAME, serverList.get(0).getServerIP());
+			System.out.println(ip);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 		}

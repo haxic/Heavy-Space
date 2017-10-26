@@ -19,8 +19,7 @@ public class MasterServerRMI extends UnicastRemoteObject implements IMasterServe
 
 	@Override
 	public List<GameServerInfo> getGameServerList(String token, String username) throws RemoteException {
-		System.out.println("TEST");
-		return masterServerRequestHandler.getGameServerListForClient(token, username);
+		return masterServerRequestHandler.getGameServerList(token, username);
 	}
 
 	@Override

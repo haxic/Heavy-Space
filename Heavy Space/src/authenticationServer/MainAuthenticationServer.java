@@ -5,9 +5,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
+import java.util.List;
 
 import shared.Config;
 import shared.dal.DataAccessLayer;
+import shared.dbo.GameServer;
 import shared.idal.IDataAccessLayer;
 import shared.rmi.AuthenticationServerRMI;
 
@@ -26,11 +28,11 @@ public class MainAuthenticationServer {
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 		while (true) {
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

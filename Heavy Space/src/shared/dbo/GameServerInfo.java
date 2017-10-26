@@ -1,6 +1,8 @@
 package shared.dbo;
 
-public class GameServerInfo {
+import java.io.Serializable;
+
+public class GameServerInfo implements Serializable {
 
 	String serverName = "unknown";
 	String serverIP;

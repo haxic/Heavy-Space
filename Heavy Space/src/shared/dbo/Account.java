@@ -1,6 +1,6 @@
 package shared.dbo;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class Account {
 	public static final String ACCOUNT = "account";
@@ -11,9 +11,9 @@ public class Account {
 	private int id;
 	private String username;
 	private String password;
-	private Date createdDate;
+	private LocalDateTime createdDate;
 
-	public Account(int id, String username, String password, Date createdDate) {
+	public Account(int id, String username, String password, LocalDateTime createdDate) {
 		super();
 		this.id = id;
 		this.username = username;
@@ -34,7 +34,7 @@ public class Account {
 		return password;
 	}
 
-	public Date getCreatedDate() {
+	public LocalDateTime getCreatedDate() {
 		return createdDate;
 	}
 
