@@ -20,48 +20,23 @@ import tests.dbsetup.DBTestSetup;
 public class BasicServerTests extends DBTestSetup {
 
 	@Test
-	public void createAccountAndAuthenticate() {
+	public void testAllServerRequests() {
 		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this);
 		MasterServerRequestHandler msrh = new MasterServerRequestHandler(this);
 		String username = "test";
 		String password = "test1234";
 		String ip = "ip";
+		
+		// Create account
 		arh.createAccount(username, password, ip);
+		
+		// Authenticate (and get authentication token)
 		String result = arh.authenticate(username, password, ip);
 		String[] splitResult = result.split("\\s+");
 		assertEquals(splitResult[0], Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
-	}
-
-	@Test
-	public void hostGameServerAndJoin() {
-		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this);
-		MasterServerRequestHandler msrh = new MasterServerRequestHandler(this);
-		String username = "test";
-		String password = "test1234";
-		String ip = "ip";
-		arh.createAccount(username, password, ip);
-		String result = arh.authenticate(username, password, ip);
-		String[] splitResult = result.split("\\s+");
 		String token = splitResult[1];
-		msrh.hostGameServer(token, username);
-		List<GameServerInfo> serverList = msrh.getGameServerList(token, username);
-		assertTrue(!serverList.isEmpty());
-		String serverIP = msrh.joinGameServer(token, username, serverList.get(0).getServerIP());
-		assertEquals(ip, serverList.get(0).getServerIP());
-		assertEquals(serverIP, serverList.get(0).getServerIP());
-	}
-
-	@Test
-	public void rehosthostGameServer() {
-		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this);
-		MasterServerRequestHandler msrh = new MasterServerRequestHandler(this);
-		String username = "test";
-		String password = "test1234";
-		String ip = "ip";
-		arh.createAccount(username, password, ip);
-		String result = arh.authenticate(username, password, ip);
-		String[] splitResult = result.split("\\s+");
-		String token = splitResult[1];
+		
+		// Host game
 		msrh.hostGameServer(token, username);
 		LocalDateTime first = null;
 		LocalDateTime second = null;
@@ -70,14 +45,35 @@ public class BasicServerTests extends DBTestSetup {
 		} catch (SQLException e) {
 			fail();
 		}
+		
+		// Re-host game
 		msrh.hostGameServer(token, username);
 		try {
 			second = getGameServerDAO().getGameServer(1).getLastChecked();
 		} catch (SQLException e) {
 			fail();
 		}
-		System.out.println(first + " " + second);
 		assertTrue(first.isBefore(second));
+		
+		// Get server list from master server
+		List<GameServerInfo> serverList = msrh.getGameServerList(token, username);
+		assertTrue(!serverList.isEmpty());
+		
+		// The client tells the master server that it wants to join the server
+		String serverIP = msrh.joinGameServer(token, username, serverList.get(0).getServerIP());
+		assertEquals(ip, serverList.get(0).getServerIP());
+		assertEquals(serverIP, serverList.get(0).getServerIP());
+		
+		// The game server asks the master server if the client is authenticated
+		boolean clientCheck = msrh.checkClient(token, username, token, username);
+		assertTrue(clientCheck);
+		
+		// The game server heart-beats
+		String newToken = msrh.heartbeat(token, username);
+
+		// Check client with new token
+		clientCheck = msrh.checkClient(newToken, username, newToken, username);
+		assertTrue(clientCheck);
 	}
 
 }

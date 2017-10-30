@@ -32,4 +32,14 @@ public class MasterServerRMI extends UnicastRemoteObject implements IMasterServe
 		return masterServerRequestHandler.hostGameServer(token, username);
 	}
 
+	@Override
+	public boolean checkClient(String token, String username, String clientToken, String clientUsername) throws RemoteException {
+		return masterServerRequestHandler.checkClient(token, username, token, username);
+	}
+
+	@Override
+	public String heartbeat(String token, String username) throws RemoteException {
+		return masterServerRequestHandler.heartbeat(token, username);
+	}
+
 }

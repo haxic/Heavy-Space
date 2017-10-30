@@ -29,7 +29,6 @@ public class Authenticater {
 		return authenticationToken.getAccountID()
 				+ "//" + authenticationToken.getClientIP()
 				+ "//" + authenticationToken.getMasterServerIP()
-				+ "//" + authenticationToken.getGameServerIP()
 				+ "//" + authenticationToken.getAuthenticationDate()
 				+ "//" + AUTHENTICATION_SECRET;
 	}

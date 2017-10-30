@@ -20,8 +20,6 @@ public class AuthenticationRequestHandler {
 		try {
 			account = dal.getAccountDAO().getAccount(username);
 		} catch (SQLException e) {
-			String error = "A client tried to authenticate. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -40,8 +38,6 @@ public class AuthenticationRequestHandler {
 			dal.getAuthenticationTokenDAO().updateAuthenticationToken(account.getID(), ip, Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
 		} catch (SQLException e) {
-			String error = "A client tried to authenticate. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -62,7 +58,6 @@ public class AuthenticationRequestHandler {
 			Account account = dal.getAccountDAO().getAccount(username);
 			dal.getAuthenticationTokenDAO().createAuthenticationToken(account.getID(), ip, Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
 		} catch (SQLException e) {
-			String error = "A client tried to create an account. [Username: " + username + "] SQLException: " + e.getMessage();
 			e.printStackTrace();
 			return;
 		}

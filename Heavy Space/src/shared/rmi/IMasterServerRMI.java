@@ -14,4 +14,8 @@ public interface IMasterServerRMI extends Remote {
 
 	public String hostGameServer(String token, String username) throws RemoteException;
 
+	public boolean checkClient(String token, String username, String clientToken, String clientUsername) throws RemoteException;
+	
+	public String heartbeat(String token, String username) throws RemoteException;
+
 }

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import security.Authenticater;
+import shared.Config;
 import shared.dbo.Account;
 import shared.dbo.AuthenticationToken;
 import shared.dbo.GameServer;
@@ -19,12 +20,11 @@ public class MasterServerRequestHandler {
 	}
 
 	public List<GameServerInfo> getGameServerList(String token, String username) {
+		// Validate client
 		Account account;
 		try {
 			account = dal.getAccountDAO().getAccount(username);
 		} catch (SQLException e) {
-			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -32,20 +32,18 @@ public class MasterServerRequestHandler {
 		try {
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
 		} catch (SQLException e) {
-			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
+		
+		// Get game server list
 		List<GameServerInfo> gameServers;
 		try {
 			gameServers = dal.getGameServerDAO().getGameServersForClients();
 		} catch (SQLException e) {
-			String error = "A client tried to retrieve game server list. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -53,12 +51,11 @@ public class MasterServerRequestHandler {
 	}
 
 	public String joinGameServer(String token, String username, String ip) {
+		// Validate client
 		Account account;
 		try {
 			account = dal.getAccountDAO().getAccount(username);
 		} catch (SQLException e) {
-			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -66,8 +63,6 @@ public class MasterServerRequestHandler {
 		try {
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
 		} catch (SQLException e) {
-			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -75,11 +70,10 @@ public class MasterServerRequestHandler {
 		if (!authenticated)
 			return null;
 
+		// Update game server ip on token
 		try {
 			dal.getAuthenticationTokenDAO().updateAuthenticationTokenField(account.getID(), AuthenticationToken.GAME_SERVER_IP, ip);
 		} catch (SQLException e) {
-			String error = "A client tried to join a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -87,12 +81,11 @@ public class MasterServerRequestHandler {
 	}
 
 	public String hostGameServer(String token, String username) {
+		// Validate client
 		Account account;
 		try {
 			account = dal.getAccountDAO().getAccount(username);
 		} catch (SQLException e) {
-			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
@@ -100,45 +93,136 @@ public class MasterServerRequestHandler {
 		try {
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
 		} catch (SQLException e) {
-			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
+		
+		// Check if the game server is already hosting
 		boolean isHosting;
 		try {
 			isHosting = dal.getGameServerDAO().getGameServer(account.getID()) != null;
 		} catch (SQLException e) {
-			String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-			System.out.println(error);
 			e.printStackTrace();
 			return null;
 		}
 
 		if (isHosting) {
+			// If hosting, update game server information
 			try {
 				dal.getGameServerDAO().updateGameServerField(account.getID(), GameServer.LAST_CHECKED, "DEFAULT");
 			} catch (SQLException e) {
-				String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-				System.out.println(error);
 				e.printStackTrace();
 				return null;
 			}
 		} else {
+			// If not hosting, create game server
 			try {
 				dal.getGameServerDAO().createGameServer(account.getID());
 			} catch (SQLException e) {
-				String error = "A client tried to host a game server. [Username: " + username + "] SQLException: " + e.getMessage();
-				System.out.println(error);
 				e.printStackTrace();
 				return null;
 			}
 		}
-
 		return null;
+	}
+
+	public boolean checkClient(String token, String username, String clientToken, String clientUsername) {
+		// Validate game server client
+		Account account;
+		try {
+			account = dal.getAccountDAO().getAccount(username);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		AuthenticationToken authenticationToken;
+		try {
+			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
+		if (!authenticated)
+			return false;
+
+		// Validate client
+		Account clientAccount;
+		try {
+			clientAccount = dal.getAccountDAO().getAccount(username);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		AuthenticationToken clientAuthenticationToken;
+		try {
+			clientAuthenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(clientAccount.getID());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		boolean clientAuthenticated = Authenticater.checkAuthenticationToken(clientAuthenticationToken, token);
+		if (!clientAuthenticated)
+			return false;
+
+		return true;
+	}
+
+	public String heartbeat(String token, String username) {
+		// Validate client
+		Account account;
+		try {
+			account = dal.getAccountDAO().getAccount(username);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		AuthenticationToken authenticationToken;
+		try {
+			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
+		if (!authenticated)
+			return null;
+		
+		// Check if hosting
+		boolean isHosting;
+		try {
+			isHosting = dal.getGameServerDAO().getGameServer(account.getID()) != null;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		if (isHosting) {
+			// If hosting, update game server information
+			try {
+				dal.getGameServerDAO().updateGameServerField(account.getID(), GameServer.LAST_CHECKED, "DEFAULT");
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+		// Update account authentication token
+		AuthenticationToken newAuthenticationToken = null;
+		try {
+			dal.getAuthenticationTokenDAO().updateAuthenticationTokenField(account.getID(), AuthenticationToken.AUTHENTICATION_DATE, "DEFAULT");
+			newAuthenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		// Create authentication token
+		String newToken = Authenticater.getAuthenticationTokenAsHashedString(newAuthenticationToken);
+		return newToken;
 	}
 
 }

@@ -49,7 +49,8 @@ public class AuthenticationTokenDAO implements IAuthenticationTokenDAO {
 	@Override
 	public void updateAuthenticationTokenField(int accountID, String field, Object value) throws SQLException {
 		if (value instanceof String)
-			value = "'" + value + "'";
+			if (!value.equals("DEFAULT"))
+				value = "'" + value + "'";
 		Statement s = dbc.createStatement();
 		s.executeUpdate("UPDATE " + AuthenticationToken.AUTHENTICATION_TOKEN + " SET " + field + " = " + value + " WHERE " + AuthenticationToken.ACCOUNT_ID + " = " + accountID + ";");
 	}
