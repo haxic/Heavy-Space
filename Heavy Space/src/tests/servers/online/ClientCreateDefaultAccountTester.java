@@ -1,4 +1,4 @@
-package tests.online;
+package tests.servers.online;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;

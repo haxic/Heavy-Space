@@ -1,4 +1,4 @@
-package tests.local;
+package tests.servers.local;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
