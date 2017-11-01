@@ -18,7 +18,10 @@ public class TCPServer implements Runnable {
 	private boolean shouldClose;
 	private boolean acceptNewConnections;
 
-	public TCPServer() {
+	private GameModel gameModel;
+
+	public TCPServer(GameModel gameModel) {
+		this.gameModel = gameModel;
 		try {
 			serverAddress = InetAddress.getByName(serverIP);
 		} catch (UnknownHostException e) {
@@ -70,7 +73,7 @@ public class TCPServer implements Runnable {
 							clientSocket.close();
 					} else {
 						System.out.println("Client connected. " + clientSocket.getInetAddress());
-						connections.add(new TCPObject(clientSocket, null));
+						connections.add(new TCPObject(clientSocket, gameModel.addPlayer("test").getDataTransferObject()));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -97,29 +100,27 @@ public class TCPServer implements Runnable {
 		}
 	}
 
-	// @Override
-	// public void run() {
-	// while (true) {
-	// List<TCPObject> disconnections = new ArrayList<>();
-	// for (TCPObject connection : connections) {
-	// while (!connection.received.isEmpty()) {
-	// System.out.println(connection.received.poll());
-	// }
-	// if (connection.isDisconnected()) {
-	// disconnections.add(connection);
-	// continue;
-	// }
-	// }
-	// for (TCPObject tcpObject : disconnections) {
-	// connections.remove(tcpObject);
-	// System.out.println(tcpObject.socket.getInetAddress() + " removed. Active
-	// connections: " + connections.size());
-	// }
-	// try {
-	// thread.sleep(1);
-	// } catch (InterruptedException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	// }
+//	public void run2() {
+//		while (true) {
+//			List<TCPObject> disconnections = new ArrayList<>();
+//			for (TCPObject connection : connections) {
+//				while (!connection.received.isEmpty()) {
+//					System.out.println(connection.received.poll());
+//				}
+//				if (connection.isDisconnected()) {
+//					disconnections.add(connection);
+//					continue;
+//				}
+//			}
+//			for (TCPObject tcpObject : disconnections) {
+//				connections.remove(tcpObject);
+//				System.out.println(tcpObject.socket.getInetAddress() + " removed. Active connections: " + connections.size());
+//			}
+//			try {
+//				thread.sleep(1);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 }

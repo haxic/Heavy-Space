@@ -2,15 +2,19 @@ package gameServer;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import shared.socket.DataPacket;
 
 public class DataTransferObject {
-	Queue<byte[]> received;
-	Queue<byte[]> toSend;
+	Queue<byte[]> received = new ConcurrentLinkedQueue();
+	Queue<byte[]> toSend = new ConcurrentLinkedQueue();
+	DTOStatus status;
+	private boolean disconnected;
 
 	public void receiveData(byte[] data) {
 		received.add(data);
+		status = DTOStatus.Connected;
 	}
 
 	public void sendData(List<DataPacket> dataPackets) {
@@ -30,4 +34,11 @@ public class DataTransferObject {
 		return received.poll();
 	}
 
+	public void disconnect() {
+		disconnected = true;
+	}
+
+	public boolean isDisconnected() {
+		return disconnected;
+	}
 }

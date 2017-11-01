@@ -11,12 +11,12 @@ public class TCPObject {
 	DataInputStream in;
 	InputHandler inputHandler;
 	OutputHandler outputHandler;
-	private boolean disconnected;
 	boolean shouldClose;
 	DataTransferObject dto;
 
-	public TCPObject(Socket socket, DataTransferObject player) throws IOException {
+	public TCPObject(Socket socket, DataTransferObject dto) throws IOException {
 		this.socket = socket;
+		this.dto = dto;
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
 		outputHandler = new OutputHandler();
@@ -31,13 +31,18 @@ public class TCPObject {
 			while (!shouldClose && !socket.isClosed() && socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
 				int length;
 				try {
-					length = in.readInt();
-					if (length > 0) {
+					while ((length = in.readInt()) > 0) {
+						System.out.println("Data received!");
 						byte[] data = new byte[length];
 						in.readFully(data, 0, data.length);
 						dto.receiveData(data);
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					sleep(1);
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -47,8 +52,13 @@ public class TCPObject {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			disconnected = true;
+			disconnect();
 		}
+
+	}
+
+	private void disconnect() {
+		dto.disconnect();
 	}
 
 	class OutputHandler extends Thread implements Runnable {
@@ -60,11 +70,17 @@ public class TCPObject {
 					if (message == null || message.length == 0)
 						continue;
 					try {
+						System.out.println("Data send!");
 						out.writeInt(message.length);
 						out.write(message);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				}
+				try {
+					sleep(1);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			try {
@@ -73,12 +89,8 @@ public class TCPObject {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			disconnected = true;
+			disconnect();
 		}
-	}
-
-	public boolean isDisconnected() {
-		return disconnected;
 	}
 
 	public void cleanUp() {

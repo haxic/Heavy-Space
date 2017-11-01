@@ -23,7 +23,8 @@ public class MainGameServer {
 	}
 
 	private void setupTCPServer() {
-		tcpServer = new TCPServer();
+		tcpServer = new TCPServer(gameModel);
+		tcpServer.acceptNewConnections();
 	}
 
 	private void setupUDPServer() {
@@ -36,7 +37,6 @@ public class MainGameServer {
 		while (!shouldStop) {
 			if (System.currentTimeMillis() - timer > hz) {
 				timer += hz;
-				System.out.println(hz);
 				update();
 			}
 			try {
@@ -55,6 +55,7 @@ public class MainGameServer {
 	}
 
 	private void sendGameSate() {
+		gameModel.players
 	}
 
 	private void updateGameState() {

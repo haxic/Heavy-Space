@@ -17,7 +17,12 @@ public class GameModel {
 	}
 
 	public Player addPlayer(String username) {
-		return players.put(username, new Player(username));
+		Player player = players.get(username);
+		if (player != null)
+			player.reconnect();
+		else
+			player = players.put(username, new Player(username));
+		return player;
 	}
 
 	public List<DataPacket> getWorldAsData() {

@@ -1,5 +1,5 @@
 package gameServer;
 
-public enum PlayerStatus {
+public enum DTOStatus {
 	Ready, GettingWorld, Active, Inactive
 }
