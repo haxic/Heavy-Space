@@ -1,4 +1,4 @@
-package gameServer;
+package gameServer.network;
 
 import java.util.List;
 import java.util.Queue;
@@ -9,12 +9,10 @@ import shared.socket.DataPacket;
 public class DataTransferObject {
 	Queue<byte[]> received = new ConcurrentLinkedQueue();
 	Queue<byte[]> toSend = new ConcurrentLinkedQueue();
-	DTOStatus status;
 	private boolean disconnected;
 
 	public void receiveData(byte[] data) {
 		received.add(data);
-		status = DTOStatus.Connected;
 	}
 
 	public void sendData(List<DataPacket> dataPackets) {

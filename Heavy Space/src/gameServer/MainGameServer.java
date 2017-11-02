@@ -1,12 +1,18 @@
 package gameServer;
 
+import gameServer.network.TCPServer;
+import gameServer.network.ValidationService;
 import shared.game.WorldBuilder;
 
 public class MainGameServer {
 
 	TCPServer tcpServer;
 	GameModel gameModel;
+	ValidationService validationService;
+
 	public MainGameServer() {
+		validationService = new ValidationService();
+		tcpServer = new TCPServer(validationService);
 		gameModel = new GameModel();
 		initializeWorld();
 		initializeServer();
@@ -18,13 +24,8 @@ public class MainGameServer {
 	}
 
 	private void initializeServer() {
-		setupTCPServer();
+		tcpServer.startServer();
 		setupUDPServer();
-	}
-
-	private void setupTCPServer() {
-		tcpServer = new TCPServer(gameModel);
-		tcpServer.acceptNewConnections();
 	}
 
 	private void setupUDPServer() {
@@ -49,7 +50,7 @@ public class MainGameServer {
 
 	private void update() {
 		processInputs();
-		processAI();
+		// processAI();
 		updateGameState();
 		sendGameSate();
 	}

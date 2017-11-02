@@ -1,5 +1,7 @@
 package gameServer;
 
+import gameServer.network.DataTransferObject;
+
 public class Player {
 	private String username;
 	private DataTransferObject dto;

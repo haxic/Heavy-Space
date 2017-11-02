@@ -1,7 +1,2 @@
-/masterServer/
-/tests/
-/security/
-/shared/
-/authenticationServer/
 /gameServer/
-/game/
+/tests/

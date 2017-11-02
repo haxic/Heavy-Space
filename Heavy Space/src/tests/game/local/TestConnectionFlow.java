@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import gameServer.GameModel;
 import gameServer.Player;
-import gameServer.DataTransferObject;
+import gameServer.network.DataTransferObject;
 import shared.game.WorldBuilder;
 
 public class TestConnectionFlow {

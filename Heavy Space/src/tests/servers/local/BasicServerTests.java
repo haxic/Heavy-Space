@@ -32,6 +32,7 @@ public class BasicServerTests extends DBTestSetup {
 		
 		// Authenticate (and get authentication token)
 		String result = arh.authenticate(username, password, ip);
+		System.out.println(result);
 		String[] splitResult = result.split("\\s+");
 		assertEquals(splitResult[0], Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
 		String token = splitResult[1];

@@ -1,9 +1,11 @@
-package gameServer;
+package gameServer.network;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
+import gameServer.GameModel;
 
 public class TCPObject {
 	Socket socket;
@@ -14,11 +16,10 @@ public class TCPObject {
 	boolean shouldClose;
 	DataTransferObject dto;
 
-	public TCPObject(Socket socket, DataTransferObject dto) throws IOException {
+	public TCPObject(Socket socket, GameModel gameModel) throws IOException {
 		this.socket = socket;
-		this.dto = dto;
 		in = new DataInputStream(socket.getInputStream());
-		out = new DataOutputStream(socket.getOutputStream());
+		out = new DataOutputStream(socket.getOutputStream());		
 		outputHandler = new OutputHandler();
 		outputHandler.start();
 		inputHandler = new InputHandler();
