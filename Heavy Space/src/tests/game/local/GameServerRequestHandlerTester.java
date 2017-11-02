@@ -6,7 +6,7 @@ public class GameServerRequestHandlerTester implements IGameServerRequestHandler
 
 	@Override
 	public boolean validateClient(String username, String token) {
-		return Math.random() < 0.5;
+		return username != null && token != null;
 	}
 
 }

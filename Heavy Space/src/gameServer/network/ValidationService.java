@@ -2,16 +2,26 @@ package gameServer.network;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ValidationService {
 	IGameServerRequestHandler gameServerRequestHandler;
-
-	public ValidationService(IGameServerRequestHandler gameServerRequestHandler) {
+	int timeout;
+	Set<ClientValidator> activeClientValidators = Collections.newSetFromMap(new ConcurrentHashMap<ClientValidator, Boolean>());
+	int validationCounter;
+	
+	public ValidationService(IGameServerRequestHandler gameServerRequestHandler, int timeout) {
 		this.gameServerRequestHandler = gameServerRequestHandler;
+		this.timeout = timeout;
 	}
 
 	public void handleNewConnection(Socket socket) {
 		ClientValidator clientValidator = new ClientValidator(socket);
+		validationCounter++;
+		activeClientValidators.add(clientValidator);
 		try {
 			clientValidator.startValidation();
 		} catch (IOException e) {
@@ -19,33 +29,43 @@ public class ValidationService {
 		}
 	}
 
-	private void handleException(SocketHandler socketHandler, IOException e) {
-		e.printStackTrace();
-		if (!socketHandler.isClosed()) {
+	public int getNumberOfCurrentlyActiveClientValidators() {
+		return activeClientValidators.size();
+	}
+
+	public int getValidationCounterCurrentValue() {
+		return validationCounter;
+	}
+	
+	private void handleException(ClientValidator clientValidator, IOException e) {
+		// e.printStackTrace();
+		if (!clientValidator.socketHandler.isClosed()) {
 			try {
-				socketHandler.close();
+				clientValidator.socketHandler.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				// e1.printStackTrace();
 			}
 		}
+		activeClientValidators.remove(clientValidator);
 	}
 
-	private void handleInvalidConnection(SocketHandler socketHandler, String errorMessage) {
+	private void handleInvalidConnection(ClientValidator clientValidator, String errorMessage) {
 		try {
-			socketHandler.sendData(errorMessage.getBytes());
+			clientValidator.socketHandler.sendData(errorMessage.getBytes());
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
+		activeClientValidators.remove(clientValidator);
 	}
 
-	private void handleValidatedConnection(SocketHandler socketHandler, String username, String token) {
+	private void handleValidatedConnection(ClientValidator clientValidator, String username, String token) {
 		byte[] invalidMessage = "Accepted: validation successful.".getBytes();
 		try {
-			socketHandler.sendData(invalidMessage);
+			clientValidator.socketHandler.sendData(invalidMessage);
 		} catch (IOException e) {
-			e.printStackTrace();
-			return;
+//			e.printStackTrace();
 		}
+		activeClientValidators.remove(clientValidator);
 		// gameModel.addPlayer("test").getDataTransferObject()
 	}
 
@@ -64,31 +84,42 @@ public class ValidationService {
 
 		@Override
 		public void run() {
+			try {
+				socketHandler.setSoTimeout(timeout);
+			} catch (SocketException e) {
+				e.printStackTrace();
+			}
 			String username = null;
 			String token = null;
 			try {
 				byte[] dataReceived = socketHandler.readData();
-				if (dataReceived == null)
-					handleInvalidConnection(socketHandler, "Failed to join: data is null.");
+				if (dataReceived == null) {
+					handleInvalidConnection(this, "Failed to join: data is null.");
+					return;
+				}
 				String result = new String(dataReceived);
 				try {
 					String[] splitResult = result.split("\\s+");
 					username = splitResult[0];
 					token = splitResult[1];
 				} catch (Exception e) {
-					handleInvalidConnection(socketHandler, "Failed to join: couldn't parse username and token.");
+					handleInvalidConnection(this, "Failed to join: couldn't parse username and token.");
+					return;
 				}
 			} catch (IOException e) {
-				handleException(socketHandler, e);
+				handleException(this, e);
+				return;
 			}
 			if (username == null || token == null) {
-				handleInvalidConnection(socketHandler, "Failed to join: invalid credentials.");
+				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
 			boolean validated = gameServerRequestHandler.validateClient(username, token);
 			if (validated) {
-				handleValidatedConnection(socketHandler, username, token);
+				handleValidatedConnection(this, username, token);
+				return;
 			} else {
-				handleInvalidConnection(socketHandler, "Failed to join: client not validated.");
+				handleInvalidConnection(this, "Failed to join: client not validated.");
+				return;
 			}
 		}
 

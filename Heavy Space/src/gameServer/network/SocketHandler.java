@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class SocketHandler {
 
@@ -43,6 +44,10 @@ public class SocketHandler {
 	public void close() throws IOException {
 		if (!socket.isClosed())
 			socket.close();
+	}
+
+	public void setSoTimeout(int timeout) throws SocketException {
+		socket.setSoTimeout(timeout);
 	}
 
 }
