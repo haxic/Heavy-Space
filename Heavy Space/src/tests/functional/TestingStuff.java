@@ -1,4 +1,4 @@
-package tests;
+package tests.functional;
 
 import java.util.ArrayList;
 import java.util.List;

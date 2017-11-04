@@ -12,23 +12,24 @@ import shared.dal.DataAccessLayer;
 import shared.dbo.GameServer;
 import shared.idal.IDataAccessLayer;
 import shared.rmi.AuthenticationServerRMI;
+import tests.LocalConfig;
 
-public class MainAuthenticationServer {
+public class AuthenticationServer {
 	IDataAccessLayer dal;
+	Config config;
 
-	public MainAuthenticationServer() throws SQLException {
-		dal = new DataAccessLayer();
-
+	public AuthenticationServer(Config config) throws SQLException {
+		this.config = config;
+		dal = new DataAccessLayer(config);
 		AuthenticationServerRMI authenticationServerRMI;
 		try {
-			authenticationServerRMI = new AuthenticationServerRMI(Config.AUTHENTICATION_SERVER_PORT, dal);
-			Registry registry = LocateRegistry.createRegistry(Config.AUTHENTICATION_SERVER_PORT);
+			authenticationServerRMI = new AuthenticationServerRMI(config.authenticationServerPort, dal, config);
+			Registry registry = LocateRegistry.createRegistry(config.authenticationServerPort);
 			registry.bind("authenticate", authenticationServerRMI);
 			System.out.println("Login server RMI bound.");
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
-
 
 		while (true) {
 			try {
@@ -39,11 +40,4 @@ public class MainAuthenticationServer {
 		}
 	}
 
-	public static void main(String[] args) {
-		try {
-			new MainAuthenticationServer();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
 }

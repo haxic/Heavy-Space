@@ -11,26 +11,27 @@ import shared.dal.DataAccessLayer;
 import shared.idal.IDataAccessLayer;
 import shared.rmi.MasterServerRMI;
 
-public class MainMasterServer {
+public class MasterServer {
 	IDataAccessLayer dal;
-	
-	public MainMasterServer() throws SQLException {
-		dal = new DataAccessLayer();
+	Config config;
+
+	public MasterServer(Config config) throws SQLException {
+		this.config = config;
+		dal = new DataAccessLayer(config);
 
 		MasterServerRMI masterServerRMI;
 		try {
-			masterServerRMI = new MasterServerRMI(Config.MASTER_SERVER_PORT, dal);
-			Registry registry = LocateRegistry.createRegistry(Config.MASTER_SERVER_PORT);
+			masterServerRMI = new MasterServerRMI(config.masterServerPort, dal);
+			Registry registry = LocateRegistry.createRegistry(config.masterServerPort);
 			registry.bind("master", masterServerRMI);
 			System.out.println("Master server RMI bound.");
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
-		
-		
+
 		long timer = System.currentTimeMillis();
 		int intervals = 5000;
-//		int intervals = 60000;
+		// int intervals = 60000;
 
 		while (true) {
 			try {
@@ -42,14 +43,6 @@ public class MainMasterServer {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	public static void main(String[] args) {
-		try {
-			new MainMasterServer();
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 }

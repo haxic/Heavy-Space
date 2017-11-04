@@ -10,9 +10,11 @@ import shared.idal.IDataAccessLayer;
 
 public class AuthenticationRequestHandler {
 	private IDataAccessLayer dal;
+	private Config config;
 
-	public AuthenticationRequestHandler(IDataAccessLayer dal) {
+	public AuthenticationRequestHandler(IDataAccessLayer dal, Config config) {
 		this.dal = dal;
+		this.config = config;
 	}
 
 	public String authenticate(String username, String password, String ip) {
@@ -35,7 +37,7 @@ public class AuthenticationRequestHandler {
 		// Update account authentication token
 		AuthenticationToken authenticationToken = null;
 		try {
-			dal.getAuthenticationTokenDAO().updateAuthenticationToken(account.getID(), ip, Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
+			dal.getAuthenticationTokenDAO().updateAuthenticationToken(account.getID(), ip, config.masterServerIP + ":" + config.masterServerPort);
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -44,10 +46,10 @@ public class AuthenticationRequestHandler {
 
 		// Create authentication token
 		String token = Authenticater.getAuthenticationTokenAsHashedString(authenticationToken);
-		return Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT + " " + token;
+		return config.masterServerIP + ":" + config.masterServerPort + " " + token + " " + username;
 	}
 
-	public void createAccount(String username, String password, String ip) {
+	public boolean createAccount(String username, String password, String ip) {
 		// TODO: Make sure that this is transactional! The created account must
 		// be locked until the token has been created for it.
 		// TODO: The account should be removed if the token cannot be created.
@@ -56,10 +58,11 @@ public class AuthenticationRequestHandler {
 		try {
 			dal.getAccountDAO().createAccount(username, hashedPassword);
 			Account account = dal.getAccountDAO().getAccount(username);
-			dal.getAuthenticationTokenDAO().createAuthenticationToken(account.getID(), ip, Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
+			dal.getAuthenticationTokenDAO().createAuthenticationToken(account.getID(), ip, config.masterServerIP + ":" + config.masterServerPort);
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return;
+			return false;
 		}
 	}
 

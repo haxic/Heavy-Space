@@ -1,10 +1,23 @@
 package shared;
 
 public class Config {
-	public static final String AUTHENTICATION_SERVER_IP = "127.0.0.1";
-	public static final int AUTHENTICATION_SERVER_PORT = 5431;
-	public static final String MASTER_SERVER_IP = "127.0.0.1";
-	public static final int MASTER_SERVER_PORT = 5430;
-	public static final String GAME_SERVER_IP = "127.0.0.1";
-	public static final int GAME_SERVER_PORT = 5429;
+	public String authenticationServerIP;
+	public int authenticationServerPort;
+	public String masterServerIP;
+	public int masterServerPort;
+	public String dbEndPoint;
+	public String dbUsername;
+	public String dbPassword;
+	public boolean useSSL;
+
+	public Config() {
+		authenticationServerIP = "127.0.0.1";
+		authenticationServerPort = 5431;
+		masterServerIP = "127.0.0.1";
+		masterServerPort = 5430;
+		dbEndPoint = "jdbc:postgresql://ec2-23-21-92-251.compute-1.amazonaws.com/d4jfrp7pjrtdjh";
+		dbUsername = "fbqkxcdwyqdbcj";
+		dbPassword = "6d89f6eea619b383f076c82d1da8bfd0d784ef381648b0021ceb63467ca0b1ad";
+		useSSL = true;
+	}
 }

@@ -15,32 +15,30 @@ import authenticationServer.AuthenticationRequestHandler;
 import masterServer.MasterServerRequestHandler;
 import shared.Config;
 import shared.dbo.GameServerInfo;
+import tests.LocalConfig;
 import tests.dbsetup.DBTestSetup;
 
 public class BasicServerTests extends DBTestSetup {
 
-	public BasicServerTests(String endpoint, String username, String password) {
-		super(endpoint, username, password);
-	}
+	Config localConfig = new LocalConfig();
 
 	@Test
 	public void testAllServerRequests() {
-		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this);
+		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this, localConfig);
 		MasterServerRequestHandler msrh = new MasterServerRequestHandler(this);
 		String username = "test";
 		String password = "test1234";
 		String ip = "ip";
-		
+
 		// Create account
 		arh.createAccount(username, password, ip);
-		
+
 		// Authenticate (and get authentication token)
 		String result = arh.authenticate(username, password, ip);
-		System.out.println(result);
 		String[] splitResult = result.split("\\s+");
-		assertEquals(splitResult[0], Config.MASTER_SERVER_IP + ":" + Config.MASTER_SERVER_PORT);
+		assertEquals(splitResult[0], localConfig.masterServerIP + ":" + localConfig.masterServerPort);
 		String token = splitResult[1];
-		
+
 		// Host game
 		msrh.hostGameServer(token, username);
 		LocalDateTime first = null;
@@ -50,7 +48,7 @@ public class BasicServerTests extends DBTestSetup {
 		} catch (SQLException e) {
 			fail();
 		}
-		
+
 		// Re-host game
 		msrh.hostGameServer(token, username);
 		try {
@@ -59,20 +57,20 @@ public class BasicServerTests extends DBTestSetup {
 			fail();
 		}
 		assertTrue(first.isBefore(second));
-		
+
 		// Get server list from master server
 		List<GameServerInfo> serverList = msrh.getGameServerList(token, username);
 		assertTrue(!serverList.isEmpty());
-		
+
 		// The client tells the master server that it wants to join the server
 		String serverIP = msrh.joinGameServer(token, username, serverList.get(0).getServerIP());
 		assertEquals(ip, serverList.get(0).getServerIP());
 		assertEquals(serverIP, serverList.get(0).getServerIP());
-		
+
 		// The game server asks the master server if the client is authenticated
 		boolean clientCheck = msrh.checkClient(token, username, token, username);
 		assertTrue(clientCheck);
-		
+
 		// The game server heart-beats
 		String newToken = msrh.heartbeat(token, username);
 

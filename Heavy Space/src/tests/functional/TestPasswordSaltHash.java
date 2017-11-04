@@ -1,4 +1,4 @@
-package tests;
+package tests.functional;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

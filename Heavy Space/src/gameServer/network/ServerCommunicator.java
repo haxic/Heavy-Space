@@ -10,10 +10,10 @@ import shared.rmi.IMasterServerRMI;
 
 public class ServerCommunicator implements IServerCommunicator {
 
-	IAuthenticationServerRMI authenticationServerRMI;
+	private IAuthenticationServerRMI authenticationServerRMI;
 	private String authenticationServerAddress;
 
-	IMasterServerRMI masterServerRMI;
+	private IMasterServerRMI masterServerRMI;
 	private String masterServerAddress;
 
 	private String username;
@@ -24,13 +24,22 @@ public class ServerCommunicator implements IServerCommunicator {
 		this.authenticationServerAddress = authenticationServerAddress;
 	}
 
+	public IAuthenticationServerRMI getAuthenticationServerRMI() {
+		return authenticationServerRMI;
+	}
+
+	public IMasterServerRMI getMasterServerRMI() {
+		return masterServerRMI;
+	}
+
 	@Override
 	public boolean authenticate(String username, String password) {
 		this.username = username;
 		this.password = password;
 		String result = null;
 		try {
-			authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + authenticationServerAddress + "/authenticate");
+			if (authenticationServerRMI == null)
+				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + authenticationServerAddress + "/authenticate");
 			result = authenticationServerRMI.authenticate(username, password);
 		} catch (RemoteException | MalformedURLException | NotBoundException e) {
 			e.printStackTrace();
@@ -68,6 +77,18 @@ public class ServerCommunicator implements IServerCommunicator {
 			} catch (MalformedURLException | RemoteException | NotBoundException e1) {
 				e1.printStackTrace();
 			}
+			return false;
+		}
+	}
+
+	@Override
+	public boolean createAccount(String username, String password) {
+		try {
+			if (authenticationServerRMI == null)
+				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + authenticationServerAddress + "/authenticate");
+			return authenticationServerRMI.createAccount(username, password);
+		} catch (MalformedURLException | NotBoundException | RemoteException e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

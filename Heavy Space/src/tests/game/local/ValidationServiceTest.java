@@ -6,16 +6,16 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.mindrot.jbcrypt.BCrypt;
 
 import gameServer.network.IServerCommunicator;
-import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
-import shared.Config;
 import tests.dbsetup.OnlineUserData;
-import tests.game.local.ValidationServiceTest.Tester;
+import tests.implementations.ServerCommunicatorLocal;
 
 public class ValidationServiceTest {
 
@@ -24,7 +24,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testValidationService() {
-		IServerCommunicator serverCommunicator = new ServerCommunicator(Config.AUTHENTICATION_SERVER_IP + ":" + Config.AUTHENTICATION_SERVER_PORT);
+		IServerCommunicator serverCommunicator = new ServerCommunicatorLocal();
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
 		ValidationService validationService = new ValidationService(serverCommunicator, 500);
@@ -39,12 +39,9 @@ public class ValidationServiceTest {
 			}
 		}
 		Tester[] testers = new Tester[NUMBER_OF_THREADS];
-		if (NUMBER_OF_THREADS > 1)
-			for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-				testers[i] = new Tester(i, CONNECTIONS_PER_THREAD, i % 6);
-			}
-		else
-			testers[0] = new Tester(0, CONNECTIONS_PER_THREAD, 5);
+		for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+			testers[i] = new Tester(i, CONNECTIONS_PER_THREAD, i % 6);
+		}
 		boolean done = true;
 		do {
 			try {
@@ -70,13 +67,13 @@ public class ValidationServiceTest {
 				types[j] += testers[i].types[j];
 			}
 		}
-		System.out.print("Validation counter:" + validationService.getValidationCounterCurrentValue() + " Active validations:" + validationService.getNumberOfCurrentlyActiveClientValidators()
-				+ " Total: " + total + " Accepted: " + accepted + " Failed: " + failed + " Types: [");
-		System.out.print(types[0]);
+
+		assertEquals(total, 360);
+		assertEquals(accepted, 120);
+		assertEquals(failed, 240);
 		for (int i = 1; i < types.length; i++) {
-			System.out.print(", " + types[i]);
+			assertEquals(types[i], 60);
 		}
-		System.out.println("]");
 	}
 
 	public class Tester implements Runnable {

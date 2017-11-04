@@ -1,44 +1,78 @@
 package tests.servers.online;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import org.junit.Test;
+
 import shared.Config;
 import shared.rmi.IAuthenticationServerRMI;
+import tests.LocalConfig;
+import tests.dbsetup.DBTestSetup;
 
-public class ClientCreateMultipleAccountsTester {
-	public ClientCreateMultipleAccountsTester() {
+public class ClientCreateMultipleAccountsTester extends DBTestSetup {
+	Config localConfig = new LocalConfig();
+	int readyCounter;
+	IAuthenticationServerRMI authenticationServerRMI;
+
+	@Test
+	public void clientCreateMultipleAccountsTester() {
 		// Spawn multiple threads that execute at the same time
-		for (int i = 50; i < 100; i++)
-			new Worker(i).start();
-	}
-
-	class Worker extends Thread {
-		int i;
-
-		public Worker(int i) {
-			this.i = i;
+		try {
+			authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + localConfig.authenticationServerPort + "/authenticate");
+		} catch (MalformedURLException | RemoteException | NotBoundException e1) {
+			e1.printStackTrace();
+			fail();
 		}
-
-		@Override
-		public void run() {
+		for (int i = 0; i < 40; i++)
+			new Worker(i).start();
+		while (readyCounter < 40) {
 			try {
-				// Connect to RMI
-				IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
-				// Create account
-				authenticationServerRMI.createAccount("test" + i, "test" + (i + i));
-				// Authenticate and fetch result
-				String token = authenticationServerRMI.authenticate("test" + i, "test" + (i + i));
-				System.out.println(token);
-			} catch (MalformedURLException | RemoteException | NotBoundException e) {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
+				fail();
 			}
 		}
 	}
 
-	public static void main(String[] args) {
-		new ClientCreateMultipleAccountsTester();
+	class Worker extends Thread implements Runnable {
+		int i;
+		String username;
+		String password;
+
+		public Worker(int i) {
+			this.i = i;
+			username = "test" + i;
+			password = "test" + (i + i);
+		}
+
+		@Override
+		public void run() {
+			// Connect to RMI
+			// Create account
+			try {
+				authenticationServerRMI.createAccount(username, password);
+				// Authenticate and fetch result
+				String result = authenticationServerRMI.authenticate(username, password);
+				String[] splitResult = result.split("\\s+");
+				String ip = splitResult[0];
+				String token = splitResult[1];
+				String resultUsername = splitResult[2];
+				assertEquals(username, resultUsername);
+				assertTrue(token != null);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				fail();
+			}
+			readyCounter++;
+		}
 	}
 }

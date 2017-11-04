@@ -13,16 +13,14 @@ import shared.idal.IAccountDAO;
 import shared.idal.IAuthenticationTokenDAO;
 import shared.idal.IDataAccessLayer;
 import shared.idal.IGameServerDAO;
+import tests.LocalConfig;
 
 public class DBTestSetup implements IDataAccessLayer {
-	private static final String ENDPOINT = "jdbc:postgresql://127.0.0.1:5432/testdb";
-	private static final String USERNAME = "haxic";
-	private static final String PASSWORD = "";
-
 	private Connection dbc;
 	IAccountDAO accountDAO;
 	IAuthenticationTokenDAO authenticationTokenDAO;
 	IGameServerDAO gameServerDAO;
+	private LocalConfig localConfig = new LocalConfig();
 
 	public DBTestSetup() {
 		connect();
@@ -43,9 +41,9 @@ public class DBTestSetup implements IDataAccessLayer {
 		dbc = null;
 		try {
 			Properties props = new Properties();
-			props.setProperty("user", USERNAME);
-			props.setProperty("password", PASSWORD);
-			dbc = DriverManager.getConnection(ENDPOINT, props);
+			props.setProperty("user", localConfig.dbUsername);
+			props.setProperty("password", localConfig.dbPassword);
+			dbc = DriverManager.getConnection(localConfig.dbEndPoint, props);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! " + e.getMessage());
 			return;

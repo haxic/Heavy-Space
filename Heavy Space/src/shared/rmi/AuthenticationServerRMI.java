@@ -17,9 +17,9 @@ import shared.idal.IDataAccessLayer;
 public class AuthenticationServerRMI extends UnicastRemoteObject implements IAuthenticationServerRMI {
 	AuthenticationRequestHandler authenticationRequestHandler;
 
-	public AuthenticationServerRMI(int port, IDataAccessLayer dal) throws RemoteException {
+	public AuthenticationServerRMI(int port, IDataAccessLayer dal, Config config) throws RemoteException {
 		super(port);
-		authenticationRequestHandler = new AuthenticationRequestHandler(dal);
+		authenticationRequestHandler = new AuthenticationRequestHandler(dal, config);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class AuthenticationServerRMI extends UnicastRemoteObject implements IAut
 	}
 
 	@Override
-	public void createAccount(String username, String password) throws RemoteException {
+	public boolean createAccount(String username, String password) throws RemoteException {
 		// Get client ip
 		String ip = null;
 		try {
@@ -46,7 +46,8 @@ public class AuthenticationServerRMI extends UnicastRemoteObject implements IAut
 			e.printStackTrace();
 		}
 		if (ip == null)
-			return;
-		authenticationRequestHandler.createAccount(username, password, ip);
+			return false;
+
+		return authenticationRequestHandler.createAccount(username, password, ip);
 	}
 }

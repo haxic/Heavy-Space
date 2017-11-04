@@ -7,22 +7,21 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import shared.Config;
 import shared.idal.IAccountDAO;
 import shared.idal.IAuthenticationTokenDAO;
 import shared.idal.IDataAccessLayer;
 import shared.idal.IGameServerDAO;
 
 public class DataAccessLayer implements IDataAccessLayer {
-	private static final String ENDPOINT = "jdbc:postgresql://ec2-23-21-92-251.compute-1.amazonaws.com/d4jfrp7pjrtdjh";
-	private static final String USERNAME = "fbqkxcdwyqdbcj";
-	private static final String PASSWORD = "6d89f6eea619b383f076c82d1da8bfd0d784ef381648b0021ceb63467ca0b1ad";
-
 	Connection dbc;
 	IAccountDAO accountDAO;
 	IAuthenticationTokenDAO authenticationTokenDAO;
 	IGameServerDAO gameServerDAO;
+	private Config config;
 
-	public DataAccessLayer() {
+	public DataAccessLayer(Config config) {
+		this.config = config;
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e) {
@@ -32,11 +31,13 @@ public class DataAccessLayer implements IDataAccessLayer {
 		dbc = null;
 		try {
 			Properties props = new Properties();
-			props.setProperty("user", USERNAME);
-			props.setProperty("password", PASSWORD);
-			props.setProperty("ssl", "true");
-			props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
-			dbc = DriverManager.getConnection(ENDPOINT, props);
+			props.setProperty("user", config.dbUsername);
+			props.setProperty("password", config.dbPassword);
+			if (config.useSSL) {
+				props.setProperty("ssl", "true");
+				props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
+			}
+			dbc = DriverManager.getConnection(config.dbEndPoint, props);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! " + e.getMessage());
 			return;
@@ -47,12 +48,9 @@ public class DataAccessLayer implements IDataAccessLayer {
 		}
 
 		/*
-		 * try {
-		 * dbc.setAutoCommit(false);
-		 * } catch (SQLException e) {
-		 * System.out.println("Disabling database auto commit failed! " + e.getMessage());
-		 * return;
-		 * }
+		 * try { dbc.setAutoCommit(false); } catch (SQLException e) {
+		 * System.out.println("Disabling database auto commit failed! " +
+		 * e.getMessage()); return; }
 		 */
 		accountDAO = new AccountDAO(dbc);
 		authenticationTokenDAO = new AuthenticationTokenDAO(dbc);

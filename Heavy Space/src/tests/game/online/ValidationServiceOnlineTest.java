@@ -4,26 +4,31 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import org.junit.Test;
-import org.mindrot.jbcrypt.BCrypt;
+import java.rmi.RemoteException;
 
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
-import shared.Config;
+import tests.LocalConfig;
+import tests.dbsetup.DBTestSetup;
 import tests.dbsetup.OnlineUserData;
 
-public class ValidationServiceOnlineTest {
+public class ValidationServiceOnlineTest extends DBTestSetup {
 
-	private static final int NUMBER_OF_THREADS = 24;
+	private static final int NUMBER_OF_THREADS = 12;
 	private static final int CONNECTIONS_PER_THREAD = 5;
+	IServerCommunicator serverCommunicator;
 
 	@Test
 	public void testValidationService() {
-		IServerCommunicator serverCommunicator = new ServerCommunicator(Config.AUTHENTICATION_SERVER_IP + ":" + Config.AUTHENTICATION_SERVER_PORT);
+		LocalConfig localConfig = new LocalConfig();
+		serverCommunicator = new ServerCommunicator(localConfig.authenticationServerIP + ":" + localConfig.authenticationServerPort);
+		serverCommunicator.createAccount(OnlineUserData.USERNAME, OnlineUserData.PASSWORD);
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
 
@@ -39,12 +44,9 @@ public class ValidationServiceOnlineTest {
 			}
 		}
 		Tester[] testers = new Tester[NUMBER_OF_THREADS];
-		if (NUMBER_OF_THREADS > 1)
-			for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-				testers[i] = new Tester(i, CONNECTIONS_PER_THREAD, i % 6);
-			}
-		else
-			testers[0] = new Tester(0, CONNECTIONS_PER_THREAD, 5);
+		for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+			testers[i] = new Tester(i, CONNECTIONS_PER_THREAD, i % 6);
+		}
 		boolean done = true;
 		do {
 			try {
@@ -70,13 +72,13 @@ public class ValidationServiceOnlineTest {
 				types[j] += testers[i].types[j];
 			}
 		}
-		System.out.print("Validation counter:" + validationService.getValidationCounterCurrentValue() + " Active validations:" + validationService.getNumberOfCurrentlyActiveClientValidators()
-				+ " Total: " + total + " Accepted: " + accepted + " Failed: " + failed + " Types: [");
-		System.out.print(types[0]);
+
+		assertEquals(total, 360);
+		assertEquals(accepted, 120);
+		assertEquals(failed, 240);
 		for (int i = 1; i < types.length; i++) {
-			System.out.print(", " + types[i]);
+			assertEquals(types[i], 60);
 		}
-		System.out.println("]");
 	}
 
 	public class Tester implements Runnable {
@@ -140,7 +142,16 @@ public class ValidationServiceOnlineTest {
 				this.id = id;
 				this.type = type;
 				username = "client-" + id + "#" + id;
-				token = BCrypt.hashpw(username, BCrypt.gensalt());
+				serverCommunicator.createAccount(username, username);
+				String result = null;
+				try {
+					result = ((ServerCommunicator) serverCommunicator).getAuthenticationServerRMI().authenticate(username, username);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+					fail();
+				}
+				String[] splitResult = result.split("\\s+");
+				token = splitResult[1];
 				thread = new Thread(this);
 				thread.start();
 			}

@@ -1,22 +1,30 @@
 package tests.servers.online;
 
+import static org.junit.Assert.fail;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import org.junit.Test;
+
 import shared.Config;
 import shared.dbo.GameServerInfo;
 import shared.rmi.IAuthenticationServerRMI;
 import shared.rmi.IMasterServerRMI;
+import tests.LocalConfig;
 import tests.dbsetup.OnlineUserData;
 
 public class GameServerHostAndJoinTester {
-	public static void main(String[] args) {
+	Config localConfig = new LocalConfig();
+	
+	@Test
+	public void gameServerHostAndJoinTester() {
 		try {
 			// Connect to RMI
-			IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
+			IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + localConfig.authenticationServerPort + "/authenticate");
 			// Authenticate and fetch result
 			String result = authenticationServerRMI.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD);
 			// Get master server ip and authentication token from result
@@ -30,9 +38,9 @@ public class GameServerHostAndJoinTester {
 			
 			List<GameServerInfo> serverList = masterServerRMI.getGameServerList(token, OnlineUserData.USERNAME);
 			String ip = masterServerRMI.joinGameServer(token, OnlineUserData.USERNAME, serverList.get(0).getServerIP());
-			System.out.println(ip);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
+			fail();
 		}
 	}
 }

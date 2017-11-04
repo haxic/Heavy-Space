@@ -6,4 +6,6 @@ public interface IServerCommunicator {
 
 	boolean validateClient(String clientToken, String clientUsername);
 
+	boolean createAccount(String username, String password);
+
 }
