@@ -113,7 +113,7 @@ public class ValidationService {
 			if (username == null || token == null) {
 				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
-			boolean validated = serverCommuicator.validateClient(username, token);
+			boolean validated = serverCommuicator.validateClient(token, username);
 			if (validated) {
 				handleValidatedConnection(this, username, token);
 				return;

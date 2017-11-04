@@ -20,7 +20,7 @@ import tests.dbsetup.OnlineUserData;
 
 public class ValidationServiceOnlineTest extends DBTestSetup {
 
-	private static final int NUMBER_OF_THREADS = 12;
+	private static final int NUMBER_OF_THREADS = 6;
 	private static final int CONNECTIONS_PER_THREAD = 5;
 	IServerCommunicator serverCommunicator;
 
@@ -72,17 +72,16 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 				types[j] += testers[i].types[j];
 			}
 		}
-
-		assertEquals(total, 360);
-		assertEquals(accepted, 120);
-		assertEquals(failed, 240);
+		assertEquals(30, total);
+		assertEquals(10, accepted);
+		assertEquals(20, failed);
 		for (int i = 1; i < types.length; i++) {
-			assertEquals(types[i], 60);
+			assertEquals(types[i], 5);
 		}
 	}
 
 	public class Tester implements Runnable {
-		private int id;
+		private int spawnerID;
 		private Thread thread;
 		public int accepted;
 		public int failed;
@@ -94,15 +93,15 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 		public int startedCounter;
 		private int finishedCounter;
 
-		public Tester(int id, int numberOfConnections) {
-			this.id = id;
+		public Tester(int spawnerID, int numberOfConnections) {
+			this.spawnerID = spawnerID;
 			this.numberOfConnections = numberOfConnections;
 			thread = new Thread(this);
 			thread.start();
 		}
 
-		public Tester(int id, int numberOfConnections, int type) {
-			this.id = id;
+		public Tester(int spawnerID, int numberOfConnections, int type) {
+			this.spawnerID = spawnerID;
 			this.numberOfConnections = numberOfConnections;
 			this.type = type;
 			randomTypes = false;
@@ -141,17 +140,7 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 			public SocketTester(int id, int type) {
 				this.id = id;
 				this.type = type;
-				username = "client-" + id + "#" + id;
-				serverCommunicator.createAccount(username, username);
-				String result = null;
-				try {
-					result = ((ServerCommunicator) serverCommunicator).getAuthenticationServerRMI().authenticate(username, username);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-					fail();
-				}
-				String[] splitResult = result.split("\\s+");
-				token = splitResult[1];
+				username = "client-" + spawnerID + "#" + id;
 				thread = new Thread(this);
 				thread.start();
 			}
@@ -159,6 +148,19 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 			@SuppressWarnings("resource")
 			@Override
 			public void run() {
+				{
+					serverCommunicator.createAccount(username, username);
+					String result = null;
+					try {
+						result = ((ServerCommunicator) serverCommunicator).getAuthenticationServerRMI().authenticate(username, username);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+						fail();
+					}
+					String[] splitResult = result.split("\\s+");
+					token = splitResult[1];
+					assertEquals(username, splitResult[2]);
+				}
 				try {
 					Socket clientSocket = new Socket(TCPServer.SERVER_IP, TCPServer.SERVER_PORT);
 					if (type == 3) {
@@ -206,6 +208,7 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 					done();
 					return;
 				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
 					fail();
 				}
 				fail();

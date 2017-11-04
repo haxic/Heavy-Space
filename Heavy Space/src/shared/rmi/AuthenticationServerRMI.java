@@ -47,7 +47,6 @@ public class AuthenticationServerRMI extends UnicastRemoteObject implements IAut
 		}
 		if (ip == null)
 			return false;
-
 		return authenticationRequestHandler.createAccount(username, password, ip);
 	}
 }
