@@ -19,6 +19,10 @@ import tests.dbsetup.DBTestSetup;
 
 public class BasicServerTests extends DBTestSetup {
 
+	public BasicServerTests(String endpoint, String username, String password) {
+		super(endpoint, username, password);
+	}
+
 	@Test
 	public void testAllServerRequests() {
 		AuthenticationRequestHandler arh = new AuthenticationRequestHandler(this);

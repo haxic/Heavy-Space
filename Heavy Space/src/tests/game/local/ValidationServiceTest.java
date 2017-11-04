@@ -9,8 +9,13 @@ import org.junit.Test;
 import static org.junit.Assert.fail;
 import org.mindrot.jbcrypt.BCrypt;
 
+import gameServer.network.IServerCommunicator;
+import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
+import shared.Config;
+import tests.dbsetup.OnlineUserData;
+import tests.game.local.ValidationServiceTest.Tester;
 
 public class ValidationServiceTest {
 
@@ -19,8 +24,10 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testValidationService() {
-		GameServerRequestHandlerTester gsrhTester = new GameServerRequestHandlerTester();
-		ValidationService validationService = new ValidationService(gsrhTester, 500);
+		IServerCommunicator serverCommunicator = new ServerCommunicator(Config.AUTHENTICATION_SERVER_IP + ":" + Config.AUTHENTICATION_SERVER_PORT);
+		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
+			fail();
+		ValidationService validationService = new ValidationService(serverCommunicator, 500);
 		TCPServer tcpServer = new TCPServer(validationService);
 		tcpServer.startServer();
 
@@ -63,14 +70,15 @@ public class ValidationServiceTest {
 				types[j] += testers[i].types[j];
 			}
 		}
-		System.out.print("Validation counter:" + validationService.getValidationCounterCurrentValue() + " Active validations:" + validationService.getNumberOfCurrentlyActiveClientValidators() + " Total: " + total + " Accepted: " + accepted + " Failed: " + failed + " Types: [");
+		System.out.print("Validation counter:" + validationService.getValidationCounterCurrentValue() + " Active validations:" + validationService.getNumberOfCurrentlyActiveClientValidators()
+				+ " Total: " + total + " Accepted: " + accepted + " Failed: " + failed + " Types: [");
 		System.out.print(types[0]);
 		for (int i = 1; i < types.length; i++) {
 			System.out.print(", " + types[i]);
 		}
 		System.out.println("]");
 	}
-	
+
 	public class Tester implements Runnable {
 		private int id;
 		private Thread thread;

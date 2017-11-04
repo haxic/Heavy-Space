@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TCPServer implements Runnable {
 	public static final String SERVER_IP = "192.168.1.215";
-	public static final int SERVER_PORT = 6031;
+	public static final int SERVER_PORT = 6029;
 	InetAddress serverAddress;
 	ServerSocket serverSocket;
 	Thread thread;

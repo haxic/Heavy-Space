@@ -38,7 +38,7 @@ public class MasterServerRequestHandler {
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
-		
+
 		// Get game server list
 		List<GameServerInfo> gameServers;
 		try {
@@ -99,7 +99,7 @@ public class MasterServerRequestHandler {
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
-		
+
 		// Check if the game server is already hosting
 		boolean isHosting;
 		try {
@@ -138,6 +138,8 @@ public class MasterServerRequestHandler {
 			e.printStackTrace();
 			return false;
 		}
+		if (account == null)
+			return false;
 		AuthenticationToken authenticationToken;
 		try {
 			authenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(account.getID());
@@ -145,6 +147,8 @@ public class MasterServerRequestHandler {
 			e.printStackTrace();
 			return false;
 		}
+		if (authenticationToken == null)
+			return false;
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return false;
@@ -152,11 +156,13 @@ public class MasterServerRequestHandler {
 		// Validate client
 		Account clientAccount;
 		try {
-			clientAccount = dal.getAccountDAO().getAccount(username);
+			clientAccount = dal.getAccountDAO().getAccount(clientUsername);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
+		if (clientAccount == null)
+			return false;
 		AuthenticationToken clientAuthenticationToken;
 		try {
 			clientAuthenticationToken = dal.getAuthenticationTokenDAO().getAuthenticationToken(clientAccount.getID());
@@ -164,10 +170,11 @@ public class MasterServerRequestHandler {
 			e.printStackTrace();
 			return false;
 		}
-		boolean clientAuthenticated = Authenticater.checkAuthenticationToken(clientAuthenticationToken, token);
+		if (clientAuthenticationToken == null)
+			return false;
+		boolean clientAuthenticated = Authenticater.checkAuthenticationToken(clientAuthenticationToken, clientToken);
 		if (!clientAuthenticated)
 			return false;
-
 		return true;
 	}
 
@@ -190,7 +197,7 @@ public class MasterServerRequestHandler {
 		boolean authenticated = Authenticater.checkAuthenticationToken(authenticationToken, token);
 		if (!authenticated)
 			return null;
-		
+
 		// Check if hosting
 		boolean isHosting;
 		try {
@@ -209,7 +216,7 @@ public class MasterServerRequestHandler {
 				return null;
 			}
 		}
-		
+
 		// Update account authentication token
 		AuthenticationToken newAuthenticationToken = null;
 		try {

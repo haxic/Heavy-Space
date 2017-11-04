@@ -25,7 +25,7 @@ public class Authenticater {
 		return BCrypt.checkpw(buildAuthenticationTokenString(authenticationToken), hashedToken);
 	}
 
-	private static String buildAuthenticationTokenString(AuthenticationToken authenticationToken) {
+	public static String buildAuthenticationTokenString(AuthenticationToken authenticationToken) {
 		return authenticationToken.getAccountID()
 				+ "//" + authenticationToken.getClientIP()
 				+ "//" + authenticationToken.getMasterServerIP()

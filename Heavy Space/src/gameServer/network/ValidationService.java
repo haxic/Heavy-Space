@@ -8,13 +8,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ValidationService {
-	IGameServerRequestHandler gameServerRequestHandler;
+	IServerCommunicator serverCommuicator;
 	int timeout;
 	Set<ClientValidator> activeClientValidators = Collections.newSetFromMap(new ConcurrentHashMap<ClientValidator, Boolean>());
 	int validationCounter;
 	
-	public ValidationService(IGameServerRequestHandler gameServerRequestHandler, int timeout) {
-		this.gameServerRequestHandler = gameServerRequestHandler;
+	public ValidationService(IServerCommunicator serverCommuicator, int timeout) {
+		this.serverCommuicator = serverCommuicator;
 		this.timeout = timeout;
 	}
 
@@ -113,7 +113,7 @@ public class ValidationService {
 			if (username == null || token == null) {
 				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
-			boolean validated = gameServerRequestHandler.validateClient(username, token);
+			boolean validated = serverCommuicator.validateClient(username, token);
 			if (validated) {
 				handleValidatedConnection(this, username, token);
 				return;

@@ -34,7 +34,7 @@ public class MasterServerRMI extends UnicastRemoteObject implements IMasterServe
 
 	@Override
 	public boolean checkClient(String token, String username, String clientToken, String clientUsername) throws RemoteException {
-		return masterServerRequestHandler.checkClient(token, username, token, username);
+		return masterServerRequestHandler.checkClient(token, username, clientToken, clientUsername);
 	}
 
 	@Override

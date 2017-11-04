@@ -1,3 +1,5 @@
-/gameServer/
 /tests/
-/username/
+/gameServer/
+/shared/
+/masterServer/
+/security/

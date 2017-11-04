@@ -13,7 +13,8 @@ public class ClientCreateDefaultAccountTester {
 	public static void main(String[] args) {
 		try {
 			// Connect to RMI
-			IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://localhost:" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
+			IAuthenticationServerRMI authenticationServerRMI = (IAuthenticationServerRMI) Naming
+					.lookup("rmi://" + Config.AUTHENTICATION_SERVER_IP + ":" + Config.AUTHENTICATION_SERVER_PORT + "/authenticate");
 			// Create account
 			authenticationServerRMI.createAccount(OnlineUserData.USERNAME, OnlineUserData.PASSWORD);
 			System.out.println("Account created \"" + OnlineUserData.USERNAME + "\" with password \"" + OnlineUserData.PASSWORD + "\"");
