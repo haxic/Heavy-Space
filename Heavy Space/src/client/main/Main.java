@@ -113,7 +113,7 @@ public class Main {
 				// Pretend that this is the message reader
 				dataPacket = new DataPacket(data);
 				Vector3f newPosition = new Vector3f(dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f);
-				System.out.println(newPosition.x + " " + newPosition.y + " " + newPosition.z);
+//				System.out.println(newPosition.x + " " + newPosition.y + " " + newPosition.z);
 				camera.position = newPosition;
 			}
 			position.set(camera.position);
@@ -151,11 +151,12 @@ public class Main {
 				displayManager.toggleCursor();
 			if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_Z))
 				camera.toggleLockUp();
-
-			dataPacket = new DataPacket(new byte[100]);
+			dataPacket = new DataPacket(new byte[200]);
 			dataPacket.addInteger((int) (position.x * 1000));
 			dataPacket.addInteger((int) (position.y * 1000));
 			dataPacket.addInteger((int) (position.z * 1000));
+			dataPacket.addByte((byte) 20);
+//			System.out.println((int) (position.z * 1000) + " " + dataPacket.getIntegerAt(8));
 			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getLength(), address, config.gameServerDefaultPort);
 			udp.sendData(datagramPacket);
 			// Logic

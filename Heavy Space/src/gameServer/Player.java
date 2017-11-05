@@ -7,7 +7,7 @@ import gameServer.network.DataTransferObject;
 public class Player {
 	private String username;
 	private DataTransferObject dto;
-	public Vector3f position;
+	public Vector3f position = new Vector3f();
 
 	public Player(String username) {
 		this.username = username;

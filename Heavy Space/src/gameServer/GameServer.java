@@ -71,7 +71,7 @@ public class GameServer {
 	}
 
 	private void loop() {
-		int hz = 1000 / 100;
+		int hz = 1000 / 60;
 		long timer = System.currentTimeMillis();
 		boolean shouldStop = false;
 		while (!shouldStop) {
@@ -99,7 +99,10 @@ public class GameServer {
 		while ((data = udpServer.getData()) != null) {
 			// Pretend that this is the message reader
 			DataPacket dataPacket = new DataPacket(data);
-			Vector3f newPosition = new Vector3f(dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f);
+			int intX = dataPacket.getInteger();
+			int intY = dataPacket.getInteger();
+			int intZ = dataPacket.getInteger();
+			Vector3f newPosition = new Vector3f(intX / 1000.0f, intY / 1000.0f, intZ / 1000.0f);
 			// pretend that the id of the player was send, such that it can be
 			// used in agenmangeter
 			agentManager.handleReceivedData(newPosition);
@@ -116,10 +119,11 @@ public class GameServer {
 		List<DataPacket> gameState = new ArrayList<DataPacket>();
 		for (Entry<String, Player> pair : playerManager.players.entrySet()) {
 			Player player = pair.getValue();
-			DataPacket dataPacket = new DataPacket(new byte[100]);
+			DataPacket dataPacket = new DataPacket(new byte[200]);
 			dataPacket.addInteger((int) (player.position.x * 1000));
 			dataPacket.addInteger((int) (player.position.y * 1000));
 			dataPacket.addInteger((int) (player.position.z * 1000));
+			dataPacket.addByte((byte) 20);
 			gameState.add(dataPacket);
 		}
 		for (Entry<String, Agent> pair : agentManager.agents.entrySet()) {

@@ -36,7 +36,8 @@ public class IntToByteConversionTest {
 		dataPacket.addShort((short) (orientation.z * 100));
 		System.out.println(dataPacket.getByte());
 		System.out.println(dataPacket.getByte());
-		System.out.println(new Vector3f(dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f));
+		Vector3f newPosition = new Vector3f(dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f);
+		System.out.println(newPosition.x + " " + newPosition.y + " " + newPosition.z);
 		System.out.println(new Vector3f(dataPacket.getShort() / 100.0f, dataPacket.getShort() / 100.0f, dataPacket.getShort() / 100.0f));
 		// Get message type
 		System.out.println(dataPacket.getByteAt(0));
@@ -46,7 +47,6 @@ public class IntToByteConversionTest {
 		System.out.println(new Vector3f(dataPacket.getIntegerAt(2) / 1000.0f, dataPacket.getIntegerAt(6) / 1000.0f, dataPacket.getIntegerAt(10) / 1000.0f));
 		// Get orientation
 		System.out.println(new Vector3f(dataPacket.getShortAt(14) / 100.0f, dataPacket.getShortAt(16) / 100.0f, dataPacket.getShortAt(18) / 100.0f));
-
 
 	}
 
