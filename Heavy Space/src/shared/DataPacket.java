@@ -1,24 +1,29 @@
-package shared.socket;
+package shared;
 
 public class DataPacket {
 
-	byte[] data = new byte[504];
-	int position = 0;
+	byte[] data;
+	int adder = 0;
+	int getter = 0;
+
+	public DataPacket(byte[] data) {
+		this.data = data;
+	}
 
 	public void addByte(byte value) {
-		data[position++] = value;
+		data[adder++] = value;
 	}
 
 	public void addShort(short value) {
-		data[position++] = (byte) value;
-		data[position++] = (byte) (value >> Byte.SIZE);
+		data[adder++] = (byte) value;
+		data[adder++] = (byte) (value >> Byte.SIZE);
 	}
 
 	public void addInteger(int value) {
-		data[position++] = (byte) value;
-		data[position++] = (byte) (value >> Byte.SIZE);
-		data[position++] = (byte) (value >> Byte.SIZE * 2);
-		data[position++] = (byte) (value >> Byte.SIZE * 3);
+		data[adder++] = (byte) value;
+		data[adder++] = (byte) (value >> Byte.SIZE);
+		data[adder++] = (byte) (value >> Byte.SIZE * 2);
+		data[adder++] = (byte) (value >> Byte.SIZE * 3);
 	}
 
 	public void shortToByteArray(short value) {
@@ -44,8 +49,30 @@ public class DataPacket {
 		return data[start];
 	}
 
+	public int getInteger() {
+		int value = getIntegerAt(getter);
+		getter += 4;
+		return value;
+	}
+
+	public short getShort() {
+		short value = getShortAt(getter);
+		getter += 2;
+		return value;
+	}
+
+	public byte getByte() {
+		byte value = getByteAt(getter);
+		getter++;
+		return value;
+	}
+
 	public byte[] getData() {
 		return data;
+	}
+
+	public int getLength() {
+		return adder - 1;
 	}
 
 }

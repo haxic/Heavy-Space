@@ -3,6 +3,7 @@ package gameServer.network;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -38,7 +39,9 @@ public class SocketHandler {
 	}
 
 	public boolean isClosed() {
-		return socket.isClosed();
+		return socket.isClosed(); // || !socket.isConnected() ||
+									// socket.isInputShutdown() ||
+									// socket.isOutputShutdown();
 	}
 
 	public void close() throws IOException {
@@ -48,6 +51,10 @@ public class SocketHandler {
 
 	public void setSoTimeout(int timeout) throws SocketException {
 		socket.setSoTimeout(timeout);
+	}
+
+	public InetAddress getAddress() {
+		return socket.getInetAddress();
 	}
 
 }

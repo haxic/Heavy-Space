@@ -13,5 +13,7 @@ public class LocalConfig extends Config {
 		dbUsername = "haxic";
 		dbPassword = "";
 		useSSL = false;
+		gameServerDefaultPort = 6029;
+		gameClientDefaultPort = 6028;
 	}
 }

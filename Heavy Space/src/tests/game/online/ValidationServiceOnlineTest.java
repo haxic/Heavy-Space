@@ -10,10 +10,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import gameServer.AgentManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
+import shared.Config;
 import tests.LocalConfig;
 import tests.dbsetup.DBTestSetup;
 import tests.dbsetup.OnlineUserData;
@@ -23,6 +25,7 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 	private static final int NUMBER_OF_THREADS = 6;
 	private static final int CONNECTIONS_PER_THREAD = 5;
 	IServerCommunicator serverCommunicator;
+	Config config = new LocalConfig();
 
 	@Test
 	public void testValidationService() {
@@ -32,9 +35,15 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
 
-		ValidationService validationService = new ValidationService(serverCommunicator, 500);
-		TCPServer tcpServer = new TCPServer(validationService);
-		tcpServer.startServer();
+		AgentManager agentmanager = new AgentManager(null);
+		ValidationService validationService = new ValidationService(serverCommunicator, null, 500, false);
+		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
+		try {
+			tcpServer.startServer();
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		while (!tcpServer.isAccepting()) {
 			try {
@@ -162,7 +171,7 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 					assertEquals(username, splitResult[2]);
 				}
 				try {
-					Socket clientSocket = new Socket(TCPServer.SERVER_IP, TCPServer.SERVER_PORT);
+					Socket clientSocket = new Socket("localhost", config.gameServerDefaultPort);
 					if (type == 3) {
 						clientSocket.close();
 						failed++;

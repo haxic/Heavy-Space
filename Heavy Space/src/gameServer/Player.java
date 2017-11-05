@@ -1,10 +1,13 @@
 package gameServer;
 
+import org.joml.Vector3f;
+
 import gameServer.network.DataTransferObject;
 
 public class Player {
 	private String username;
 	private DataTransferObject dto;
+	public Vector3f position;
 
 	public Player(String username) {
 		this.username = username;

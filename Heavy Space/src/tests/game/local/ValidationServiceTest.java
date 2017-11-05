@@ -11,25 +11,40 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.mindrot.jbcrypt.BCrypt;
 
+import gameServer.AgentManager;
+import gameServer.PlayerManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
+import shared.Config;
+import tests.LocalConfig;
 import tests.dbsetup.OnlineUserData;
 import tests.implementations.ServerCommunicatorLocal;
+import tests.implementations.TestAgentManager;
+import tests.implementations.TestPlayerManager;
 
 public class ValidationServiceTest {
 
 	private static final int NUMBER_OF_THREADS = 18;
 	private static final int CONNECTIONS_PER_THREAD = 20;
+	private String ip = "localhost";
+	Config config = new LocalConfig();
 
 	@Test
 	public void testValidationService() {
 		IServerCommunicator serverCommunicator = new ServerCommunicatorLocal();
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
-		ValidationService validationService = new ValidationService(serverCommunicator, 500);
-		TCPServer tcpServer = new TCPServer(validationService);
-		tcpServer.startServer();
+		PlayerManager playerManager = new TestPlayerManager();
+		AgentManager agentManager = new TestAgentManager(playerManager);
+		ValidationService validationService = new ValidationService(serverCommunicator, agentManager, 500, false);
+		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
+		try {
+			tcpServer.startServer();
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		while (!tcpServer.isAccepting()) {
 			try {
@@ -146,7 +161,7 @@ public class ValidationServiceTest {
 			@Override
 			public void run() {
 				try {
-					Socket clientSocket = new Socket(TCPServer.SERVER_IP, TCPServer.SERVER_PORT);
+					Socket clientSocket = new Socket("localhost", config.gameServerDefaultPort);
 					if (type == 3) {
 						clientSocket.close();
 						failed++;

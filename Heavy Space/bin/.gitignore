@@ -1,9 +1,4 @@
-/tests/
 /gameServer/
 /shared/
-/masterServer/
-/security/
-/implementations/
-/test/
-/authenticationServer/
-/functional/
+/tests/
+/client/

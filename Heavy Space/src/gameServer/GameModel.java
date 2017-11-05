@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import shared.DataPacket;
 import shared.game.GameEntity;
-import shared.socket.DataPacket;
 
 public class GameModel {
 	Map<String, Player> players = new HashMap<String, Player>();
@@ -27,7 +27,7 @@ public class GameModel {
 
 	public List<DataPacket> getWorldAsData() {
 		List<DataPacket> dataPackets = new ArrayList<DataPacket>();
-		DataPacket dataPacket = new DataPacket();
+		DataPacket dataPacket = new DataPacket(null);
 		byte messageType = 10; // 0
 		byte bulkSize = (byte) gameEntities.size(); // 1
 

@@ -7,15 +7,21 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ValidationService {
-	IServerCommunicator serverCommuicator;
-	int timeout;
-	Set<ValidationTask> validationTasks = Collections.newSetFromMap(new ConcurrentHashMap<ValidationTask, Boolean>());
-	int validationCounter;
+import gameServer.AgentManager;
 
-	public ValidationService(IServerCommunicator serverCommuicator, int timeout) {
+public class ValidationService {
+	private IServerCommunicator serverCommuicator;
+	private int timeout;
+	private Set<ValidationTask> validationTasks = Collections.newSetFromMap(new ConcurrentHashMap<ValidationTask, Boolean>());
+	private int validationCounter;
+	private AgentManager agentManager;
+	private boolean local;
+
+	public ValidationService(IServerCommunicator serverCommuicator, AgentManager agentManager, int timeout, boolean local) {
 		this.serverCommuicator = serverCommuicator;
+		this.agentManager = agentManager;
 		this.timeout = timeout;
+		this.local = local;
 	}
 
 	public void handleNewConnection(Socket socket) {
@@ -25,6 +31,13 @@ public class ValidationService {
 		try {
 			validationTask.startValidation();
 		} catch (IOException e) {
+			if (!validationTask.socketHandler.isClosed()) {
+				try {
+					validationTask.socketHandler.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 			e.printStackTrace();
 		}
 	}
@@ -63,7 +76,7 @@ public class ValidationService {
 			}
 		}
 		validationTasks.remove(validationTask);
-		
+
 	}
 
 	private void handleValidatedConnection(ValidationTask validationTask, String username, String token) {
@@ -74,8 +87,7 @@ public class ValidationService {
 			// e.printStackTrace();
 		}
 		validationTasks.remove(validationTask);
-		// gameModel.addPlayer("test").getDataTransferObject()
-		
+		agentManager.handleValidatedConnection(validationTask.socketHandler, username, token);
 	}
 
 	class ValidationTask implements Runnable {
@@ -122,8 +134,7 @@ public class ValidationService {
 			if (username == null || token == null) {
 				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
-			boolean validated = serverCommuicator.validateClient(token, username);
-			if (validated) {
+			if (local || serverCommuicator.validateClient(token, username)) {
 				handleValidatedConnection(this, username, token);
 				return;
 			} else {

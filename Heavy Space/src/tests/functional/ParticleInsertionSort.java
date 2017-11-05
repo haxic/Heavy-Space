@@ -6,7 +6,7 @@ import java.util.List;
 import client.entities.Particle;
 import utilities.InsertionSort;
 
-public class TestingStuff {
+public class ParticleInsertionSort {
 	public static void main(String[] args) {
 		// Full sort ArrayList
 		List<Particle> particles = new ArrayList<Particle>();

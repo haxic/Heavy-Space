@@ -8,9 +8,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import shared.Config;
+
 public class TCPServer implements Runnable {
-	public static final String SERVER_IP = "192.168.1.215";
-	public static final int SERVER_PORT = 6029;
 	InetAddress serverAddress;
 	ServerSocket serverSocket;
 	Thread thread;
@@ -18,8 +18,12 @@ public class TCPServer implements Runnable {
 	private boolean acceptNewConnections;
 	private ValidationService validationService;
 	private boolean isBlocking;
+	private String ip;
+	private int port;
 
-	public TCPServer(ValidationService validationService) {
+	public TCPServer(String ip, int port, ValidationService validationService) {
+		this.ip = ip;
+		this.port = port;
 		this.validationService = validationService;
 	}
 
@@ -34,20 +38,10 @@ public class TCPServer implements Runnable {
 		}
 	}
 
-	public void startServer() {
-		try {
-			serverAddress = InetAddress.getByName(SERVER_IP);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return;
-		}
-		try {
-			serverSocket = new ServerSocket(SERVER_PORT, 100, serverAddress);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
-		System.out.println("TCP server started. Using port: " + SERVER_PORT + ".");
+	public void startServer() throws IOException {
+		serverAddress = InetAddress.getByName(ip);
+		serverSocket = new ServerSocket(port, 100, serverAddress);
+		System.out.println("TCP server started. " + ip + ":" + port);
 		acceptNewConnections();
 		thread = new Thread(this);
 		thread.start();
