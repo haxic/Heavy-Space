@@ -41,8 +41,8 @@ public class ParticleSystem {
 		return (float) row / (float) texture.getAtlasSize();
 	}
 
-	public void update(List<Particle> particles, Camera camera, float delta) {
-		timeCounter += delta;
+	public void update(List<Particle> particles, Camera camera, float dt) {
+		timeCounter += dt;
 		if (timeCounter >= cooldown && !removeThis) {
 			timeCounter -= cooldown;
 			float dirX = (float) Math.random() * 2f - 1f;

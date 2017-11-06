@@ -27,14 +27,14 @@ public class ParticleManager {
 		particleSystems.remove(particleSystem);
 	}
 
-	public void update(Camera camera, float delta) {
+	public void update(Camera camera, float dt) {
 		for (ParticleSystem particleSystem : particleSystems) {
-			particleSystem.update(particles, camera, delta);
+			particleSystem.update(particles, camera, dt);
 		}
 		Iterator<Particle> iterator = particles.iterator();
 		while (iterator.hasNext()) {
 			Particle particle = iterator.next();
-			if (!particle.update(camera, delta)) {
+			if (!particle.update(camera, dt)) {
 				iterator.remove();
 			}
 		}

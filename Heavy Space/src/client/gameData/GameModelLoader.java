@@ -13,6 +13,7 @@ public class GameModelLoader {
 	public Model stall;
 	public Model fern;
 	public Texture particleAtlasTexture;
+	public Model skybox;
 
 	public GameModelLoader(Loader loader) {
 		dragon = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("dragon")), loader.loadTexture("dragon", 1, 1));
@@ -23,5 +24,6 @@ public class GameModelLoader {
 		fern.setHasTransparency(true);
 		fern.setAllowBackLighting(true);
 		particleAtlasTexture = loader.loadTexture("cosmic", 4, 1);
+		skybox = loader.loadSkybox("space", 500);
 	}
 }

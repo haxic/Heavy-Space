@@ -59,7 +59,6 @@ public class UDPServer {
 	}
 
 	private void disconnect() {
-		requestClose();
 		if (!serverSocket.isClosed())
 			serverSocket.close();
 	}

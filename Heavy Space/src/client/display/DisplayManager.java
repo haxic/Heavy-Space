@@ -72,7 +72,7 @@ public class DisplayManager {
 		// setBasicAntialising(4);
 	}
 
-	public void handleInputs() {
+	public void pollInputs() {
 		double currentTime = GLFW.glfwGetTime();
 		deltaTime = (float) (GLFW.glfwGetTime() - lastTime);
 		lastTime = currentTime;

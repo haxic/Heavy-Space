@@ -115,7 +115,7 @@ public class ValidationService {
 			try {
 				byte[] dataReceived = socketHandler.readData();
 				if (dataReceived == null) {
-					handleInvalidConnection(this, "Failed to join: data is null.");
+					handleInvalidConnection(this, "Failed to join: failed to receive data.");
 					return;
 				}
 				String result = new String(dataReceived);

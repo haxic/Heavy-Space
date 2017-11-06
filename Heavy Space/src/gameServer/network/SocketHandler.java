@@ -57,4 +57,11 @@ public class SocketHandler {
 		return socket.getInetAddress();
 	}
 
+	public void requestClose() {
+		try {
+			close();
+		} catch (IOException e) {
+		}
+	}
+
 }

@@ -71,7 +71,7 @@ public class GameServer {
 	}
 
 	private void loop() {
-		int hz = 1000 / 60;
+		int hz = 1000 / 30;
 		long timer = System.currentTimeMillis();
 		boolean shouldStop = false;
 		while (!shouldStop) {
@@ -120,6 +120,7 @@ public class GameServer {
 		for (Entry<String, Player> pair : playerManager.players.entrySet()) {
 			Player player = pair.getValue();
 			DataPacket dataPacket = new DataPacket(new byte[200]);
+			dataPacket.addInteger((int) (player.position.x * 1000));
 			dataPacket.addInteger((int) (player.position.x * 1000));
 			dataPacket.addInteger((int) (player.position.y * 1000));
 			dataPacket.addInteger((int) (player.position.z * 1000));
