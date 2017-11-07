@@ -12,8 +12,8 @@ import java.util.List;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import client.components.ActorComponent;
 import client.display.DisplayManager;
-import client.entities.Actor;
 import client.entities.Camera;
 import client.entities.Light;
 import client.gameData.GameModelLoader;
@@ -68,7 +68,7 @@ public class MainTEST {
 			e.printStackTrace();
 		}
 
-		List<Actor> actors = new ArrayList<Actor>();
+		List<ActorComponent> actors = new ArrayList<ActorComponent>();
 		// actors.add(new Actor(new Entity(new Vector3f(0, 20, 0), new
 		// Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f)),
 		// gameModelLoader.stall));
@@ -83,14 +83,14 @@ public class MainTEST {
 		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new
 		// Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
 
-		Actor dragonActor = new Actor(new Entity(new Vector3f(0, 0, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
+		ActorComponent dragonActor = new ActorComponent(new Entity(new Vector3f(0, 0, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
 		actors.add(dragonActor);
-		Actor fernActor = new Actor(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern);
+		ActorComponent fernActor = new ActorComponent(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern);
 		actors.add(fernActor);
-		Actor fernActor2 = new Actor(new Entity(new Vector3f(-10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern, 3);
+		ActorComponent fernActor2 = new ActorComponent(new Entity(new Vector3f(-10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern, 3);
 		actors.add(fernActor2);
 
-		for (Actor actor : actors) {
+		for (ActorComponent actor : actors) {
 			renderManager.addActor(actor);
 		}
 

@@ -5,60 +5,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joml.Vector3f;
-
-import client.entities.Actor;
+import client.components.ActorComponent;
 import client.entities.Camera;
 import client.entities.Light;
-import client.gameData.GameModelLoader;
 import client.gameData.ParticleSystem;
 import client.models.Model;
 import client.renderers.ParticleManager;
-import shared.game.Entity;
+import hecs.EntityContainer;
+import hecs.Entity;
+import hecs.EntityManager;
+import hecs.EntitySystem;
 
-public class Scene {
+public class Scene extends EntitySystem implements EntityContainer {
 
-	private GameModelLoader gameModelLoader;
 	public Camera camera;
 	public List<Light> lights;
-	public Map<Model, List<Actor>> actors;
+	public Map<Model, List<Entity>> actors;
 	public Model skybox;
 	public ParticleManager particleManager;
 
-	public Scene(GameModelLoader gameModelLoader) {
-		this.gameModelLoader = gameModelLoader;
+	public Scene(EntityManager hecsManager) {
+		super(hecsManager);
 		camera = new Camera();
 		lights = new ArrayList<Light>();
-		actors = new HashMap<Model, List<Actor>>();
+		actors = new HashMap<Model, List<Entity>>();
 		particleManager = new ParticleManager();
 	}
 
 	public void update(float dt) {
 		particleManager.update(camera, dt);
-	}
-
-	public void addActor(Actor actor) {
-		Model model = actor.getModel();
-		List<Actor> batch = actors.get(model);
-		if (batch != null) {
-			batch.add(actor);
-		} else {
-			List<Actor> newBatch = new ArrayList<>();
-			newBatch.add(actor);
-			actors.put(model, newBatch);
-		}
-	}
-
-	public void removeActor(Actor actor) {
-		Model model = actor.getModel();
-		List<Actor> batch = actors.get(model);
-		if (batch == null || batch != null && !batch.contains(actor)) {
-			System.out.println("WARNING: trying to remove an actor that isn't in the rendering list! Actor id: " + actor + ".");
-			return;
-		}
-		batch.remove(actor);
-		if (batch.isEmpty())
-			actors.remove(model);
 	}
 
 	public void addParticleSystem(ParticleSystem particleSystem) {
@@ -69,12 +44,45 @@ public class Scene {
 		particleManager.removeParticleSystem(particleSystem);
 	}
 
-	public void createMenuScene() {
-		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
-		lights.add(sun);
-		Actor dragonActor = new Actor(new Entity(new Vector3f(0, -5, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
-		addActor(dragonActor);
-		skybox = gameModelLoader.skybox;
+	public void addLight(Light light) {
+		lights.add(light);
 	}
 
+	public void setSkybox(Model skybox) {
+		this.skybox = skybox;
+	}
+
+	@Override
+	public void attach(Entity entity) {
+		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
+		Model model = actorComponent.getModel();
+		List<Entity> batch = actors.get(model);
+		if (batch != null) {
+			batch.add(entity);
+		} else {
+			List<Entity> newBatch = new ArrayList<>();
+			newBatch.add(entity);
+			actors.put(model, newBatch);
+		}
+		entity.attach(this);
+	}
+
+	@Override
+	public void detach(Entity entity) {
+		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
+		Model model = actorComponent.getModel();
+		List<Entity> batch = actors.get(model);
+		if (batch == null || batch != null && !batch.contains(entity)) {
+			System.out.println("WARNING: trying to remove an entity that isn't in the rendering list! Entity id: " + entity.getEID() + ".");
+			return;
+		}
+		batch.remove(entity);
+		if (batch.isEmpty())
+			actors.remove(model);
+		entity.detach(this);
+	}
+
+	@Override
+	public void cleanUp() {
+	}
 }

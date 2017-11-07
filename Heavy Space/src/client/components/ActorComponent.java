@@ -1,4 +1,4 @@
-package client.entities;
+package client.components;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,43 +9,34 @@ import client.gameData.ModelAttachementTag;
 import client.models.Model;
 import client.models.ModelAttachment;
 import client.models.ModelAttachmentPoint;
-import shared.game.Entity;
+import hecs.EntityComponent;
+import hecs.EntityContainer;
+import hecs.Entity;
 
-public class Actor {
+public class ActorComponent implements EntityComponent {
 
-	private Entity entity;
 	private Model model;
 	private Map<ModelAttachementTag, ModelAttachment> attachments = new HashMap<>();
 	private ModelAttachment attachedTo;
 	private int textureIndex = 0;
 	private Vector2f textureOffset;
 
-	public Actor(Entity entity, Model model) {
-		this.entity = entity;
+	public ActorComponent(Model model) {
 		this.model = model;
 		textureOffset = new Vector2f(calculateTextureXOffset(), calculateTextureYOffset());
 	}
-	
-	public Actor(Entity entity, Model model, int textureIndex) {
-		this.entity = entity;
+
+	public ActorComponent(Model model, int textureIndex) {
 		this.model = model;
 		this.textureIndex = textureIndex;
 		textureOffset = new Vector2f(calculateTextureXOffset(), calculateTextureYOffset());
-	}
-
-	public Entity getEntity() {
-		return entity;
-	}
-
-	public void setEntity(Entity entity) {
-		this.entity = entity;
 	}
 
 	public Model getModel() {
 		return model;
 	}
 
-	public boolean attachAnObject(Actor attachedActor, ModelAttachementTag modelAttachementTag) {
+	public boolean attachAnObject(ActorComponent attachedActor, ModelAttachementTag modelAttachementTag) {
 		if (attachments.containsKey(modelAttachementTag)) {
 			// TODO: Don't use syso!
 			System.out.println("Warning: tried to attach to a busy attachment point!");
@@ -76,7 +67,7 @@ public class Actor {
 	public ModelAttachmentPoint getAttachementPoint() {
 		return attachedTo.getAttachToActor().getModel().getAttachementPoint(attachedTo.getModelAttachementTag());
 	}
-	
+
 	private float calculateTextureXOffset() {
 		int column = textureIndex % model.getTexture().getAtlasSize();
 		return (float) column / (float) model.getTexture().getAtlasSize();
@@ -94,5 +85,4 @@ public class Actor {
 	public void setTextureOffset(Vector2f textureOffset) {
 		this.textureOffset = textureOffset;
 	}
-
 }

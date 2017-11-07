@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import client.components.ActorComponent;
 import client.display.DisplayManager;
-import client.entities.Actor;
 import client.entities.Camera;
 import client.entities.Light;
 import client.entities.Particle;
@@ -14,6 +14,8 @@ import client.gameData.ParticleSystem;
 import client.main.Scene;
 import client.models.Model;
 import client.models.Texture;
+import hecs.Entity;
+import hecs.EntityManager;
 import utilities.Loader;
 
 public class RenderManager {
@@ -24,9 +26,9 @@ public class RenderManager {
 
 	Scene current;
 
-	public RenderManager(DisplayManager displayManager, Loader loader, Texture particleAtlasTexture) {
+	public RenderManager(EntityManager entityManager, DisplayManager displayManager, Loader loader, Texture particleAtlasTexture) {
 		this.displayManager = displayManager;
-		entityRenderer = new EntityRenderer();
+		entityRenderer = new EntityRenderer(entityManager);
 		skyboxRenderer = new SkyboxRenderer();
 		particleRenderer = new ParticleRenderer(loader, particleAtlasTexture);
 
@@ -38,7 +40,7 @@ public class RenderManager {
 		Model skybox = scene.skybox;
 		List<Particle> particles = scene.particleManager.getParticles();
 		List<Light> lights = scene.lights;
-		Map<Model, List<Actor>> actors = scene.actors;
+		Map<Model, List<Entity>> actors = scene.actors;
 		boolean renderSolidParticles = scene.particleManager.isRenderSolidParticles();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);

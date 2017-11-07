@@ -3,6 +3,7 @@ package client.main;
 import client.display.DisplayManager;
 import client.gameData.GameModelLoader;
 import client.renderers.RenderManager;
+import hecs.EntityManager;
 import shared.Config;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
@@ -23,18 +24,21 @@ public class GameClient {
 	private MenuController menuController;
 	private GameController gameController;
 	private ClientController currentController;
+	private EntityManager entityManager;
+	private GameFactory gameFactory;
 
 	public GameClient() {
+		entityManager = new EntityManager();
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
 		LocalConfig config = new LocalConfig();
-
+		gameFactory = new GameFactory(entityManager, gameModelLoader);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler, "localhost", config.gameClientDefaultPort, config);
-		renderManager = new RenderManager(displayManager, loader, gameModelLoader.particleAtlasTexture);
+		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
 
-		menuController = new MenuController(eventHandler, gameModelLoader, config);
+		menuController = new MenuController(entityManager, eventHandler, gameFactory, config);
 		currentController = menuController;
 
 		loop();
@@ -56,7 +60,7 @@ public class GameClient {
 					gameController.close();
 				connectionManager.disconnect();
 				if (connectionManager.joinServer(ip, port))
-					gameController = new GameController(gameModelLoader);
+					gameController = new GameController(entityManager, gameFactory);
 				currentController = gameController;
 				break;
 			case DISCONNECT:
@@ -89,7 +93,7 @@ public class GameClient {
 			frames++;
 			if (System.currentTimeMillis() - timer >= 1000) {
 				timer += 1000;
-				System.out.println("Fps: " + frames);
+				System.out.println("Fps: " + frames + ". Entities:" + entityManager.numberOfEntities() + ". Components:" + entityManager.numberOfComponents() + ".");
 				frames = 0;
 			}
 		}

@@ -2,8 +2,8 @@ package client.main;
 
 import org.lwjgl.glfw.GLFW;
 
-import client.gameData.GameModelLoader;
 import client.inputs.KeyboardHandler;
+import hecs.EntityManager;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
@@ -12,14 +12,17 @@ public class GameController implements ClientController {
 	private Scene scene;
 
 	private EventHandler eventHandler;
-	private GameModelLoader gameModelLoader;
+	private GameFactory gameFactory;
+
+	private EntityManager entityManager;
 
 	private static final int KEY_SPAWN = GLFW.GLFW_KEY_SPACE;
 
-	public GameController(GameModelLoader gameModelLoader) {
-		this.gameModelLoader = gameModelLoader;
-		scene = new Scene(gameModelLoader);
-		scene.skybox = gameModelLoader.skybox;
+	public GameController(EntityManager entityManager, GameFactory gameFactory) {
+		this.entityManager = entityManager;
+		this.gameFactory = gameFactory;
+		scene = new Scene(entityManager);
+		gameFactory.setSkybox(scene);
 	}
 
 	@Override

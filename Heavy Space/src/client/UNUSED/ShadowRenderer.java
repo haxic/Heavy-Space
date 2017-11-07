@@ -1,4 +1,4 @@
-package client.renderers;
+package client.UNUSED;
 
 import java.util.List;
 import java.util.Map;
@@ -14,8 +14,8 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import client.components.ActorComponent;
 import client.display.DisplayManager;
-import client.entities.Actor;
 import client.entities.Camera;
 import client.entities.Light;
 import client.models.Mesh;
@@ -24,7 +24,6 @@ import client.models.ModelAttachmentPoint;
 import client.models.ShadowMap;
 import client.models.Texture;
 import client.shaders.EntityShader;
-import client.shaders.ShadowShader;
 import shared.game.Entity;
 import utilities.Loader;
 import utilities.MatrixUtils;
@@ -39,12 +38,12 @@ public class ShadowRenderer {
 		shadowMap = Loader.createShadowMap(1024, 1024);
 	}
 
-	public void render(Camera camera, List<Light> lights, Map<Model, List<Actor>> actors) {
+	public void render(Camera camera, List<Light> lights, Map<Model, List<ActorComponent>> actors) {
 		prepareShadowShader(camera, lights.get(0));
 		for (Model model : actors.keySet()) {
 			prepareModel(model);
-			List<Actor> batch = actors.get(model);
-			for (Actor actor : batch) {
+			List<ActorComponent> batch = actors.get(model);
+			for (ActorComponent actor : batch) {
 				prepareInstance(actor, camera);
 				// Draw model.
 				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getMesh().getIndicesSize(), GL11.GL_UNSIGNED_INT, 0);
@@ -76,7 +75,7 @@ public class ShadowRenderer {
 		shadowShader.start();
 	}
 
-	private void prepareInstance(Actor actor, Camera camera) {
+	private void prepareInstance(ActorComponent actor, Camera camera) {
 		Matrix4f projectionMatrix = camera.getProjectionMatrix();
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		Entity entity = actor.getEntity();

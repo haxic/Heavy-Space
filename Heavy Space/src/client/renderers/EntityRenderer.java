@@ -9,42 +9,34 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import client.entities.Actor;
+import client.components.ActorComponent;
 import client.entities.Camera;
 import client.entities.Light;
 import client.models.Mesh;
 import client.models.Model;
 import client.models.Texture;
 import client.shaders.EntityShader;
-import shared.game.Entity;
+import hecs.Entity;
+import hecs.EntityManager;
+import hecs.EntitySystem;
+import shared.components.UnitComponent;
 import utilities.MatrixUtils;
 
-public class EntityRenderer {
+public class EntityRenderer extends EntitySystem {
 	EntityShader entityShader;
 
-	public EntityRenderer() {
+	public EntityRenderer(EntityManager hecsManager) {
+		super(hecsManager);
 		entityShader = new EntityShader();
 	}
 
-	public void render(Camera camera, List<Light> lights, Map<Model, List<Actor>> actors) {
+	public void render(Camera camera, List<Light> lights, Map<Model, List<Entity>> entities) {
 		prepareEntityShader(camera, lights);
-		for (Model model : actors.keySet()) {
+		for (Model model : entities.keySet()) {
 			prepareModel(model);
-			List<Actor> batch = actors.get(model);
-			for (Actor actor : batch) {
-				prepareInstance(actor, camera);
-				// Draw model.
-				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getMesh().getIndicesSize(), GL11.GL_UNSIGNED_INT, 0);
-			}
-			unbindModel();
-		}
-		entityShader.stop();
-		prepareEntityShader(camera, lights);
-		for (Model model : actors.keySet()) {
-			prepareModel(model);
-			List<Actor> batch = actors.get(model);
-			for (Actor actor : batch) {
-				prepareInstance(actor, camera);
+			List<Entity> batch = entities.get(model);
+			for (Entity entity : batch) {
+				prepareInstance(entity, camera);
 				// Draw model.
 				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getMesh().getIndicesSize(), GL11.GL_UNSIGNED_INT, 0);
 			}
@@ -52,7 +44,6 @@ public class EntityRenderer {
 		}
 		entityShader.stop();
 	}
-
 
 	private void prepareEntityShader(Camera camera, List<Light> lights) {
 		entityShader.start();
@@ -63,18 +54,23 @@ public class EntityRenderer {
 		entityShader.loadLights(lights);
 	}
 
-	private void prepareInstance(Actor actor, Camera camera) {
+	private void prepareInstance(Entity entity, Camera camera) {
 		Matrix4f projectionMatrix = camera.getProjectionMatrix();
 		Matrix4f viewMatrix = camera.getViewMatrix();
-		Entity entity = actor.getEntity();
+		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
+		UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(entity, UnitComponent.class);
 		// TODO: Implement attachment placement.
 		// Vector3f position = new Vector3f();
 		// Vector3f rotation = new Vector3f();
 		// if (actor.isAttached()) {
-		// ModelAttachmentPoint modelAttachmentPoint = actor.getAttachementPoint();
-		// Vector3f atp = actor.getModelAttachment().getAttachToActor().getEntity().getPosition();
-		// Vector3f atr = actor.getModelAttachment().getAttachToActor().getEntity().getRotation();
-		// Vector3f ats = actor.getModelAttachment().getAttachToActor().getEntity().getScale();
+		// ModelAttachmentPoint modelAttachmentPoint =
+		// actor.getAttachementPoint();
+		// Vector3f atp =
+		// actor.getModelAttachment().getAttachToActor().getEntity().getPosition();
+		// Vector3f atr =
+		// actor.getModelAttachment().getAttachToActor().getEntity().getRotation();
+		// Vector3f ats =
+		// actor.getModelAttachment().getAttachToActor().getEntity().getScale();
 		// Vector3f ap = modelAttachmentPoint.getPosition();
 		// Vector3f ar = modelAttachmentPoint.getRotation();
 		// position.add(atp).add(ap);
@@ -83,13 +79,13 @@ public class EntityRenderer {
 		// position = entity.getPosition();
 		// rotation = entity.getRotation();
 		// }
-		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(unitComponent.getPosition(), unitComponent.getRotation(), unitComponent.getScale());
 		Matrix4f mvpMatrix = projectionMatrix.mul(viewMatrix, new Matrix4f()).mul(modelMatrix);
 		Matrix4f modelViewMatrix = viewMatrix.mul(modelMatrix, new Matrix4f());
 		entityShader.loadModelViewProjectionMatrix(mvpMatrix);
 		entityShader.loadModelViewMatrix(modelViewMatrix);
 		entityShader.loadModelMatrix(modelMatrix);
-		entityShader.loadTextureOffset(actor.getTextureOffset());
+		entityShader.loadTextureOffset(actorComponent.getTextureOffset());
 	}
 
 	private void unbindModel() {

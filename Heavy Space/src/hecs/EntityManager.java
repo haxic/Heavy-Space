@@ -6,28 +6,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class HECSManager {
+public class EntityManager {
 	private int lowestUnassignedEntityID;
-	private Map<Class<? extends HECSComponent>, HashMap<HECSEntity, HECSComponent>> dataStructure;
-	private List<HECSEntity> entities;
+	private Map<Class<? extends EntityComponent>, HashMap<Entity, EntityComponent>> dataStructure;
+	private List<Entity> entities;
+	private int componentCounter = 0;
 
-	public HECSManager() {
-		entities = new ArrayList<HECSEntity>();
-		dataStructure = new HashMap<Class<? extends HECSComponent>, HashMap<HECSEntity, HECSComponent>>();
+	public EntityManager() {
+		entities = new ArrayList<Entity>();
+		dataStructure = new HashMap<Class<? extends EntityComponent>, HashMap<Entity, EntityComponent>>();
 		lowestUnassignedEntityID = 1;
+	}
+
+	public int numberOfEntities() {
+		return entities.size();
+	}
+
+	public int numberOfComponents() {
+		return componentCounter;
 	}
 
 	/**
 	 * This method generates and returns a unique entity ID.
 	 */
 	private long generateEntityID() {
-//		System.out.println(lowestUnassignedEntityID);
+		// System.out.println(lowestUnassignedEntityID);
 		if (lowestUnassignedEntityID < Integer.MAX_VALUE) {
 			return lowestUnassignedEntityID++;
 		} else {
 			for (long i = 1; i < Integer.MAX_VALUE; i++) {
 				boolean isContaining = false;
-				for (HECSEntity pickedEntity : entities) {
+				for (Entity pickedEntity : entities) {
 					if (pickedEntity.getEID() == i) {
 						isContaining = true;
 						break;
@@ -54,9 +63,9 @@ public class HECSManager {
 	/**
 	 * This method creates and returns a new entity object.
 	 */
-	public HECSEntity createEntity(HECSComponent... components) {
+	public Entity createEntity(EntityComponent... components) {
 		long entityID = generateEntityID();
-		HECSEntity entity = new HECSEntity(entityID);
+		Entity entity = new Entity(entityID);
 		entities.add(entity);
 		if (components != null)
 			addComponents(components, entity);
@@ -66,7 +75,7 @@ public class HECSManager {
 	/**
 	 * This adds a list of components to an entity;
 	 */
-	public void addComponents(HECSComponent[] components, HECSEntity entity) {
+	public void addComponents(EntityComponent[] components, Entity entity) {
 		for (int i = 0; i < components.length; i++) {
 			addComponent(components[i], entity);
 		}
@@ -75,13 +84,14 @@ public class HECSManager {
 	/**
 	 * This method adds a selected component to a selected entity.
 	 */
-	public HECSComponent addComponent(HECSComponent component, HECSEntity entity) {
-		HashMap<HECSEntity, HECSComponent> components = dataStructure.get(component.getClass());
+	public EntityComponent addComponent(EntityComponent component, Entity entity) {
+		HashMap<Entity, EntityComponent> components = dataStructure.get(component.getClass());
 		if (components == null) {
-			components = new HashMap<HECSEntity, HECSComponent>();
+			components = new HashMap<Entity, EntityComponent>();
 			dataStructure.put(component.getClass(), components);
 		}
 		components.put(entity, component);
+		componentCounter++;
 		return component;
 	}
 
@@ -89,18 +99,29 @@ public class HECSManager {
 	 * This method deletes a selected entity and all of its components from the
 	 * entire data structure.
 	 */
-	public void removeEntity(HECSEntity entity) {
+	public void removeEntity(Entity entity) {
 		if (!entities.contains(entity))
 			return;
-		for (Entry<Class<? extends HECSComponent>, HashMap<HECSEntity, HECSComponent>> entry : dataStructure
-				.entrySet()) {
-			boolean containsEntity = entry.getValue().containsKey(entity);
-			if (containsEntity) {
-				entry.getValue().remove(entity);
-			}
+		// Detach entity from all containers
+		// TODO: Improve this. LOL!
+		EntityContainer[] containers = new EntityContainer[entity.references.size()];
+		for (int i = 0; i < containers.length; i++) {
+			containers[i] = entity.references.get(i);
 		}
-		for (HECSContainer component : entity.references) {
-			component.detach(entity);
+		for (int i = 0; i < containers.length; i++) {
+			containers[i].detach(entity);
+		}
+		// Remove all components belonging to the entity
+		for (Entry<Class<? extends EntityComponent>, HashMap<Entity, EntityComponent>> entry : dataStructure.entrySet()) {
+			HashMap<Entity, EntityComponent> value = entry.getValue();
+			if (value.containsKey(entity)) {
+				EntityComponent component = value.get(entity);
+				if (component instanceof EntityContainer) {
+					((EntityContainer) component).cleanUp();
+				}
+				value.remove(entity);
+				componentCounter--;
+			}
 		}
 		entities.remove(entity);
 	}
@@ -109,8 +130,8 @@ public class HECSManager {
 	 * This method removes all instances of s selected component class type from
 	 * a selected entity.
 	 */
-	public void removeComponentAll(Class<? extends HECSComponent> componentClass, HECSEntity entity) {
-		HashMap<HECSEntity, HECSComponent> componentsOfEntity = dataStructure.get(componentClass);
+	public void removeComponentAll(Class<? extends EntityComponent> componentClass, Entity entity) {
+		HashMap<Entity, EntityComponent> componentsOfEntity = dataStructure.get(componentClass);
 		if (componentsOfEntity == null)
 			return;
 		while (componentsOfEntity.containsKey(entity)) {
@@ -122,7 +143,7 @@ public class HECSManager {
 	 * This method removes all instances of all component class types in the
 	 * selected component class type list from a selected entity.
 	 */
-	public void removeMultipleComponents(Class<? extends HECSComponent>[] componentClass, HECSEntity entity) {
+	public void removeMultipleComponents(Class<? extends EntityComponent>[] componentClass, Entity entity) {
 		if (componentClass != null)
 			for (int i = 0; i < componentClass.length; i++) {
 				removeComponentAll(componentClass[i], entity);
@@ -133,8 +154,8 @@ public class HECSManager {
 	 * This method attempts to remove any one instance of a selected component
 	 * class type from a selected entity.
 	 */
-	public void removeComponentOnce(Class<? extends HECSComponent> componentClass, HECSEntity entity) {
-		HashMap<HECSEntity, HECSComponent> componentsOfEntity = dataStructure.get(componentClass);
+	public void removeComponentOnce(Class<? extends EntityComponent> componentClass, Entity entity) {
+		HashMap<Entity, EntityComponent> componentsOfEntity = dataStructure.get(componentClass);
 		if (componentsOfEntity == null)
 			return;
 		componentsOfEntity.remove(entity);
@@ -144,12 +165,12 @@ public class HECSManager {
 	 * This method returns a list of all entities that contains a selected
 	 * component class type.
 	 */
-	public List<HECSEntity> getEntitiesContainingComponent(Class<? extends HECSComponent> componentClass) {
-		HashMap<HECSEntity, HECSComponent> components = dataStructure.get(componentClass);
+	public List<Entity> getEntitiesContainingComponent(Class<? extends EntityComponent> componentClass) {
+		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
 
 		if (components != null) {
-			List<HECSEntity> containingEntities = new ArrayList<HECSEntity>();
-			for (Entry<HECSEntity, HECSComponent> entry : components.entrySet()) {
+			List<Entity> containingEntities = new ArrayList<Entity>();
+			for (Entry<Entity, EntityComponent> entry : components.entrySet()) {
 				containingEntities.add(entry.getKey());
 			}
 			return containingEntities;
@@ -162,11 +183,11 @@ public class HECSManager {
 	 * This method attempts to return one entity that contains a instance of a
 	 * selected component class type.
 	 */
-	public HECSEntity getEntityContainingComponentOfClass(Class<? extends HECSComponent> componentClass) {
-		HashMap<HECSEntity, HECSComponent> components = dataStructure.get(componentClass);
+	public Entity getEntityContainingComponentOfClass(Class<? extends EntityComponent> componentClass) {
+		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
 		if (components == null)
 			return null;
-		for (Entry<HECSEntity, HECSComponent> entry : components.entrySet()) {
+		for (Entry<Entity, EntityComponent> entry : components.entrySet()) {
 			return entry.getKey();
 		}
 		return null;
@@ -176,12 +197,11 @@ public class HECSManager {
 	 * This method attempts to return a selected component class type contains
 	 * by any one entity that contains an instance of it.
 	 */
-	public HECSComponent getComponentOfClassContainingSameComponentOfClass(
-			Class<? extends HECSComponent> componentClass) {
+	public EntityComponent getComponentOfClassContainingSameComponentOfClass(Class<? extends EntityComponent> componentClass) {
 		return dataStructure.get(componentClass).get(getEntityContainingComponentOfClass(componentClass));
 	}
 
-	public HECSComponent getComponentInEntity(HECSEntity entity, Class<? extends HECSComponent> componentClass) {
+	public EntityComponent getComponentInEntity(Entity entity, Class<? extends EntityComponent> componentClass) {
 		return dataStructure.get(componentClass).get(entity);
 	}
 
@@ -190,8 +210,7 @@ public class HECSManager {
 	 * type A from any one entity that contains a selected component class type
 	 * B.
 	 */
-	public HECSComponent getComponentOfClassOfEntityContainingDifferentComponentOfClass(
-			Class<? extends HECSComponent> componentClass1, Class<? extends HECSComponent> componentClass2) {
+	public EntityComponent getComponentOfClassOfEntityContainingDifferentComponentOfClass(Class<? extends EntityComponent> componentClass1, Class<? extends EntityComponent> componentClass2) {
 		return dataStructure.get(componentClass2).get(getEntityContainingComponentOfClass(componentClass1));
 	}
 }

@@ -1,6 +1,8 @@
-package client.shaders;
+package client.UNUSED;
 
 import org.joml.Matrix4f;
+
+import client.shaders.ShaderProgram;
 
 public class ShadowShader extends ShaderProgram {
 	private static final String VERTEX_FILE = "shaders/shadow.vert";
