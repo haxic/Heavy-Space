@@ -2,11 +2,8 @@ package gameServer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.util.Set;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.joml.Vector3f;
@@ -19,7 +16,7 @@ import gameServer.network.UDPServer;
 import gameServer.network.ValidationService;
 import shared.Config;
 import shared.DataPacket;
-import shared.game.WorldBuilder;
+import shared.functionality.EventHandler;
 
 public class GameServer {
 
@@ -29,6 +26,7 @@ public class GameServer {
 	private ValidationService validationService;
 	private TCPServer tcpServer;
 	private UDPServer udpServer;
+	private EventHandler eventHandler;
 
 	private GameModel gameModel;
 
@@ -40,6 +38,7 @@ public class GameServer {
 		this.config = config;
 		this.serverIP = serverIP;
 		this.serverPort = serverPort;
+		eventHandler = new EventHandler();
 		playerManager = new PlayerManager();
 		agentManager = new AgentManager(playerManager);
 		if (!local) {
@@ -57,7 +56,6 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-		WorldBuilder.createTestWorld(gameModel);
 	}
 
 	private void initializeServer() {

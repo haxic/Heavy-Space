@@ -1,4 +1,4 @@
-package client.main;
+package shared.functionality;
 
 import java.util.LinkedList;
 import java.util.Queue;

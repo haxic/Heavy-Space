@@ -9,6 +9,9 @@ import java.net.UnknownHostException;
 import gameServer.network.SocketHandler;
 import gameServer.network.UDPServer;
 import shared.Config;
+import shared.functionality.Event;
+import shared.functionality.EventHandler;
+import shared.functionality.EventType;
 import tests.LocalConfig;
 
 public class ConnectionManager {
@@ -34,12 +37,12 @@ public class ConnectionManager {
 		token = "whatevertoken";
 	}
 
-	GameController joinServer(String serverIP, int serverPort) {
+	boolean joinServer(String serverIP, int serverPort) {
 		try {
 			udp.startServer();
 		} catch (SocketException | UnknownHostException e) {
 			e.printStackTrace();
-			return null;
+			return false;
 		}
 
 		boolean validated = false;
@@ -50,8 +53,8 @@ public class ConnectionManager {
 			byte[] data = tcp.readData();
 			if (data == null) {
 				closeConnection();
-				eventHandler.addEvent(new Event(Event.JOIN_SERVER_FAILED, "Unable to read data"));
-				return null;
+				eventHandler.addEvent(new Event(EventType.JOIN_SERVER_FAILED, "Unable to read data"));
+				return false;
 			}
 			String result = new String(data);
 			String[] splitResult;
@@ -61,20 +64,20 @@ public class ConnectionManager {
 					validated = true;
 			} catch (Exception e) {
 				closeConnection();
-				eventHandler.addEvent(new Event(Event.JOIN_SERVER_FAILED, e.getMessage()));
-				return null;
+				eventHandler.addEvent(new Event(EventType.JOIN_SERVER_FAILED, e.getMessage()));
+				return false;
 			}
 		} catch (IOException e) {
 			closeConnection();
-			eventHandler.addEvent(new Event(Event.JOIN_SERVER_FAILED, e.getMessage()));
-			return null;
+			eventHandler.addEvent(new Event(EventType.JOIN_SERVER_FAILED, e.getMessage()));
+			return false;
 		}
 		if (!validated) {
 			closeConnection();
-			eventHandler.addEvent(new Event(Event.JOIN_SERVER_FAILED, "Not validated"));
-			return null;
+			eventHandler.addEvent(new Event(EventType.JOIN_SERVER_FAILED, "Not validated"));
+			return false;
 		}
-		return new GameController();
+		return true;
 		// TODO: Maybe send UDP package for server to identify client UDP
 		// ip/port
 	}

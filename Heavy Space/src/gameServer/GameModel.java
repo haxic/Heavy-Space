@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import shared.DataPacket;
-import shared.game.GameEntity;
+import shared.game.Entity;
 
 public class GameModel {
 	Map<String, Player> players = new HashMap<String, Player>();
-	List<GameEntity> gameEntities = new ArrayList<GameEntity>();
+	List<Entity> gameEntities = new ArrayList<Entity>();
 
-	public void addGameEntity(GameEntity asteroid) {
+	public void addGameEntity(Entity asteroid) {
 		gameEntities.add(asteroid);
 	}
 
@@ -35,15 +35,15 @@ public class GameModel {
 		dataPacket.addByte(messageType);
 		// Add bulk
 		dataPacket.addByte(bulkSize);
-		for (GameEntity gameEntity : gameEntities) {
+		for (Entity gameEntity : gameEntities) {
 			// Add position
-			dataPacket.addInteger((int) (gameEntity.position.x * 1000)); // 2
-			dataPacket.addInteger((int) (gameEntity.position.y * 1000)); // 6
-			dataPacket.addInteger((int) (gameEntity.position.z * 1000)); // 10
+			dataPacket.addInteger((int) (gameEntity.getPosition().x * 1000)); // 2
+			dataPacket.addInteger((int) (gameEntity.getPosition().y * 1000)); // 6
+			dataPacket.addInteger((int) (gameEntity.getPosition().z * 1000)); // 10
 			// Add orientation
-			dataPacket.addShort((short) (gameEntity.orientation.x * 100)); // 14
-			dataPacket.addShort((short) (gameEntity.orientation.y * 100)); // 18
-			dataPacket.addShort((short) (gameEntity.orientation.z * 100));
+			dataPacket.addShort((short) (gameEntity.getRotation().x * 100)); // 14
+			dataPacket.addShort((short) (gameEntity.getRotation().y * 100)); // 18
+			dataPacket.addShort((short) (gameEntity.getRotation().z * 100));
 		}
 		return dataPackets;
 	}

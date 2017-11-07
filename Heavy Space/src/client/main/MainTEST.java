@@ -15,7 +15,6 @@ import org.lwjgl.glfw.GLFW;
 import client.display.DisplayManager;
 import client.entities.Actor;
 import client.entities.Camera;
-import client.entities.Entity;
 import client.entities.Light;
 import client.gameData.GameModelLoader;
 import client.gameData.ParticleSystem;
@@ -25,6 +24,7 @@ import client.renderers.RenderManager;
 import gameServer.network.SocketHandler;
 import gameServer.network.UDPServer;
 import shared.DataPacket;
+import shared.game.Entity;
 import tests.LocalConfig;
 import utilities.Loader;
 

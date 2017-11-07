@@ -9,12 +9,12 @@ import org.joml.Vector3f;
 
 import client.entities.Actor;
 import client.entities.Camera;
-import client.entities.Entity;
 import client.entities.Light;
 import client.gameData.GameModelLoader;
 import client.gameData.ParticleSystem;
 import client.models.Model;
 import client.renderers.ParticleManager;
+import shared.game.Entity;
 
 public class Scene {
 

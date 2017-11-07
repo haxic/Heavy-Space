@@ -17,7 +17,6 @@ import org.lwjgl.opengl.GL30;
 import client.display.DisplayManager;
 import client.entities.Actor;
 import client.entities.Camera;
-import client.entities.Entity;
 import client.entities.Light;
 import client.models.Mesh;
 import client.models.Model;
@@ -26,6 +25,7 @@ import client.models.ShadowMap;
 import client.models.Texture;
 import client.shaders.EntityShader;
 import client.shaders.ShadowShader;
+import shared.game.Entity;
 import utilities.Loader;
 import utilities.MatrixUtils;
 

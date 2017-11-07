@@ -6,6 +6,9 @@ import client.gameData.GameModelLoader;
 import client.inputs.KeyboardHandler;
 import client.renderers.RenderManager;
 import shared.Config;
+import shared.functionality.Event;
+import shared.functionality.EventHandler;
+import shared.functionality.EventType;
 
 public class MenuController implements ClientController {
 	private Scene scene;
@@ -33,10 +36,10 @@ public class MenuController implements ClientController {
 		if (KeyboardHandler.kb_keyDownOnce(KEY_JOIN)) {
 			counter++;
 			System.out.println(counter);
-			eventHandler.addEvent(new Event(Event.JOIN_SERVER, "localhost", config.gameServerDefaultPort));
+			eventHandler.addEvent(new Event(EventType.JOIN_SERVER, "localhost", config.gameServerDefaultPort));
 		}
 		if (KeyboardHandler.kb_keyDownOnce(KEY_DISCONNECT)) {
-			eventHandler.addEvent(new Event(Event.DISCONNECT));
+			eventHandler.addEvent(new Event(EventType.DISCONNECT));
 		}
 	}
 

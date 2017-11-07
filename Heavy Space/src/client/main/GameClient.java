@@ -4,6 +4,8 @@ import client.display.DisplayManager;
 import client.gameData.GameModelLoader;
 import client.renderers.RenderManager;
 import shared.Config;
+import shared.functionality.Event;
+import shared.functionality.EventHandler;
 import tests.LocalConfig;
 import utilities.Loader;
 
@@ -41,28 +43,33 @@ public class GameClient {
 	public void handleEvents() {
 		Event event;
 		while ((event = eventHandler.poll()) != null) {
-			if (event.type == Event.AUTHENTICATE) {
+			switch (event.type) {
+			case AUTHENTICATE:
 				String username = (String) event.data[0];
 				String password = (String) event.data[1];
 				// gameController.authenticate
-			}
-			if (event.type == Event.JOIN_SERVER) {
+				break;
+			case JOIN_SERVER:
 				String ip = (String) event.data[0];
 				int port = (int) event.data[1];
 				if (gameController != null)
 					gameController.close();
 				connectionManager.disconnect();
-				gameController = connectionManager.joinServer(ip, port);
+				if (connectionManager.joinServer(ip, port))
+					gameController = new GameController(gameModelLoader);
 				currentController = gameController;
-			}
-			if (event.type == Event.DISCONNECT) {
+				break;
+			case DISCONNECT:
 				if (gameController != null)
 					gameController.close();
 				connectionManager.disconnect();
 				currentController = menuController;
-			}
-			if (event.type == Event.JOIN_SERVER_FAILED) {
+				break;
+			case JOIN_SERVER_FAILED:
 				System.out.println(event.type + ": " + event.data[0]);
+				break;
+			default:
+				break;
 			}
 		}
 	}

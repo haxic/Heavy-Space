@@ -9,6 +9,7 @@ import client.gameData.ModelAttachementTag;
 import client.models.Model;
 import client.models.ModelAttachment;
 import client.models.ModelAttachmentPoint;
+import shared.game.Entity;
 
 public class Actor {
 
