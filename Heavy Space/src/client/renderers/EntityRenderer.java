@@ -2,8 +2,11 @@ package client.renderers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -79,7 +82,8 @@ public class EntityRenderer extends EntitySystem {
 		// position = entity.getPosition();
 		// rotation = entity.getRotation();
 		// }
-		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(unitComponent.getPosition(), unitComponent.getRotation(), unitComponent.getScale());
+//		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(unitComponent.getPosition(), unitComponent.getRotationMatrix(), unitComponent.getScale());
+		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(unitComponent);
 		Matrix4f mvpMatrix = projectionMatrix.mul(viewMatrix, new Matrix4f()).mul(modelMatrix);
 		Matrix4f modelViewMatrix = viewMatrix.mul(modelMatrix, new Matrix4f());
 		entityShader.loadModelViewProjectionMatrix(mvpMatrix);

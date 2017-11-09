@@ -5,9 +5,9 @@ import org.joml.Vector3f;
 
 public class Camera {
 	public Vector3f position;
-	Vector3f direction;
-	public Vector3f right;
+	public Vector3f forward;
 	public Vector3f up;
+	public Vector3f right;
 	float fov, aspectRatio, near, far;
 	boolean lockUp;
 
@@ -19,33 +19,33 @@ public class Camera {
 
 	public Camera() {
 		position = new Vector3f(0, 0, 0);
-		direction = new Vector3f(0, 0, -1);
+		forward = new Vector3f(0, 0, -1);
 		right = new Vector3f(1, 0, 0);
 		up = new Vector3f(0, 1, 0);
 		fov = 70;
 		near = 1;
-		far = 1000;
+		far = 2000;
 	}
 
 	public void pitch(double angle) {
 		// D = normalize(D * cos a + up * sin a)
-		direction.mul((float) Math.cos(angle), tempVector1).add(up.mul((float) Math.sin(angle), tempVector2)).normalize(direction);
+		forward.mul((float) Math.cos(angle), tempVector1).add(up.mul((float) Math.sin(angle), tempVector2)).normalize(forward);
 		// up = cross(R, direction);
-		right.cross(direction, up);
+		right.cross(forward, up);
 	}
 
 	public void roll(double angle) {
 		// right = normalize(right * cos a + up * sin a)
 		right.mul((float) Math.cos(angle), tempVector1).add(up.mul((float) Math.sin(angle), tempVector2)).normalize(right);
 		// up = cross(right, direction);
-		right.cross(direction, up);
+		right.cross(forward, up);
 	}
 
 	public void yaw(double angle) {
 		// right = right * cos a + direction * sin a
-		right.mul((float) Math.cos(angle), tempVector1).add(direction.mul((float) Math.sin(angle), tempVector2), right);
+		right.mul((float) Math.cos(angle), tempVector1).add(forward.mul((float) Math.sin(angle), tempVector2), right);
 		// direction = cross(up, right)
-		up.cross(right, direction);
+		up.cross(right, forward);
 	}
 
 	public Vector3f getPosition() {
@@ -56,12 +56,12 @@ public class Camera {
 		this.position = position;
 	}
 
-	public Vector3f getDirection() {
-		return direction;
+	public Vector3f getForward() {
+		return forward;
 	}
 
-	public void setDirection(Vector3f direction) {
-		this.direction = direction;
+	public void setForward(Vector3f forward) {
+		this.forward = forward;
 	}
 
 	public Vector3f getUp() {
@@ -112,7 +112,7 @@ public class Camera {
 	}
 
 	public void updateViewMatrix() {
-		viewMatrix.identity().lookAt(getPosition(), getPosition().add(getDirection(), tempVector1), getUp());
+		viewMatrix.identity().lookAt(getPosition(), getPosition().add(getForward(), tempVector1), getUp());
 	}
 
 	public Matrix4f getProjectionMatrix() {

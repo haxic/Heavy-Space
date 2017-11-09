@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import client.gameData.ModelAttachementTag;
 import client.models.Model;
@@ -85,4 +86,5 @@ public class ActorComponent implements EntityComponent {
 	public void setTextureOffset(Vector2f textureOffset) {
 		this.textureOffset = textureOffset;
 	}
+
 }

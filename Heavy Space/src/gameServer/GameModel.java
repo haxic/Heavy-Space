@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hecs.Entity;
 import shared.DataPacket;
-import shared.game.Entity;
 
 public class GameModel {
 	Map<String, Player> players = new HashMap<String, Player>();

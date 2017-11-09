@@ -33,7 +33,7 @@ public class GameClient {
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
 		LocalConfig config = new LocalConfig();
-		gameFactory = new GameFactory(entityManager, gameModelLoader);
+		gameFactory = new GameFactory(entityManager, gameModelLoader, false);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler, "localhost", config.gameClientDefaultPort, config);
 		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
@@ -85,7 +85,7 @@ public class GameClient {
 		int frames = 0;
 		while (!displayManager.shouldClose()) {
 			displayManager.pollInputs();
-			currentController.processInputs();
+			currentController.processInputs(displayManager.getDeltaTime());
 			handleEvents();
 			currentController.update(displayManager.getDeltaTime());
 			renderManager.render(currentController.getScene());
@@ -93,7 +93,7 @@ public class GameClient {
 			frames++;
 			if (System.currentTimeMillis() - timer >= 1000) {
 				timer += 1000;
-				System.out.println("Fps: " + frames + ". Entities:" + entityManager.numberOfEntities() + ". Components:" + entityManager.numberOfComponents() + ".");
+//				System.out.println("Fps: " + frames + ". Entities:" + entityManager.numberOfEntities() + ". Components:" + entityManager.numberOfComponents() + ".");
 				frames = 0;
 			}
 		}

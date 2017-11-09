@@ -2,7 +2,7 @@ package client.main;
 
 public interface ClientController {
 
-	public void processInputs();
+	public void processInputs(float deltaTime);
 
 	public void update(float deltaTime);
 

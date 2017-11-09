@@ -8,12 +8,15 @@ import java.util.Map.Entry;
 
 import org.joml.Vector3f;
 
+import client.main.GameFactory;
 import gameServer.AgentManager.Agent;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.UDPServer;
 import gameServer.network.ValidationService;
+import gameServer.systems.AIBotSystem;
+import hecs.EntityManager;
 import shared.Config;
 import shared.DataPacket;
 import shared.functionality.EventHandler;
@@ -33,11 +36,16 @@ public class GameServer {
 	private Config config;
 	private String serverIP;
 	private int serverPort;
-
+	private EntityManager entityManager;
+	private GameFactory gameFactory;
+	
+	private AIBotSystem aiBotSystem;
+	
 	public GameServer(Config config, String serverIP, int serverPort, boolean local) {
 		this.config = config;
 		this.serverIP = serverIP;
 		this.serverPort = serverPort;
+		entityManager = new EntityManager();
 		eventHandler = new EventHandler();
 		playerManager = new PlayerManager();
 		agentManager = new AgentManager(playerManager);
@@ -50,12 +58,16 @@ public class GameServer {
 		tcpServer = new TCPServer(serverIP, serverPort, validationService);
 		udpServer = new UDPServer(serverIP, serverPort);
 		gameModel = new GameModel();
+		
+		
+		aiBotSystem = new AIBotSystem(entityManager);
 		initializeWorld();
 		initializeServer();
 		loop();
 	}
 
 	private void initializeWorld() {
+		gameFactory.createBot(new Vector3f(0, 0, -30), new Vector3f(0, 0, 0));
 	}
 
 	private void initializeServer() {
@@ -68,13 +80,13 @@ public class GameServer {
 		}
 	}
 
+	public static final int TIMESTEP = 1000 / 30;
 	private void loop() {
-		int hz = 1000 / 30;
 		long timer = System.currentTimeMillis();
 		boolean shouldStop = false;
 		while (!shouldStop) {
-			if (System.currentTimeMillis() - timer > hz) {
-				timer += hz;
+			if (System.currentTimeMillis() - timer > TIMESTEP) {
+				timer += TIMESTEP;
 				update();
 			}
 			try {
@@ -87,7 +99,7 @@ public class GameServer {
 
 	private void update() {
 		processInputs();
-		// processAI();
+		processAI();
 		updateGameState();
 		sendGameSate();
 	}
@@ -108,6 +120,7 @@ public class GameServer {
 	}
 
 	private void processAI() {
+		aiBotSystem.update();
 	}
 
 	private void updateGameState() {

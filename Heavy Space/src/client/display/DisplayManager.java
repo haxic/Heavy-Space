@@ -10,6 +10,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 
+import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -19,18 +20,19 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import client.inputs.KeyboardHandler;
 import client.inputs.MouseHandler;
+//import client.inputs.MousePositionHandler;
 import client.inputs.MouseScrollHandler;
 
 public class DisplayManager {
-	private boolean cursorEnabled = true;
+	private static boolean cursorEnabled = true;
 	private long windowID;
 	private int width, height;
 	private double aspect;
 	private double lastTime;
 
 	private float deltaTime;
-	private float mouseX;
-	private float mouseY;
+	private static Vector2f mousePosition = new Vector2f();
+	private static Vector2f mousePositionDelta = new Vector2f();
 
 	public DisplayManager(int width, int height) {
 		if (!GLFW.glfwInit()) {
@@ -49,6 +51,7 @@ public class DisplayManager {
 		GLFW.glfwMakeContextCurrent(windowID);
 
 		GLFW.glfwSetScrollCallback(windowID, new MouseScrollHandler());
+//		GLFW.glfwSetCursorPosCallback(windowID, new MousePositionHandler());
 		GLFW.glfwSetMouseButtonCallback(windowID, new MouseHandler());
 		GLFW.glfwSetKeyCallback(windowID, new KeyboardHandler());
 
@@ -70,6 +73,7 @@ public class DisplayManager {
 		GLFW.glfwSwapInterval(1);
 		// GLFW.glfwSetInputMode(windowID, GLFW.GLFW_STICKY_KEYS, GL11.GL_TRUE);
 		// setBasicAntialising(4);
+		disableCursor();
 	}
 
 	public void pollInputs() {
@@ -81,8 +85,9 @@ public class DisplayManager {
 		GLFW.glfwGetCursorPos(windowID, x, y);
 		x.rewind();
 		y.rewind();
-		mouseX = (float) x.get();
-		mouseY = (float) y.get();
+		mousePosition.set((float) x.get(), (float) y.get());
+		mousePositionDelta.set(width / 2 - mousePosition.x, height / 2 - mousePosition.y);
+//		MousePositionHandler.poll();
 		if (!cursorEnabled)
 			GLFW.glfwSetCursorPos(windowID, width / 2, height / 2);
 		KeyboardHandler.poll();
@@ -130,6 +135,7 @@ public class DisplayManager {
 		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		// TODO: Don't use syso!
 		System.out.println("ENABLE CURSOR " + cursorEnabled);
+//		MousePositionHandler.setCursorVisibility(cursorEnabled);
 	}
 
 	public void disableCursor() {
@@ -138,6 +144,7 @@ public class DisplayManager {
 		glfwSetCursorPos(windowID, getWidth() / 2, getHeight() / 2);
 		// TODO: Don't use syso!
 		System.out.println("DISABLE CURSOR " + cursorEnabled);
+//		MousePositionHandler.setCursorVisibility(cursorEnabled);
 	}
 
 	public void closeDisplay() {
@@ -161,19 +168,19 @@ public class DisplayManager {
 		return (float) aspect;
 	}
 
-	public float getMouseX() {
-		return mouseX;
+	public static Vector2f getMousePosition() {
+		return mousePosition;
 	}
-
-	public float getMouseY() {
-		return mouseY;
+	
+	public static Vector2f getMousePositionDelta() {
+		return mousePositionDelta;
 	}
 
 	public boolean keyPressed(int key) {
 		return GLFW.glfwGetKey(windowID, key) == GLFW.GLFW_PRESS;
 	}
 
-	public boolean isCursorEnabled() {
+	public static boolean isCursorEnabled() {
 		return cursorEnabled;
 	}
 

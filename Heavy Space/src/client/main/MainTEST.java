@@ -129,9 +129,9 @@ public class MainTEST {
 				camera.yaw(hor);
 			}
 			if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_W))
-				position.add(camera.getDirection().mul(dt * speed, new Vector3f()));
+				position.add(camera.getForward().mul(dt * speed, new Vector3f()));
 			if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_S))
-				position.sub(camera.getDirection().mul(dt * speed, new Vector3f()));
+				position.sub(camera.getForward().mul(dt * speed, new Vector3f()));
 			if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_D))
 				position.add(camera.right.mul(dt * speed, new Vector3f()));
 			if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_A))
