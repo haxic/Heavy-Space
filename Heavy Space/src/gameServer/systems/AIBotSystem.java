@@ -11,17 +11,16 @@ import hecs.EntityManager;
 import hecs.EntitySystem;
 import shared.components.MovementComponent;
 import shared.components.UnitComponent;
+import shared.functionality.Globals;
 
 public class AIBotSystem extends EntitySystem {
 	public AIBotSystem(EntityManager entityManager) {
 		super(entityManager);
 	}
 
-	private Vector3f temp1 = new Vector3f();
-	private Vector3f temp2 = new Vector3f();
+	Vector3f tempVector = new Vector3f();
 
 	public void update() {
-
 		List<Entity> entities = entityManager.getEntitiesContainingComponent(AIBotComponent.class);
 		if (entities == null)
 			return;
@@ -31,29 +30,43 @@ public class AIBotSystem extends EntitySystem {
 			AIBotComponent aiBot = (AIBotComponent) entityManager.getComponentInEntity(entity, AIBotComponent.class);
 			UnitComponent unit = (UnitComponent) entityManager.getComponentInEntity(entity, UnitComponent.class);
 			MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(entity, MovementComponent.class);
-			aiBot.elapsed += GameServer.TIMESTEP;
-			aiBot.timeLimit = 5000;
+			aiBot.elapsed += Globals.dt;
 			if (aiBot.elapsed >= aiBot.timeLimit) {
 				aiBot.elapsed -= aiBot.timeLimit;
 				do {
 					aiBot.targetLocation.set((float) Math.random() * 180 - 90, (float) Math.random() * 180 - 90, (float) Math.random() * 180 - 300);
 				} while (unit.getPosition().distance(aiBot.targetLocation) < 40);
 			}
-			Vector3f direction = aiBot.targetLocation.sub(unit.getPosition(), temp1);
-			// unit.lookAt(direction.normalize());
 
-			movement.angularAcc.set(0, 0, 0);
-			movement.angularAcc.add(0, 0.01f, 0.0025f);
-			movement.angularVel.set(movement.angularAcc);
-			unit.pitch(movement.angularVel.x);
-			unit.yaw(movement.angularVel.y);
-			unit.roll(movement.angularVel.z);
+			Vector3f angularThrust = new Vector3f(0, 0, 0.025f);
 
-			movement.linearAcc.set(0);
-			float speed = 0.0002f;
-			movement.linearAcc.fma(speed, unit.getForward());
-			movement.linearVel.add(movement.linearAcc);
-			unit.getPosition().add(movement.linearVel);
+			movement.getAngularAcc().zero();
+			movement.getAngularAcc().add(angularThrust);
+			movement.getAngularVel().fma(Globals.dt, movement.getAngularAcc());
+			unit.pitch(Globals.dt * movement.getAngularVel().x);
+			unit.yaw(Globals.dt * movement.getAngularVel().y);
+			unit.roll(Globals.dt * movement.getAngularVel().z);
+
+			int distance = 20;
+			Vector3f linearThrust = unit.getForward(tempVector).mul(100);
+
+			movement.getLinearAcc().zero();
+			movement.getLinearAcc().add(linearThrust);
+			movement.getLinearVel().fma(Globals.dt, movement.getLinearAcc());
+			unit.getPosition().fma(Globals.dt, movement.getLinearVel());
+
+			unit.getPosition().fma(Globals.dt, linearThrust);
+
+			if (unit.getPosition().z > distance || unit.getPosition().z < -distance) {
+				if (unit.getPosition().z > distance) {
+					unit.getPosition().z = distance;
+					unit.getForward().set(0, 0, -1);
+				} else {
+					unit.getPosition().z = -distance;
+					unit.getForward().set(0, 0, 1);
+				}
+			}
+
 		}
 	}
 

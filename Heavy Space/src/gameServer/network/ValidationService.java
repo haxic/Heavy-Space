@@ -5,21 +5,23 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import gameServer.AgentManager;
+import gameServer.ClientManager;
+import shared.functionality.TCPSocket;
 
 public class ValidationService {
 	private IServerCommunicator serverCommuicator;
 	private int timeout;
 	private Set<ValidationTask> validationTasks = Collections.newSetFromMap(new ConcurrentHashMap<ValidationTask, Boolean>());
 	private int validationCounter;
-	private AgentManager agentManager;
+	private ClientManager clientManager;
 	private boolean local;
 
-	public ValidationService(IServerCommunicator serverCommuicator, AgentManager agentManager, int timeout, boolean local) {
+	public ValidationService(IServerCommunicator serverCommuicator, ClientManager agentManager, int timeout, boolean local) {
 		this.serverCommuicator = serverCommuicator;
-		this.agentManager = agentManager;
+		this.clientManager = agentManager;
 		this.timeout = timeout;
 		this.local = local;
 	}
@@ -80,22 +82,24 @@ public class ValidationService {
 	}
 
 	private void handleValidatedConnection(ValidationTask validationTask, String username, String token) {
-		byte[] invalidMessage = "Accepted: validation successful.".getBytes();
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		byte[] uuidResponse = ("Accepted:" + uuid).getBytes();
 		try {
-			validationTask.socketHandler.sendData(invalidMessage);
+			validationTask.socketHandler.sendData(uuidResponse);
 		} catch (IOException e) {
-			// e.printStackTrace();
+			handleException(validationTask, e);
+			return;
 		}
 		validationTasks.remove(validationTask);
-		agentManager.handleValidatedConnection(validationTask.socketHandler, username, token);
+		clientManager.handleValidatedTCPConnection(validationTask.socketHandler, uuid, username, token);
 	}
 
 	class ValidationTask implements Runnable {
 		Thread thread;
-		SocketHandler socketHandler;
+		TCPSocket socketHandler;
 
 		public ValidationTask(Socket socket) {
-			this.socketHandler = new SocketHandler(socket);
+			this.socketHandler = new TCPSocket(socket, timeout);
 		}
 
 		public void startValidation() throws IOException {
@@ -105,11 +109,6 @@ public class ValidationService {
 
 		@Override
 		public void run() {
-			try {
-				socketHandler.setSoTimeout(timeout);
-			} catch (SocketException e) {
-				e.printStackTrace();
-			}
 			String username = null;
 			String token = null;
 			try {

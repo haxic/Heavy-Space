@@ -52,8 +52,7 @@ public class Scene extends EntitySystem implements EntityContainer {
 		this.skybox = skybox;
 	}
 
-	@Override
-	public void attach(Entity entity) {
+	public void addEntity(Entity entity) {
 		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
 		Model model = actorComponent.getModel();
 		List<Entity> batch = actors.get(model);
@@ -65,6 +64,10 @@ public class Scene extends EntitySystem implements EntityContainer {
 			actors.put(model, newBatch);
 		}
 		entity.attach(this);
+	}
+	
+	public void removeEntity(Entity entity) {
+		detach(entity);
 	}
 
 	@Override
@@ -80,9 +83,5 @@ public class Scene extends EntitySystem implements EntityContainer {
 		if (batch.isEmpty())
 			actors.remove(model);
 		entity.detach(this);
-	}
-
-	@Override
-	public void cleanUp() {
 	}
 }

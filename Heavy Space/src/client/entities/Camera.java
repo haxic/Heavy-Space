@@ -24,7 +24,7 @@ public class Camera {
 		up = new Vector3f(0, 1, 0);
 		fov = 70;
 		near = 1;
-		far = 2000;
+		far = 3000;
 	}
 
 	public void pitch(double angle) {

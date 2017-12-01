@@ -22,6 +22,7 @@ import client.inputs.KeyboardHandler;
 import client.inputs.MouseHandler;
 //import client.inputs.MousePositionHandler;
 import client.inputs.MouseScrollHandler;
+import shared.functionality.Globals;
 
 public class DisplayManager {
 	private static boolean cursorEnabled = true;
@@ -78,7 +79,7 @@ public class DisplayManager {
 
 	public void pollInputs() {
 		double currentTime = GLFW.glfwGetTime();
-		deltaTime = (float) (GLFW.glfwGetTime() - lastTime);
+		Globals.dt = (float) (GLFW.glfwGetTime() - lastTime);
 		lastTime = currentTime;
 		DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
 		DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
@@ -113,10 +114,6 @@ public class DisplayManager {
 		this.height = height;
 		aspect = (double) this.width / (double) this.height;
 		GL11.glViewport(0, 0, this.width, this.height);
-	}
-
-	public float getDeltaTime() {
-		return deltaTime;
 	}
 
 	public boolean shouldClose() {

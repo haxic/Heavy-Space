@@ -1,4 +1,4 @@
-package gameServer.network;
+package shared.functionality;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,14 +7,29 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class SocketHandler {
+public class TCPSocket {
 
 	private DataInputStream in;
 	private DataOutputStream out;
 	private Socket socket;
 
-	public SocketHandler(Socket socket) {
+	public TCPSocket(Socket socket) {
 		this.socket = socket;
+		try {
+			in = new DataInputStream(socket.getInputStream());
+			out = new DataOutputStream(socket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public TCPSocket(Socket socket, int timeout) {
+		this.socket = socket;
+		try {
+			socket.setSoTimeout(timeout);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 		try {
 			in = new DataInputStream(socket.getInputStream());
 			out = new DataOutputStream(socket.getOutputStream());
@@ -39,9 +54,7 @@ public class SocketHandler {
 	}
 
 	public boolean isClosed() {
-		return socket.isClosed(); // || !socket.isConnected() ||
-									// socket.isInputShutdown() ||
-									// socket.isOutputShutdown();
+		return socket.isClosed();
 	}
 
 	public void close() throws IOException {

@@ -1,17 +1,17 @@
 package tests.implementations;
 
-import gameServer.AgentManager;
+import gameServer.ClientManager;
 import gameServer.PlayerManager;
-import gameServer.network.SocketHandler;
+import shared.functionality.TCPSocket;
 
-public class TestAgentManager extends AgentManager {
+public class TestAgentManager extends ClientManager {
 
 	public TestAgentManager(PlayerManager playerManager) {
 		super(playerManager);
 	}
 
 	@Override
-	public void handleValidatedConnection(SocketHandler socketHandler, String username, String token) {
+	public void handleValidatedConnection(TCPSocket socketHandler, String username, String token) {
 
 	}
 }

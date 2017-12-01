@@ -96,8 +96,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method deletes a selected entity and all of its components from the
-	 * entire data structure.
+	 * This method deletes a selected entity and all of its components from the entire data structure.
 	 */
 	public void removeEntity(Entity entity) {
 		if (!entities.contains(entity))
@@ -116,9 +115,7 @@ public class EntityManager {
 			HashMap<Entity, EntityComponent> value = entry.getValue();
 			if (value.containsKey(entity)) {
 				EntityComponent component = value.get(entity);
-				if (component instanceof EntityContainer) {
-					((EntityContainer) component).cleanUp();
-				}
+				component.removeComponent();
 				value.remove(entity);
 				componentCounter--;
 			}
@@ -127,8 +124,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method removes all instances of s selected component class type from
-	 * a selected entity.
+	 * This method removes all instances of s selected component class type from a selected entity.
 	 */
 	public void removeComponentAll(Class<? extends EntityComponent> componentClass, Entity entity) {
 		HashMap<Entity, EntityComponent> componentsOfEntity = dataStructure.get(componentClass);
@@ -140,8 +136,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method removes all instances of all component class types in the
-	 * selected component class type list from a selected entity.
+	 * This method removes all instances of all component class types in the selected component class type list from a selected entity.
 	 */
 	public void removeMultipleComponents(Class<? extends EntityComponent>[] componentClass, Entity entity) {
 		if (componentClass != null)
@@ -151,8 +146,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method attempts to remove any one instance of a selected component
-	 * class type from a selected entity.
+	 * This method attempts to remove any one instance of a selected component class type from a selected entity.
 	 */
 	public void removeComponentOnce(Class<? extends EntityComponent> componentClass, Entity entity) {
 		HashMap<Entity, EntityComponent> componentsOfEntity = dataStructure.get(componentClass);
@@ -162,8 +156,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method returns a list of all entities that contains a selected
-	 * component class type.
+	 * This method returns a list of all entities that contains a selected component class type.
 	 */
 	public List<Entity> getEntitiesContainingComponent(Class<? extends EntityComponent> componentClass) {
 		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
@@ -180,8 +173,7 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method attempts to return one entity that contains a instance of a
-	 * selected component class type.
+	 * This method attempts to return one entity that contains a instance of a selected component class type.
 	 */
 	public Entity getEntityContainingComponentOfClass(Class<? extends EntityComponent> componentClass) {
 		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
@@ -194,21 +186,22 @@ public class EntityManager {
 	}
 
 	/**
-	 * This method attempts to return a selected component class type contains
-	 * by any one entity that contains an instance of it.
+	 * This method attempts to return a selected component class type contains by any one entity that contains an instance of it.
 	 */
 	public EntityComponent getComponentOfClassContainingSameComponentOfClass(Class<? extends EntityComponent> componentClass) {
 		return dataStructure.get(componentClass).get(getEntityContainingComponentOfClass(componentClass));
 	}
 
 	public EntityComponent getComponentInEntity(Entity entity, Class<? extends EntityComponent> componentClass) {
-		return dataStructure.get(componentClass).get(entity);
+		HashMap<Entity, EntityComponent> map = dataStructure.get(componentClass);
+		if (map == null)
+			return null;
+		return map.get(entity);
 	}
 
 	/**
-	 * This method attempts to return a instance of a selected component class
-	 * type A from any one entity that contains a selected component class type
-	 * B.
+	 * This method attempts to return a instance of a selected component class type A from any one entity that contains a selected component class
+	 * type B.
 	 */
 	public EntityComponent getComponentOfClassOfEntityContainingDifferentComponentOfClass(Class<? extends EntityComponent> componentClass1, Class<? extends EntityComponent> componentClass2) {
 		return dataStructure.get(componentClass2).get(getEntityContainingComponentOfClass(componentClass1));

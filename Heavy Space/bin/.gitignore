@@ -1,7 +1,5 @@
-/hecs/
-/client/
-/components/
-/shared/
-/UNUSED/
 /gameServer/
-/utilities/
+/shared/
+/client/
+/tests/
+/hecs/

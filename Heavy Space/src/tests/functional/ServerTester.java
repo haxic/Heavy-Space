@@ -1,27 +1,24 @@
 package tests.functional;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import gameServer.network.SocketHandler;
-import gameServer.network.UDPServer;
+import shared.functionality.UDPServer;
 import tests.LocalConfig;
 
 public class ServerTester {
 
 	public ServerTester() throws InterruptedException, UnknownHostException, SocketException {
 		LocalConfig config = new LocalConfig();
-		SocketHandler socketHandler;
-		try {
-			socketHandler = new SocketHandler(new Socket("localhost", config.gameServerDefaultPort));
-			socketHandler.sendData("hello world".getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		TCPSocket socketHandler;
+//		try {
+//			socketHandler = new TCPSocket(new Socket("localhost", config.gameServerDefaultPort));
+//			socketHandler.sendData("hello world".getBytes());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		UDPServer udpServer = new UDPServer("localhost", 6028);
 		udpServer.startServer();
 		InetAddress address = InetAddress.getByName("localhost");

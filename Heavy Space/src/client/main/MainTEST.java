@@ -21,9 +21,9 @@ import client.gameData.ParticleSystem;
 import client.inputs.KeyboardHandler;
 import client.models.Model;
 import client.renderers.RenderManager;
-import gameServer.network.SocketHandler;
-import gameServer.network.UDPServer;
 import shared.DataPacket;
+import shared.functionality.TCPSocket;
+import shared.functionality.UDPServer;
 import shared.game.Entity;
 import tests.LocalConfig;
 import utilities.Loader;
@@ -52,9 +52,9 @@ public class MainTEST {
 		lights.add(plasma2);
 
 		LocalConfig config = new LocalConfig();
-		SocketHandler tcp = null;
+		TCPSocket tcp = null;
 		try {
-			tcp = new SocketHandler(new Socket("localhost", config.gameServerDefaultPort));
+			tcp = new TCPSocket(new Socket("localhost", config.gameServerDefaultPort));
 			tcp.sendData("hello world".getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -157,7 +157,7 @@ public class MainTEST {
 			dataPacket.addInteger((int) (position.z * 1000));
 			dataPacket.addByte((byte) 20);
 //			System.out.println((int) (position.z * 1000) + " " + dataPacket.getIntegerAt(8));
-			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getLength(), address, config.gameServerDefaultPort);
+			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), address, config.gameServerDefaultPort);
 			udp.sendData(datagramPacket);
 			// Logic
 			float bounceFactor = (float) Math.cos(((currentTimeMillis % 6100.0) / 1000.0));

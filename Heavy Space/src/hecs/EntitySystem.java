@@ -6,5 +6,4 @@ public abstract class EntitySystem {
 	public EntitySystem(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
-
 }

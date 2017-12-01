@@ -10,7 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import gameServer.AgentManager;
+import gameServer.ClientManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
@@ -35,7 +35,7 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
 
-		AgentManager agentmanager = new AgentManager(null);
+		ClientManager agentmanager = new ClientManager(null);
 		ValidationService validationService = new ValidationService(serverCommunicator, null, 500, false);
 		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
 		try {

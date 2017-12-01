@@ -1,7 +1,6 @@
 package tests.functional;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.util.UUID;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -15,5 +14,15 @@ public class TestPasswordSaltHash2 {
 		System.out.println(hashpw);
 		System.out.println(hashpw.substring(7));
 		System.out.println(hashpw.getBytes().length);
+		System.out.println(hashpw.substring(7).getBytes().length);
+
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		System.out.println(uuid);
+		System.out.println(uuid.length());
+		System.out.println();
+		byte b = Byte.parseByte("00000111", 2);
+		for (int i = 0; i < 8; i++) {
+			System.out.println((b >> i) & 1);
+		}
 	}
 }

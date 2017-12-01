@@ -14,8 +14,9 @@ import hecs.EntityComponent;
 import hecs.EntityContainer;
 import hecs.Entity;
 
-public class ActorComponent implements EntityComponent {
+public class ActorComponent extends EntityComponent {
 
+	// TODO: Make the actor component contain an Actor object which holds all attributes below
 	private Model model;
 	private Map<ModelAttachementTag, ModelAttachment> attachments = new HashMap<>();
 	private ModelAttachment attachedTo;
@@ -85,6 +86,11 @@ public class ActorComponent implements EntityComponent {
 
 	public void setTextureOffset(Vector2f textureOffset) {
 		this.textureOffset = textureOffset;
+	}
+
+	@Override
+	protected void removeComponent() {
+		// TODO Auto-generated method stub
 	}
 
 }

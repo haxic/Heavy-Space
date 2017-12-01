@@ -1,4 +1,4 @@
-package gameServer.network;
+package shared.functionality;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
+
 public class UDPServer {
 	DatagramSocket serverSocket;
 	InputHandler inputHandler;
 	OutputHandler outputHandler;
-	Queue<byte[]> received = new ConcurrentLinkedQueue();
+	Queue<DatagramPacket> received = new ConcurrentLinkedQueue();
 	Queue<DatagramPacket> toSend = new ConcurrentLinkedQueue();
 	boolean shouldClose;
 	String ip;
@@ -27,6 +29,7 @@ public class UDPServer {
 	}
 
 	public void startServer() throws UnknownHostException, SocketException {
+		shouldClose = false;
 		InetAddress serverIPAddress = InetAddress.getByName(ip);
 		InetSocketAddress serverAddress = new InetSocketAddress(serverIPAddress, port);
 		serverSocket = new DatagramSocket(null);
@@ -50,7 +53,7 @@ public class UDPServer {
 	}
 
 	// Get received data
-	public byte[] getData() {
+	public DatagramPacket getData() {
 		return received.poll();
 	}
 
@@ -74,9 +77,8 @@ public class UDPServer {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				byte[] data = receivePacket.getData();
-				if (data != null) {
-					received.add(data);
+				if (receivePacket != null && receivePacket.getLength() > 0) {
+					received.add(receivePacket);
 				}
 			}
 		}

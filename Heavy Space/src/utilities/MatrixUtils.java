@@ -4,11 +4,13 @@ import org.joml.Math;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import shared.components.UnitComponent;
 
 public class MatrixUtils {
 	private static Matrix4f tempMatrix1 = new Matrix4f();
+	private static Matrix4f tempMatrix2 = new Matrix4f();
 	private static Vector3f temp1 = new Vector3f();
 
 	public static Matrix4f createModelMatrix(Vector3f position, Vector3f rotation, Vector3f scale) {
@@ -24,8 +26,7 @@ public class MatrixUtils {
 	public static Matrix4f createModelMatrix(UnitComponent unitComponent) {
 		tempMatrix1.identity();
 		tempMatrix1.translate(unitComponent.getPosition());
-		tempMatrix1.mul(new Matrix4f(unitComponent.getRight().x, unitComponent.getRight().y, unitComponent.getRight().z, 0, unitComponent.getForward().x, unitComponent.getForward().y,
-				unitComponent.getForward().z, 0, unitComponent.getUp().x, unitComponent.getUp().y, unitComponent.getUp().z, 0, 0, 0, 0, 1));
+		tempMatrix1.mul(unitComponent.getRotationMatrix(new Matrix4f()));
 		tempMatrix1.scale(unitComponent.getScale());
 		return tempMatrix1;
 	}

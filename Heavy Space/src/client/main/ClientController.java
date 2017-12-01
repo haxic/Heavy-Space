@@ -2,9 +2,9 @@ package client.main;
 
 public interface ClientController {
 
-	public void processInputs(float deltaTime);
+	public void processInputs();
 
-	public void update(float deltaTime);
+	public void update();
 
 	public Scene getScene();
 

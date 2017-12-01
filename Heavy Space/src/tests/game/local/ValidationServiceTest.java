@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.mindrot.jbcrypt.BCrypt;
 
-import gameServer.AgentManager;
+import gameServer.ClientManager;
 import gameServer.PlayerManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.TCPServer;
@@ -36,7 +36,7 @@ public class ValidationServiceTest {
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
 		PlayerManager playerManager = new TestPlayerManager();
-		AgentManager agentManager = new TestAgentManager(playerManager);
+		ClientManager agentManager = new TestAgentManager(playerManager);
 		ValidationService validationService = new ValidationService(serverCommunicator, agentManager, 500, false);
 		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
 		try {

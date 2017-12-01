@@ -15,6 +15,7 @@ import shared.Config;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
+import shared.functionality.Globals;
 
 public class MenuController implements ClientController {
 	private Scene scene;
@@ -37,21 +38,20 @@ public class MenuController implements ClientController {
 		this.eventHandler = eventHandler;
 		this.gameFactory = gameFactory;
 		this.config = config;
-		
+
 		aiBotSystem = new AIBotSystem(entityManager);
-		
+
 		scene = new Scene(entityManager);
 		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 		scene.addLight(sun);
 		gameFactory.setSkybox(scene);
-		
 
-		Entity bot = gameFactory.createBot(new Vector3f(0, 0, -30), new Vector3f((float) Math.toRadians(0), (float) Math.toRadians(0), (float) Math.toRadians(0)));
-		scene.attach(bot);
+		Entity bot = gameFactory.createBot(new Vector3f(0, 0, -30));
+		scene.addEntity(bot);
 	}
 
 	int counter;
-	
+
 	float mouseSpeed = 0.25f;
 	float speed = 50f;
 	float currentSpeed = speed;
@@ -60,10 +60,10 @@ public class MenuController implements ClientController {
 	int invertY = -1;
 
 	@Override
-	public void processInputs(float deltaTime) {
+	public void processInputs() {
 		Vector2f mousePositionDelta = DisplayManager.getMousePositionDelta();
-		float hor = invertX * mouseSpeed * deltaTime * mousePositionDelta.x;
-		float ver = invertY * mouseSpeed * deltaTime * mousePositionDelta.y;
+		float hor = invertX * mouseSpeed * Globals.dt * mousePositionDelta.x;
+		float ver = invertY * mouseSpeed * Globals.dt * mousePositionDelta.y;
 		if (!DisplayManager.isCursorEnabled()) {
 			scene.camera.pitch(ver);
 			scene.camera.yaw(hor);
@@ -72,40 +72,36 @@ public class MenuController implements ClientController {
 			currentSpeed = speed * 4;
 		}
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_W))
-			scene.camera.position.add(scene.camera.getForward().mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed, new Vector3f()));
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_S))
-			scene.camera.position.sub(scene.camera.getForward().mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.sub(scene.camera.getForward().mul(Globals.dt * currentSpeed, new Vector3f()));
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_D))
-			scene.camera.position.add(scene.camera.right.mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed, new Vector3f()));
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_A))
-			scene.camera.position.sub(scene.camera.right.mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.sub(scene.camera.right.mul(Globals.dt * currentSpeed, new Vector3f()));
 
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_Q))
-			scene.camera.roll(deltaTime * rollSpeed);
+			scene.camera.roll(Globals.dt * rollSpeed);
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_E))
-			scene.camera.roll(-deltaTime * rollSpeed);
+			scene.camera.roll(-Globals.dt * rollSpeed);
 
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_LEFT_CONTROL))
-			scene.camera.position.add(scene.camera.up.mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed, new Vector3f()));
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_LEFT_SHIFT))
-			scene.camera.position.sub(scene.camera.up.mul(deltaTime * currentSpeed, new Vector3f()));
+			scene.camera.position.sub(scene.camera.up.mul(Globals.dt * currentSpeed, new Vector3f()));
 
-//		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_LEFT_ALT))
-//			DisplayManager.toggleCursor();
+		// if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_LEFT_ALT))
+		// DisplayManager.toggleCursor();
 		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_Z))
 			scene.camera.toggleLockUp();
-		
-		
-		
-		
-		
+
 		if (KeyboardHandler.kb_keyDownOnce(KEY_JOIN)) {
 			counter++;
 			System.out.println(counter);
-			eventHandler.addEvent(new Event(EventType.JOIN_SERVER, "localhost", config.gameServerDefaultPort));
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_JOIN, "localhost", config.gameServerDefaultPort));
 		}
 		if (KeyboardHandler.kb_keyDownOnce(KEY_DISCONNECT)) {
-			eventHandler.addEvent(new Event(EventType.DISCONNECT));
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_DISCONNECT));
 		}
 	}
 
@@ -113,21 +109,18 @@ public class MenuController implements ClientController {
 	boolean create;
 	int frequency = 200;
 
-	
-
-	
 	@Override
-	public void update(float deltaTime) {
-//		if (System.currentTimeMillis() - timer >= frequency) {
-//			timer += frequency;
-//			if (create) {
-//				dragon = gameFactory.createDragon();
-//				scene.attach(dragon);
-//			} else {
-//				entityManager.removeEntity(dragon);
-//			}
-//			create = !create;
-//		}
+	public void update() {
+		// if (System.currentTimeMillis() - timer >= frequency) {
+		// timer += frequency;
+		// if (create) {
+		// dragon = gameFactory.createDragon();
+		// scene.attach(dragon);
+		// } else {
+		// entityManager.removeEntity(dragon);
+		// }
+		// create = !create;
+		// }
 		aiBotSystem.update();
 	}
 

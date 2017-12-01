@@ -7,6 +7,7 @@ import hecs.EntityManager;
 import shared.Config;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
+import shared.functionality.Globals;
 import tests.LocalConfig;
 import utilities.Loader;
 
@@ -33,7 +34,7 @@ public class GameClient {
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
 		LocalConfig config = new LocalConfig();
-		gameFactory = new GameFactory(entityManager, gameModelLoader, false);
+		gameFactory = new GameFactory(entityManager, gameModelLoader);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler, "localhost", config.gameClientDefaultPort, config);
 		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
@@ -45,32 +46,45 @@ public class GameClient {
 	}
 
 	public void handleEvents() {
+		connectionManager.handleUDPRequests();
+		connectionManager.handleTCPRequests();
 		Event event;
 		while ((event = eventHandler.poll()) != null) {
 			switch (event.type) {
-			case AUTHENTICATE:
+			case CLIENT_EVENT_AUTHENTICATE:
 				String username = (String) event.data[0];
 				String password = (String) event.data[1];
 				// gameController.authenticate
 				break;
-			case JOIN_SERVER:
+			case CLIENT_EVENT_SERVER_JOIN:
 				String ip = (String) event.data[0];
 				int port = (int) event.data[1];
 				if (gameController != null)
 					gameController.close();
-				connectionManager.disconnect();
-				if (connectionManager.joinServer(ip, port))
-					gameController = new GameController(entityManager, gameFactory);
-				currentController = gameController;
+				if (connectionManager.joinServer(ip, port)) {
+					gameController = new GameController(entityManager, eventHandler, gameFactory);
+					currentController = gameController;
+				}
 				break;
-			case DISCONNECT:
+			case CLIENT_EVENT_SERVER_DISCONNECT:
 				if (gameController != null)
 					gameController.close();
 				connectionManager.disconnect();
 				currentController = menuController;
+				gameController = null;
 				break;
-			case JOIN_SERVER_FAILED:
+			case CLIENT_EVENT_SERVER_FAILED_TO_CONNECT:
+				currentController = menuController;
+				gameController = null;
 				System.out.println(event.type + ": " + event.data[0]);
+				break;
+			case CLIENT_EVENT_CREATE_UNIT:
+				if (gameController != null)
+					gameController.createUnitFromEvent(event);
+				break;
+			case CLIENT_EVENT_UPDATE_UNIT:
+				if (gameController != null)
+					gameController.updateUnitFromEvent(event);
 				break;
 			default:
 				break;
@@ -85,19 +99,26 @@ public class GameClient {
 		int frames = 0;
 		while (!displayManager.shouldClose()) {
 			displayManager.pollInputs();
-			currentController.processInputs(displayManager.getDeltaTime());
+			Globals.now = System.currentTimeMillis();
+			currentController.processInputs();
 			handleEvents();
-			currentController.update(displayManager.getDeltaTime());
+			currentController.update();
 			renderManager.render(currentController.getScene());
 			displayManager.updateDisplay();
 			frames++;
-			if (System.currentTimeMillis() - timer >= 1000) {
-				timer += 1000;
-//				System.out.println("Fps: " + frames + ". Entities:" + entityManager.numberOfEntities() + ". Components:" + entityManager.numberOfComponents() + ".");
+			if (Globals.now - timer >= 500) {
+				connectionManager.ping();
+				timer += 500;
+				// System.out.println("Fps: " + frames + ". Entities:" +
+				// entityManager.numberOfEntities() + ". Components:" +
+				// entityManager.numberOfComponents() + ".");
 				frames = 0;
 			}
 		}
 		currentController.close();
+		renderManager.cleanUp();
+		connectionManager.disconnect();
+		System.out.println("Client shutdown!");
 	}
 
 }
