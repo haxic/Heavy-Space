@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFW;
 import client.components.Snapshot;
 import client.components.SnapshotComponent;
 import client.display.DisplayManager;
+import client.entities.Light;
 import client.inputs.KeyboardHandler;
 import hecs.Entity;
 import hecs.EntityManager;
@@ -27,7 +28,10 @@ public class GameController implements ClientController {
 	private GameModel gameModel;
 
 	private static final int KEY_SPAWN = GLFW.GLFW_KEY_SPACE;
-
+	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
+	
+	boolean useSnapshotInterpolation;
+	
 	public GameController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
@@ -35,6 +39,9 @@ public class GameController implements ClientController {
 		this.gameModel = new GameModel(entityManager);
 		scene = new Scene(entityManager);
 		gameFactory.setSkybox(scene);
+		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
+		scene.addLight(sun);
+		useSnapshotInterpolation = true;
 	}
 
 	float mouseSpeed = 0.25f;
@@ -78,6 +85,12 @@ public class GameController implements ClientController {
 		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_SPAWN));
 		}
+		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN)) {
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_SPAWN));
+		}
+		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_SNAPSHOT_INTERPOLATION)) {
+			useSnapshotInterpolation = !useSnapshotInterpolation;
+		}
 	}
 
 	private final float timestep = 100 / 1000.0f;
@@ -86,6 +99,8 @@ public class GameController implements ClientController {
 	float timestepCounter;
 
 	Vector3f tempVector = new Vector3f();
+	
+
 
 	@Override
 	public void update() {
@@ -139,6 +154,15 @@ public class GameController implements ClientController {
 				}
 			} else if (current.getTick() > Globals.tick) {
 				unitComponent.getPosition().set(current.getPosition());
+			}
+			if (!useSnapshotInterpolation) {
+				Vector3f latestPosition;
+				Snapshot latestSnapshot = snapshotComponent.peekLatest();
+				if (latestSnapshot == null)
+					latestPosition = snapshotComponent.getNext().getPosition();
+				else
+					latestPosition = latestSnapshot.getPosition();
+				unitComponent.getPosition().set(latestPosition);
 			}
 		}
 	}

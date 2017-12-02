@@ -54,7 +54,7 @@ public class GameFactory {
 		entityManager.addComponent(new UnitComponent(position, scale), entity);
 		entityManager.addComponent(new MovementComponent(), entity);
 		if (gameModelLoader != null) {
-			entityManager.addComponent(new ActorComponent(gameModelLoader.dragon), entity);
+			entityManager.addComponent(new ActorComponent(gameModelLoader.fern), entity);
 		}
 		return entity;
 	}

@@ -21,7 +21,7 @@ import client.gameData.ParticleSystem;
 import client.inputs.KeyboardHandler;
 import client.models.Model;
 import client.renderers.RenderManager;
-import shared.DataPacket;
+import shared.functionality.DataPacket;
 import shared.functionality.network.TCPSocket;
 import shared.functionality.network.UDPServer;
 import shared.game.Entity;

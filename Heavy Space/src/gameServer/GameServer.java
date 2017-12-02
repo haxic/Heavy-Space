@@ -16,9 +16,9 @@ import gameServer.systems.AIBotSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.Config;
-import shared.DataPacket;
 import shared.components.MovementComponent;
 import shared.components.UnitComponent;
+import shared.functionality.DataPacket;
 import shared.functionality.EventHandler;
 import shared.functionality.Globals;
 import shared.functionality.ShortIdentifier;
@@ -68,17 +68,17 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-		gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 10f);
-		gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 15f);
-		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 10f);
-		gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 15f);
-		gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 25f);
+		gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 100f);
+		gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 60f);
+		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 40f);
+		gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 60f);
+		gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 100f);
 	}
 
 	private void initializeServer() {
 		try {
-			udpServer.startServer(serverConfig.ip, serverConfig.port);
 			tcpServer.startServer(serverConfig.ip, serverConfig.port);
+			udpServer.startServer(serverConfig.ip, serverConfig.port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(0);

@@ -16,8 +16,8 @@ import java.util.List;
 import org.joml.Vector3f;
 
 import gameServer.Pinger;
-import shared.DataPacket;
 import shared.functionality.ByteIdentifier;
+import shared.functionality.DataPacket;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;

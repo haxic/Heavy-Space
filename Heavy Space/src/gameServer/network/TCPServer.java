@@ -2,6 +2,7 @@ package gameServer.network;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -35,7 +36,9 @@ public class TCPServer implements Runnable {
 	}
 
 	public void startServer(InetAddress ip, int port) throws IOException {
-		serverSocket = new ServerSocket(port, 100, ip);
+		InetSocketAddress serverAddress = new InetSocketAddress(ip, port);
+		serverSocket = new ServerSocket();
+		serverSocket.bind(serverAddress);
 		System.out.println("TCP server started. " + ip.getHostAddress() + ":" + port);
 		acceptNewConnections();
 		thread = new Thread(this);

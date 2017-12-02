@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.joml.Vector3f;
 import org.junit.Test;
 
-import shared.DataPacket;
+import shared.functionality.DataPacket;
 
 public class DataPacketTest {
 	@Test

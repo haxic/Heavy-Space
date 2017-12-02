@@ -16,12 +16,14 @@ public class Main {
 		IPType serverIPType = IPType.LAN;
 
 		try {
-			serverIP = InetAddress.getByName("192.168.1.215");
+//			serverIP = InetAddress.getByName("80.62.116.6");
+			serverIP = InetAddress.getByName("5.186.147.73");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.out.println("Could not retrieve hosting ip!");
 			System.exit(0);
 		}
+		serverIP = null;
 		if (serverIP == null) {
 			try {
 				serverIP = NetworkFunctions.getIP(serverIPType);

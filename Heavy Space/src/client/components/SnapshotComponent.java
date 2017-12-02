@@ -4,6 +4,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import hecs.EntityComponent;
 import shared.functionality.Globals;
@@ -31,7 +32,7 @@ public class SnapshotComponent extends EntityComponent {
 		next = snapshots.pollFirst();
 		return current;
 	}
-	
+
 	public Snapshot peekNext() {
 		return snapshots.peekFirst();
 	}
@@ -50,19 +51,23 @@ public class SnapshotComponent extends EntityComponent {
 	public Snapshot getCurrent() {
 		return current;
 	}
-	
+
 	public Snapshot getNext() {
 		return next;
 	}
-	
+
 	public int getDifference() {
 		if (current.getTick() < Short.MIN_VALUE / 2 && next.getTick() > Short.MAX_VALUE / 2)
 			return (Short.MAX_VALUE - next.getTick()) + (current.getTick() - Short.MIN_VALUE);
 		else
 			return next.getTick() - current.getTick();
 	}
-	
+
 	public int getEEID() {
 		return eeid;
+	}
+
+	public Snapshot peekLatest() {
+		return snapshots.peekLast();
 	}
 }
