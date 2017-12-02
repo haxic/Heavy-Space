@@ -48,25 +48,23 @@ public class AIBotSystem extends EntitySystem {
 			unit.roll(Globals.dt * movement.getAngularVel().z);
 
 			int distance = 20;
-			Vector3f linearThrust = unit.getForward(tempVector).mul(100);
+
+			Vector3f linearThrust = aiBot.direction.mul(aiBot.acceleration, tempVector);
 
 			movement.getLinearAcc().zero();
 			movement.getLinearAcc().add(linearThrust);
 			movement.getLinearVel().fma(Globals.dt, movement.getLinearAcc());
-			unit.getPosition().fma(Globals.dt, movement.getLinearVel());
-
+//			unit.getPosition().fma(Globals.dt, movement.getLinearVel());
 			unit.getPosition().fma(Globals.dt, linearThrust);
 
-			if (unit.getPosition().z > distance || unit.getPosition().z < -distance) {
-				if (unit.getPosition().z > distance) {
-					unit.getPosition().z = distance;
-					unit.getForward().set(0, 0, -1);
-				} else {
-					unit.getPosition().z = -distance;
-					unit.getForward().set(0, 0, 1);
-				}
+			if (unit.getPosition().z >= distance) {
+				unit.getPosition().z = distance;
+				aiBot.direction.set(0, 0, -1);
+			} else if (unit.getPosition().z <= -distance) {
+				unit.getPosition().z = -distance;
+				aiBot.direction.set(0, 0, 1);
 			}
-
+//			System.out.println(entity.getEID() + " " + unit.getPosition().z + " " + aiBot.direction.z + " " + linearThrust.z);
 		}
 	}
 

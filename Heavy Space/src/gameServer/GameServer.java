@@ -79,11 +79,11 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-		gameFactory.createBot(new Vector3f(0, 0, -10), new Vector3f(0, 0, -1), 25);
-		gameFactory.createBot(new Vector3f(0, 0, -20), new Vector3f(0, 0, 1), 15);
-		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 10);
-		gameFactory.createBot(new Vector3f(0, 0, 10), new Vector3f(0, 0, 1), 25);
-		gameFactory.createBot(new Vector3f(0, 0, 20), new Vector3f(0, 0, -1), 15);
+		gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 10f);
+		gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 15f);
+		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 10f);
+		gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 15f);
+		gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 25f);
 	}
 
 	private void initializeServer() {
@@ -159,12 +159,7 @@ public class GameServer {
 
 			ClientGameDataTransferComponent cgdtComponent = (ClientGameDataTransferComponent) entityManager.getComponentInEntity(clientEntity, ClientGameDataTransferComponent.class);
 
-			// ------------------- TEMPORARY CODE -------------------
-			// ------------------- TEMPORARY CODE -------------------
-			// ------------------- TEMPORARY CODE -------------------
-			// ------------------- TEMPORARY CODE -------------------
-			List<Entity> units = entityManager.getEntitiesContainingComponent(UnitComponent.class);
-			cgdtComponent.updateUnits(units);
+
 
 			if (!cgdtComponent.getCreateEntities().isEmpty()) {
 				DataPacket dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), Globals.tick, (byte) dataPackets.size());
@@ -193,11 +188,18 @@ public class GameServer {
 				}
 				dataPackets.add(closeDataPacket(entityCounter, dataPacket));
 			}
-
+			
+			// ------------------- TEMPORARY CODE -------------------
+			// ------------------- TEMPORARY CODE -------------------
+			// ------------------- TEMPORARY CODE -------------------
+			// ------------------- TEMPORARY CODE -------------------
+			List<Entity> units = entityManager.getEntitiesContainingComponent(UnitComponent.class);
+			cgdtComponent.updateUnits(units);
 			if (!cgdtComponent.getUpdateEntities().isEmpty()) {
 				DataPacket dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), Globals.tick, (byte) dataPackets.size());
 
 				byte entityCounter = 0;
+				System.out.println("UPDATE UNITS:");
 				for (Entity updateEntity : cgdtComponent.getUpdateEntities()) {
 					if (dataPacket.getCurrentDataSize() + 17 >= dataPacket.getMaxDataSize()) {
 						dataPackets.add(closeDataPacket(entityCounter, dataPacket));
@@ -208,6 +210,7 @@ public class GameServer {
 					}
 					UnitComponent unit = (UnitComponent) entityManager.getComponentInEntity(updateEntity, UnitComponent.class);
 					MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(updateEntity, MovementComponent.class);
+					System.out.println(updateEntity.getEID());
 
 					// 4 ints = 16 bytes
 					dataPacket.addInteger((int) (updateEntity.getEID())); // 4-7, Entity id

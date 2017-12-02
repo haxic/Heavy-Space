@@ -109,6 +109,7 @@ public class GameClient {
 			if (Globals.now - timer >= 500) {
 				connectionManager.ping();
 				timer += 500;
+//				System.out.println("TCP/UDP ping: " + tcpPinger.toString() + " " + udpPinger.toString());
 				// System.out.println("Fps: " + frames + ". Entities:" +
 				// entityManager.numberOfEntities() + ". Components:" +
 				// entityManager.numberOfComponents() + ".");

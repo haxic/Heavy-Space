@@ -99,7 +99,6 @@ public class GameController implements ClientController {
 
 		float dt = 1 - (timestepCounter / timestep);
 
-		System.out.println(Globals.dt + " " + dt);
 		// We are at tick 211 + 10ms
 		// 211+10ms-100ms = 211-90ms = 211-(90/15) = 211-6 = tick 205 + 0ms
 		// 211+13ms-100ms = 211-87ms = 211-(87/15) = 211-5+12ms = tick 206 + 12ms
@@ -153,7 +152,6 @@ public class GameController implements ClientController {
 	public void close() {
 	}
 
-
 	public void createUnitFromEvent(Event event) {
 		short tick = (short) event.data[0];
 		int eeid = (int) event.data[1];
@@ -164,6 +162,7 @@ public class GameController implements ClientController {
 		if (entity != null)
 			return;
 		// TODO: Check if eeid already exist!
+		System.out.println("Entity created: " + eeid + " " + entityType + " " + entityVariation + " " + position);
 		entity = gameFactory.createShip(position);
 		entityManager.addComponent(new SnapshotComponent(eeid, tick, position), entity);
 		gameModel.addEntity(eeid, entity);
@@ -179,8 +178,7 @@ public class GameController implements ClientController {
 		if (entity == null)
 			return;
 		Vector3f position = (Vector3f) event.data[2];
-		
-		
+//		System.out.println("(" + tick + ") Updated: " + eeid);
 		SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
 		snapshotComponent.add(tick, position);
 	}

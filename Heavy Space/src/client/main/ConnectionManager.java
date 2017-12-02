@@ -214,7 +214,7 @@ public class ConnectionManager {
 			}
 				break;
 			case SERVER_REPONSE_UPDATE_ENTITIES: {
-				short tick = dataPacket.getShort(); // 1, Tick
+				short tick = dataPacket.getShort(); // 1-2, Tick
 				int packetNumber = dataPacket.getByte(); // 3, Packet number
 				int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
 				for (int i = 0; i < numberOfEntities; i++) {
@@ -222,7 +222,6 @@ public class ConnectionManager {
 					float positionX = dataPacket.getInteger() / 1000.0f; // 9-12, Position x
 					float positionY = dataPacket.getInteger() / 1000.0f; // 13-16, Position y
 					float positionZ = dataPacket.getInteger() / 1000.0f; // 17-20, Position z
-					byte end = dataPacket.getByte();
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
 					// System.out.println("SERVER_REPONSE_UPDATE_ENTITIES" + position.x + " " + position.y + " " + position.z + " " + end);
 					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, position));
@@ -318,7 +317,6 @@ public class ConnectionManager {
 	}
 
 	public void ping() {
-		System.out.println("TCP/UDP ping: " + tcpPinger.toString() + " " + udpPinger.toString());
 		pingTCP();
 		pingUDP();
 	}

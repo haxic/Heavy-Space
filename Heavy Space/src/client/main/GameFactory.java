@@ -37,9 +37,9 @@ public class GameFactory {
 
 	public Entity createBot(Vector3f position, Vector3f direction, float speed) {
 		Entity entity = entityManager.createEntity();
-		Vector3f scale = new Vector3f(5, 5, 5);
+		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new UnitComponent(position, scale), entity);
-		entityManager.addComponent(new AIBotComponent(10000, 0.00001f), entity);
+		entityManager.addComponent(new AIBotComponent(10000, speed, direction), entity);
 		entityManager.addComponent(new MovementComponent(), entity);
 		if (gameModelLoader != null) {
 			entityManager.addComponent(new ActorComponent(gameModelLoader.dragon), entity);

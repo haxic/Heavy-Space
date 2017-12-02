@@ -46,8 +46,11 @@ public class MenuController implements ClientController {
 		scene.addLight(sun);
 		gameFactory.setSkybox(scene);
 
-		Entity bot = gameFactory.createBot(new Vector3f(0, 0, -30));
-		scene.addEntity(bot);
+		scene.addEntity(gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 10f));
+		scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 15f));
+		scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 10f));
+		scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 15f));
+		scene.addEntity(gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 25f));
 	}
 
 	int counter;

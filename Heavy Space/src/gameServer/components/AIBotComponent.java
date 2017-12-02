@@ -11,10 +11,12 @@ public class AIBotComponent extends EntityComponent {
 	public int timeLimit;
 	public float acceleration;
 	public Vector3f temp = new Vector3f();
+	public Vector3f direction;
 	
-	public AIBotComponent(int timeLimit, float acceleration) {
+	public AIBotComponent(int timeLimit, float acceleration, Vector3f direction) {
 		this.timeLimit = timeLimit;
 		this.acceleration = acceleration;
+		this.direction = direction;
 	}
 
 	@Override

@@ -1,5 +1,2 @@
-/gameServer/
-/shared/
 /client/
-/tests/
-/hecs/
+/gameServer/
