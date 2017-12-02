@@ -22,6 +22,7 @@ public class MainGameClient {
 			System.out.println("Could not retrieve hosting ip!");
 			System.exit(0);
 		}
+		serverIP = null;
 		if (serverIP == null) {
 			try {
 				serverIP = NetworkFunctions.getIP(serverIPType);

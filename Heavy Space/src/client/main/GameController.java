@@ -11,8 +11,13 @@ import client.components.SnapshotComponent;
 import client.display.DisplayManager;
 import client.entities.Light;
 import client.inputs.KeyboardHandler;
+import client.inputs.MouseHandler;
+import client.network.ConnectionManager;
+import client.systems.SnapshotSystem;
+import client.systems.SpawnSystem;
 import hecs.Entity;
 import hecs.EntityManager;
+import shared.components.SpawnComponent;
 import shared.components.UnitComponent;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
@@ -28,16 +33,25 @@ public class GameController implements ClientController {
 	private GameModel gameModel;
 
 	private static final int KEY_SPAWN = GLFW.GLFW_KEY_SPACE;
+	private static final int KEY_FIRE = GLFW.GLFW_MOUSE_BUTTON_1;
 	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
-	
+
 	boolean useSnapshotInterpolation;
-	
+
+	private SpawnSystem spawnSystem;
+	private SnapshotSystem snapshotSystem;
+
 	public GameController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
 		this.gameFactory = gameFactory;
 		this.gameModel = new GameModel(entityManager);
+
 		scene = new Scene(entityManager);
+
+		spawnSystem = new SpawnSystem(entityManager, scene);
+		snapshotSystem = new SnapshotSystem(entityManager);
+
 		gameFactory.setSkybox(scene);
 		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 		scene.addLight(sun);
@@ -82,25 +96,16 @@ public class GameController implements ClientController {
 		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_LEFT_SHIFT))
 			scene.camera.position.sub(scene.camera.up.mul(Globals.dt * currentSpeed, new Vector3f()));
 
-		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN)) {
+		if (MouseHandler.mouseDownOnce(KEY_FIRE))
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_FIRE));
+		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN))
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_SPAWN));
-		}
-		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN)) {
-			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_SPAWN));
-		}
-		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_SNAPSHOT_INTERPOLATION)) {
+		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_SNAPSHOT_INTERPOLATION))
 			useSnapshotInterpolation = !useSnapshotInterpolation;
-		}
 	}
 
 	private final float timestep = 100 / 1000.0f;
-	private final float timestepDT = 1.0f / timestep;
-
-	float timestepCounter;
-
-	Vector3f tempVector = new Vector3f();
-	
-
+	private float timestepCounter;
 
 	@Override
 	public void update() {
@@ -111,60 +116,10 @@ public class GameController implements ClientController {
 			timestepCounter -= timestep;
 			Globals.tick++;
 		}
+		float dt = timestepCounter / timestep;
 
-		float dt = 1 - (timestepCounter / timestep);
-
-		// We are at tick 211 + 10ms
-		// 211+10ms-100ms = 211-90ms = 211-(90/15) = 211-6 = tick 205 + 0ms
-		// 211+13ms-100ms = 211-87ms = 211-(87/15) = 211-5+12ms = tick 206 + 12ms
-
-		List<Entity> entities = entityManager.getEntitiesContainingComponent(SnapshotComponent.class);
-		if (entities == null)
-			return;
-		if (entities.isEmpty())
-			return;
-		for (Entity entity : entities) {
-			UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(entity, UnitComponent.class);
-			SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
-
-			Snapshot current = snapshotComponent.getCurrent();
-			Snapshot next = snapshotComponent.getNext();
-			if (current.getTick() == Globals.tick) {
-				// Continue interpolating between current and next
-				snapshotComponent.getDifference();
-				current.getPosition().sub(next.getPosition(), tempVector);
-				unitComponent.getPosition().set(current.getPosition()).fma(dt, tempVector);
-
-			} else if (current.getTick() < Globals.tick) {
-				if (next.getTick() > Globals.tick) {
-					// Continue interpolating between current and next
-					snapshotComponent.getDifference();
-					current.getPosition().sub(next.getPosition(), tempVector);
-					unitComponent.getPosition().set(current.getPosition()).fma(dt, tempVector);
-				} else if (snapshotComponent.peekNext() != null) {
-					// Interpolating on next set
-					current = snapshotComponent.next();
-					next = snapshotComponent.getNext();
-
-					snapshotComponent.getDifference();
-					current.getPosition().sub(next.getPosition(), tempVector);
-					unitComponent.getPosition().set(current.getPosition()).fma(dt, tempVector);
-				} else {
-					// Extrapolate using current and next
-				}
-			} else if (current.getTick() > Globals.tick) {
-				unitComponent.getPosition().set(current.getPosition());
-			}
-			if (!useSnapshotInterpolation) {
-				Vector3f latestPosition;
-				Snapshot latestSnapshot = snapshotComponent.peekLatest();
-				if (latestSnapshot == null)
-					latestPosition = snapshotComponent.getNext().getPosition();
-				else
-					latestPosition = latestSnapshot.getPosition();
-				unitComponent.getPosition().set(latestPosition);
-			}
-		}
+		spawnSystem.process();
+		snapshotSystem.process(dt, useSnapshotInterpolation);
 	}
 
 	@Override
@@ -189,8 +144,8 @@ public class GameController implements ClientController {
 		System.out.println("Entity created: " + eeid + " " + entityType + " " + entityVariation + " " + position);
 		entity = gameFactory.createShip(position);
 		entityManager.addComponent(new SnapshotComponent(eeid, tick, position), entity);
+		entityManager.addComponent(new SpawnComponent(tick), entity);
 		gameModel.addEntity(eeid, entity);
-		scene.addEntity(entity);
 	}
 
 	public void updateUnitFromEvent(Event event) {
@@ -202,7 +157,7 @@ public class GameController implements ClientController {
 		if (entity == null)
 			return;
 		Vector3f position = (Vector3f) event.data[2];
-//		System.out.println("(" + tick + ") Updated: " + eeid);
+		// System.out.println("(" + tick + ") Updated: " + eeid);
 		SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
 		snapshotComponent.add(tick, position);
 	}

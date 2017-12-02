@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 import utilities.NetworkFunctions;
 
 
-public class Main {
+public class MainGameServer {
 	public static void main(String[] args) {
 		ServerConfig config = new ServerConfig();
 

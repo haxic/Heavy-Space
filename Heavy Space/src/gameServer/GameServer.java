@@ -68,10 +68,10 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-		gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 100f);
-		gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 60f);
-		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 40f);
-		gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 60f);
+//		gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 100f);
+//		gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 60f);
+//		gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 40f);
+//		gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 60f);
 		gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 100f);
 	}
 

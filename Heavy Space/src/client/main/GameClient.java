@@ -77,6 +77,10 @@ public class GameClient {
 				gameController = null;
 				System.out.println(event.type + ": " + event.data[0]);
 				break;
+			case CLIENT_EVENT_GAME_ACTION_FIRE:
+//				if (gameController != null)
+//					connectionManager.
+				break;
 			case CLIENT_EVENT_CREATE_UNIT:
 				if (gameController != null)
 					gameController.createUnitFromEvent(event);
