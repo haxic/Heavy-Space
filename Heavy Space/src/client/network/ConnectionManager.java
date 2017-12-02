@@ -105,7 +105,7 @@ public class ConnectionManager {
 		boolean validated = true;
 		try {
 			connectionStatus = ConnectionStatus.Connecting;
-			System.out.println("Connecting to server " + gameServerData.getIP() + ":" + gameServerData.getPort());
+			System.out.println("Connecting to server: " + gameServerData.getIP().getHostAddress() + ":" + gameServerData.getPort());
 			tcpSocket = new TCPSocket(new Socket(gameServerData.getIP(), gameServerData.getPort()));
 			tcpSocket.sendData((username + " " + token).getBytes());
 

@@ -16,7 +16,7 @@ public class Main {
 		IPType serverIPType = IPType.LAN;
 
 		try {
-			serverIP = InetAddress.getByName("192.168.0.215");
+			serverIP = InetAddress.getByName("192.168.1.215");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.out.println("Could not retrieve hosting ip!");
