@@ -11,7 +11,7 @@ public class Main {
 		InetAddress serverIP = null;
 		int serverPort = 6029;
 
-		IPType serverIPType = IPType.External;
+		IPType serverIPType = IPType.LAN;
 
 		try {
 			serverIP = NetworkFunctions.getIP(serverIPType);
