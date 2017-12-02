@@ -78,7 +78,8 @@ public class ConnectionManager {
 		InetAddress clientIP;
 
 		if (gameServerData.isOfficial() && token == null) {
-			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Tried to join an official server without being authenticated."));
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT,
+					"Tried to join an official server without being authenticated."));
 			return false;
 		}
 
@@ -104,13 +105,15 @@ public class ConnectionManager {
 		boolean validated = true;
 		try {
 			connectionStatus = ConnectionStatus.Connecting;
+			System.out.println("Connecting to server: " + gameServerData.getIP().getHostAddress() + ":" + gameServerData.getPort());
 			tcpSocket = new TCPSocket(new Socket(gameServerData.getIP(), gameServerData.getPort()));
 			tcpSocket.sendData((username + " " + token).getBytes());
 
 			byte[] data = tcpSocket.readData();
 			if (data == null) {
 				disconnect();
-				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Unable to read data"));
+				eventHandler
+						.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Unable to read data"));
 				return false;
 			}
 			String result = new String(data);
@@ -150,9 +153,9 @@ public class ConnectionManager {
 		dataPacket.addByte(identifier); // 1, Packet identifier
 		dataPacket.addString(uuid);
 		dataPacket.addByte((byte) 20); // 1, End data packet
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
-				
-				
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(),
+				gameServerData.getIP(), gameServerData.getPort());
+
 		udpRequests.add(new UDPRequest(RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP, identifier, datagramPacket, true));
 		udpServer.sendData(datagramPacket);
 		connectionStatus = ConnectionStatus.Authenticating;
@@ -182,7 +185,8 @@ public class ConnectionManager {
 			switch (requestType) {
 			case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
-				System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP + " " + identifier);
+				System.out.println(
+						"CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP + " " + identifier);
 				UDPRequest request = findMatchingUDPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -202,7 +206,8 @@ public class ConnectionManager {
 				}
 				System.out.println("FAILED " + RequestType.CLIENT_REQUEST_READY);
 				disconnect();
-				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Failed to authenticate UDP."));
+				eventHandler.addEvent(
+						new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Failed to authenticate UDP."));
 			}
 				break;
 			case SERVER_REPONSE_SPAWN_ENTITIES: {
@@ -218,7 +223,8 @@ public class ConnectionManager {
 					float positionY = dataPacket.getInteger() / 1000.0f; // 15-18, Position y
 					float positionZ = dataPacket.getInteger() / 1000.0f; // 19-22, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position));
+					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType,
+							entityVariation, position));
 				}
 			}
 				break;
@@ -232,14 +238,16 @@ public class ConnectionManager {
 					float positionY = dataPacket.getInteger() / 1000.0f; // 13-16, Position y
 					float positionZ = dataPacket.getInteger() / 1000.0f; // 17-20, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					// System.out.println("SERVER_REPONSE_UPDATE_ENTITIES" + position.x + " " + position.y + " " + position.z + " " + end);
+					// System.out.println("SERVER_REPONSE_UPDATE_ENTITIES" + position.x + " " +
+					// position.y + " " + position.z + " " + end);
 					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, position));
 				}
 			}
 				break;
 			case CLIENT_REQUEST_PING: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
-				// System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
+				// System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING
+				// + " " + identifier);
 				UDPRequest request = findMatchingUDPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -289,7 +297,8 @@ public class ConnectionManager {
 			RequestType requestType = RequestType.values()[type & 0xFF];
 			switch (requestType) {
 			case CLIENT_REQUEST_PING: {
-				// System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
+				// System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING
+				// + " " + identifier);
 				TCPRequest request = findMatchingTCPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -354,7 +363,8 @@ public class ConnectionManager {
 		dataPacket.addString(uuid);
 		dataPacket.addInteger(udpPinger.getAverageMS());
 		dataPacket.addByte((byte) 20);
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(),
+				gameServerData.getIP(), gameServerData.getPort());
 		udpRequests.add(new UDPRequest(requestType, identifier, datagramPacket, false));
 		udpServer.sendData(datagramPacket);
 	}
