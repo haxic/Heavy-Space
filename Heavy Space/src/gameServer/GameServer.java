@@ -3,17 +3,11 @@ package gameServer;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-
 import org.joml.Vector3f;
 import client.main.GameFactory;
-import gameServer.components.AIBotComponent;
 import gameServer.components.ClientComponent;
 import gameServer.components.ClientGameDataTransferComponent;
-import gameServer.components.ClientValidatedComponent;
-import gameServer.components.ClientPendingComponent;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
@@ -25,12 +19,11 @@ import shared.Config;
 import shared.DataPacket;
 import shared.components.MovementComponent;
 import shared.components.UnitComponent;
-import shared.functionality.ByteIdentifier;
 import shared.functionality.EventHandler;
 import shared.functionality.Globals;
-import shared.functionality.RequestType;
 import shared.functionality.ShortIdentifier;
-import shared.functionality.UDPServer;
+import shared.functionality.network.RequestType;
+import shared.functionality.network.UDPServer;
 
 public class GameServer {
 
@@ -43,33 +36,29 @@ public class GameServer {
 	private UDPRequestHandler udpRequestHandler;
 	private EventHandler eventHandler;
 
-	private Config config;
-	private String serverIP;
-	private int serverPort;
 	private EntityManager entityManager;
 	private GameFactory gameFactory;
 
 	private ShortIdentifier tickIdentifier;
 
 	private AIBotSystem aiBotSystem;
+	private ServerConfig serverConfig;
 
-	public GameServer(Config config, String serverIP, int serverPort, boolean local) {
-		this.config = config;
-		this.serverIP = serverIP;
-		this.serverPort = serverPort;
+	public GameServer(ServerConfig serverConfig) {
+		this.serverConfig = serverConfig;
 		entityManager = new EntityManager();
 		eventHandler = new EventHandler();
 		playerManager = new PlayerManager(entityManager);
 		gameFactory = new GameFactory(entityManager, null);
 		clientManager = new ClientManager(entityManager, playerManager);
-		if (!local) {
-			serverCommunicator = new ServerCommunicator(config.authenticationServerIP);
+		if (serverConfig.official) {
+			serverCommunicator = new ServerCommunicator(serverConfig);
 			serverCommunicator.createAccount("testserver", "testserver");
 			serverCommunicator.authenticate("testserver", "testserver");
 		}
-		validationService = new ValidationService(serverCommunicator, clientManager, 5000, local);
-		tcpServer = new TCPServer(serverIP, serverPort, validationService);
-		udpServer = new UDPServer(serverIP, serverPort);
+		validationService = new ValidationService(serverCommunicator, clientManager, 5000);
+		tcpServer = new TCPServer(validationService);
+		udpServer = new UDPServer();
 		udpRequestHandler = new UDPRequestHandler(entityManager, gameFactory, clientManager, udpServer);
 		tickIdentifier = new ShortIdentifier();
 		aiBotSystem = new AIBotSystem(entityManager);
@@ -88,8 +77,8 @@ public class GameServer {
 
 	private void initializeServer() {
 		try {
-			udpServer.startServer();
-			tcpServer.startServer();
+			udpServer.startServer(serverConfig.ip, serverConfig.port);
+			tcpServer.startServer(serverConfig.ip, serverConfig.port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -159,8 +148,6 @@ public class GameServer {
 
 			ClientGameDataTransferComponent cgdtComponent = (ClientGameDataTransferComponent) entityManager.getComponentInEntity(clientEntity, ClientGameDataTransferComponent.class);
 
-
-
 			if (!cgdtComponent.getCreateEntities().isEmpty()) {
 				DataPacket dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), Globals.tick, (byte) dataPackets.size());
 
@@ -188,7 +175,7 @@ public class GameServer {
 				}
 				dataPackets.add(closeDataPacket(entityCounter, dataPacket));
 			}
-			
+
 			// ------------------- TEMPORARY CODE -------------------
 			// ------------------- TEMPORARY CODE -------------------
 			// ------------------- TEMPORARY CODE -------------------
@@ -199,7 +186,6 @@ public class GameServer {
 				DataPacket dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), Globals.tick, (byte) dataPackets.size());
 
 				byte entityCounter = 0;
-				System.out.println("UPDATE UNITS:");
 				for (Entity updateEntity : cgdtComponent.getUpdateEntities()) {
 					if (dataPacket.getCurrentDataSize() + 17 >= dataPacket.getMaxDataSize()) {
 						dataPackets.add(closeDataPacket(entityCounter, dataPacket));
@@ -210,7 +196,6 @@ public class GameServer {
 					}
 					UnitComponent unit = (UnitComponent) entityManager.getComponentInEntity(updateEntity, UnitComponent.class);
 					MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(updateEntity, MovementComponent.class);
-					System.out.println(updateEntity.getEID());
 
 					// 4 ints = 16 bytes
 					dataPacket.addInteger((int) (updateEntity.getEID())); // 4-7, Entity id

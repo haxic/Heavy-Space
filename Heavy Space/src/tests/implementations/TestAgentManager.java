@@ -2,7 +2,7 @@ package tests.implementations;
 
 import gameServer.ClientManager;
 import gameServer.PlayerManager;
-import shared.functionality.TCPSocket;
+import shared.functionality.network.TCPSocket;
 
 public class TestAgentManager extends ClientManager {
 

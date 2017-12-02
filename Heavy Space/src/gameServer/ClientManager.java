@@ -16,8 +16,8 @@ import hecs.EntityManager;
 import shared.DataPacket;
 import shared.components.UnitComponent;
 import shared.functionality.Globals;
-import shared.functionality.RequestType;
-import shared.functionality.TCPSocket;
+import shared.functionality.network.RequestType;
+import shared.functionality.network.TCPSocket;
 
 public class ClientManager implements EntityContainer {
 	private Map<String, Entity> clients;

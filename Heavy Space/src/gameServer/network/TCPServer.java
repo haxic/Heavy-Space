@@ -8,22 +8,18 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gameServer.ServerConfig;
 import shared.Config;
 
 public class TCPServer implements Runnable {
-	InetAddress serverAddress;
 	ServerSocket serverSocket;
 	Thread thread;
 	private boolean shouldClose;
 	private boolean acceptNewConnections;
 	private ValidationService validationService;
 	private boolean isBlocking;
-	private String ip;
-	private int port;
 
-	public TCPServer(String ip, int port, ValidationService validationService) {
-		this.ip = ip;
-		this.port = port;
+	public TCPServer(ValidationService validationService) {
 		this.validationService = validationService;
 	}
 
@@ -38,9 +34,8 @@ public class TCPServer implements Runnable {
 		}
 	}
 
-	public void startServer() throws IOException {
-		serverAddress = InetAddress.getByName(ip);
-		serverSocket = new ServerSocket(port, 100, serverAddress);
+	public void startServer(InetAddress ip, int port) throws IOException {
+		serverSocket = new ServerSocket(port, 100, ip);
 		System.out.println("TCP server started. " + ip + ":" + port);
 		acceptNewConnections();
 		thread = new Thread(this);

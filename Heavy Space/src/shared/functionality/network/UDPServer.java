@@ -1,4 +1,4 @@
-package shared.functionality;
+package shared.functionality.network;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -20,21 +20,13 @@ public class UDPServer {
 	Queue<DatagramPacket> received = new ConcurrentLinkedQueue();
 	Queue<DatagramPacket> toSend = new ConcurrentLinkedQueue();
 	boolean shouldClose;
-	String ip;
-	int port;
 
-	public UDPServer(String ip, int port) {
-		this.ip = ip;
-		this.port = port;
-	}
-
-	public void startServer() throws UnknownHostException, SocketException {
+	public void startServer(InetAddress ip, int port) throws UnknownHostException, SocketException {
 		shouldClose = false;
-		InetAddress serverIPAddress = InetAddress.getByName(ip);
-		InetSocketAddress serverAddress = new InetSocketAddress(serverIPAddress, port);
+		InetSocketAddress serverAddress = new InetSocketAddress(ip, port);
 		serverSocket = new DatagramSocket(null);
 		serverSocket.bind(serverAddress);
-		System.out.println("UDP server started. " + serverIPAddress.getHostAddress() + ":" + port);
+		System.out.println("UDP server started. " + ip + ":" + port);
 		outputHandler = new OutputHandler();
 		outputHandler.start();
 		inputHandler = new InputHandler();

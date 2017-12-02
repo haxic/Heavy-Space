@@ -8,6 +8,7 @@ import client.display.DisplayManager;
 import client.entities.Light;
 import client.inputs.KeyboardHandler;
 import client.inputs.MousePositionHandler;
+import client.network.GameServerData;
 import gameServer.systems.AIBotSystem;
 import hecs.Entity;
 import hecs.EntityManager;
@@ -24,7 +25,7 @@ public class MenuController implements ClientController {
 	private GameFactory gameFactory;
 	private EntityManager entityManager;
 
-	private Config config;
+	private GameServerData gameServerData;
 
 	private static final int KEY_DISCONNECT = GLFW.GLFW_KEY_ESCAPE;
 	private static final int KEY_JOIN = GLFW.GLFW_KEY_C;
@@ -33,11 +34,11 @@ public class MenuController implements ClientController {
 
 	private AIBotSystem aiBotSystem;
 
-	public MenuController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory, Config config) {
+	public MenuController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory, GameServerData gameServerData) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
 		this.gameFactory = gameFactory;
-		this.config = config;
+		this.gameServerData = gameServerData;
 
 		aiBotSystem = new AIBotSystem(entityManager);
 
@@ -52,8 +53,6 @@ public class MenuController implements ClientController {
 		scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 15f));
 		scene.addEntity(gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 25f));
 	}
-
-	int counter;
 
 	float mouseSpeed = 0.25f;
 	float speed = 50f;
@@ -99,9 +98,7 @@ public class MenuController implements ClientController {
 			scene.camera.toggleLockUp();
 
 		if (KeyboardHandler.kb_keyDownOnce(KEY_JOIN)) {
-			counter++;
-			System.out.println(counter);
-			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_JOIN, "localhost", config.gameServerDefaultPort));
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_JOIN, gameServerData));
 		}
 		if (KeyboardHandler.kb_keyDownOnce(KEY_DISCONNECT)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_DISCONNECT));

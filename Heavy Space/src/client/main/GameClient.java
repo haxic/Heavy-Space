@@ -2,6 +2,8 @@ package client.main;
 
 import client.display.DisplayManager;
 import client.gameData.GameModelLoader;
+import client.network.ConnectionManager;
+import client.network.GameServerData;
 import client.renderers.RenderManager;
 import hecs.EntityManager;
 import shared.Config;
@@ -19,7 +21,6 @@ public class GameClient {
 
 	private ConnectionManager connectionManager;
 
-	private Config config;
 	private EventHandler eventHandler;
 
 	private MenuController menuController;
@@ -28,18 +29,17 @@ public class GameClient {
 	private EntityManager entityManager;
 	private GameFactory gameFactory;
 
-	public GameClient() {
+	public GameClient(GameServerData gameServerData) {
 		entityManager = new EntityManager();
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
-		LocalConfig config = new LocalConfig();
 		gameFactory = new GameFactory(entityManager, gameModelLoader);
 		eventHandler = new EventHandler();
-		connectionManager = new ConnectionManager(eventHandler, "localhost", config.gameClientDefaultPort, config);
+		connectionManager = new ConnectionManager(eventHandler);
 		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
 
-		menuController = new MenuController(entityManager, eventHandler, gameFactory, config);
+		menuController = new MenuController(entityManager, eventHandler, gameFactory, gameServerData);
 		currentController = menuController;
 
 		loop();
@@ -57,11 +57,10 @@ public class GameClient {
 				// gameController.authenticate
 				break;
 			case CLIENT_EVENT_SERVER_JOIN:
-				String ip = (String) event.data[0];
-				int port = (int) event.data[1];
+				GameServerData gameServerData = (GameServerData) event.data[0];
 				if (gameController != null)
 					gameController.close();
-				if (connectionManager.joinServer(ip, port)) {
+				if (connectionManager.joinServer(gameServerData)) {
 					gameController = new GameController(entityManager, eventHandler, gameFactory);
 					currentController = gameController;
 				}

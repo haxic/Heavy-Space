@@ -1,27 +1,29 @@
 package gameServer.network;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import gameServer.ServerConfig;
 import shared.rmi.IAuthenticationServerRMI;
 import shared.rmi.IMasterServerRMI;
 
 public class ServerCommunicator implements IServerCommunicator {
 
 	private IAuthenticationServerRMI authenticationServerRMI;
-	private String authenticationServerAddress;
 
 	private IMasterServerRMI masterServerRMI;
-	private String masterServerAddress;
 
 	private String username;
 	private String password;
 	private String token;
 
-	public ServerCommunicator(String authenticationServerAddress) {
-		this.authenticationServerAddress = authenticationServerAddress;
+	private ServerConfig serverConfig;
+
+	public ServerCommunicator(ServerConfig serverConfig) {
+		this.serverConfig = serverConfig;
 	}
 
 	public IAuthenticationServerRMI getAuthenticationServerRMI() {
@@ -38,8 +40,9 @@ public class ServerCommunicator implements IServerCommunicator {
 		this.password = password;
 		String result = null;
 		try {
+			// TODO: include port
 			if (authenticationServerRMI == null)
-				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + authenticationServerAddress + "/authenticate");
+				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + serverConfig.authenticationServerIP.getHostAddress() + "/authenticate");
 			result = authenticationServerRMI.authenticate(username, password);
 		} catch (RemoteException | MalformedURLException | NotBoundException e) {
 			e.printStackTrace();
@@ -49,19 +52,21 @@ public class ServerCommunicator implements IServerCommunicator {
 			return false;
 		try {
 			String[] splitResult = result.split("\\s+");
-			masterServerAddress = splitResult[0];
-			token = splitResult[1];
+			serverConfig.masterServerIP = InetAddress.getByName(splitResult[0]);
+			serverConfig.authenticationServerPort = Integer.parseInt(splitResult[1]);
+			token = splitResult[2];
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 		try {
-			masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerAddress + "/master");
+			// TODO: include port
+			masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + serverConfig.masterServerIP.getHostAddress() + "/master");
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 			return false;
 		}
-		return token != null && masterServerAddress != null;
+		return token != null;
 	}
 
 	@Override
@@ -72,7 +77,8 @@ public class ServerCommunicator implements IServerCommunicator {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			try {
-				masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerAddress + "/master");
+				// TODO: include port
+				masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + serverConfig.masterServerIP.getHostAddress() + "/master");
 				return masterServerRMI.checkClient(token, username, clientToken, clientUsername);
 			} catch (MalformedURLException | RemoteException | NotBoundException e1) {
 				e1.printStackTrace();
@@ -84,8 +90,9 @@ public class ServerCommunicator implements IServerCommunicator {
 	@Override
 	public boolean createAccount(String username, String password) {
 		try {
+			// TODO: include port
 			if (authenticationServerRMI == null)
-				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + authenticationServerAddress + "/authenticate");
+				authenticationServerRMI = (IAuthenticationServerRMI) Naming.lookup("rmi://" + serverConfig.authenticationServerIP.getHostAddress() + "/authenticate");
 			return authenticationServerRMI.createAccount(username, password);
 		} catch (MalformedURLException | NotBoundException | RemoteException e) {
 			e.printStackTrace();

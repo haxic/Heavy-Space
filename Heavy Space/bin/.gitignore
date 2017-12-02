@@ -1,2 +1,6 @@
 /client/
 /gameServer/
+/network/
+/shared/
+/tests/
+/utilities/

@@ -75,14 +75,15 @@ public class GameServerDAO implements IGameServerDAO {
 	private GameServer fillGameServer(ResultSet rs) throws SQLException {
 		int accountID = rs.getInt(GameServer.ACCOUNT_ID);
 		Timestamp lastChecked = rs.getTimestamp(GameServer.LAST_CHECKED);
-		return new GameServer(accountID, null, lastChecked != null ? lastChecked.toLocalDateTime() : null);
+		return new GameServer(accountID, null, null, lastChecked != null ? lastChecked.toLocalDateTime() : null);
 	}
 
 	private GameServer fillGameServerFullData(ResultSet rs) throws SQLException {
 		int accountID = rs.getInt(GameServer.ACCOUNT_ID);
 		String serverIP = rs.getString(GameServer.SERVER_IP);
+		String serverPort = rs.getString(GameServer.SERVER_PORT);
 		Timestamp lastChecked = rs.getTimestamp(GameServer.LAST_CHECKED);
-		return new GameServer(accountID, serverIP, lastChecked != null ? lastChecked.toLocalDateTime() : null);
+		return new GameServer(accountID, serverIP, serverPort, lastChecked != null ? lastChecked.toLocalDateTime() : null);
 	}
 
 	private GameServerInfo fillGameServerInfo(ResultSet rs) throws SQLException {

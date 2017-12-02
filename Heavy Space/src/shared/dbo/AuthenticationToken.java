@@ -6,6 +6,7 @@ public class AuthenticationToken {
 	public static final String AUTHENTICATION_TOKEN = "authentication_token";
 	public static final String ACCOUNT_ID = "account_id";
 	public static final String CLIENT_IP = "client_ip";
+	public static final String CLIENT_PORT = "client_port";
 	public static final String MASTER_SERVER_IP = "master_server_ip";
 	public static final String GAME_SERVER_IP = "game_server_ip";
 	public static final String AUTHENTICATION_DATE = "authentication_date";

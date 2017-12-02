@@ -1,10 +1,14 @@
-package client.main;
+package client.network;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,33 +16,26 @@ import java.util.List;
 import org.joml.Vector3f;
 
 import gameServer.Pinger;
-import gameServer.components.ClientPendingComponent;
-import gameServer.components.ClientValidatedComponent;
-import shared.Config;
 import shared.DataPacket;
 import shared.functionality.ByteIdentifier;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
 import shared.functionality.Globals;
-import shared.functionality.UDPRequest;
-import shared.functionality.UDPServer;
-import shared.functionality.RequestType;
-import shared.functionality.TCPSocket;
-import shared.functionality.TCPSocketHandler;
-import tests.LocalConfig;
+import shared.functionality.network.RequestType;
+import shared.functionality.network.TCPSocket;
+import shared.functionality.network.TCPSocketHandler;
+import shared.functionality.network.UDPServer;
+import utilities.NetworkFunctions;
 
 public class ConnectionManager {
 
-	private String udpIP;
-	private int udpPort;
 	private UDPServer udpServer;
 	private TCPSocket tcpSocket;
 
 	private String username;
 	private String token;
 
-	private Config config;
 	private EventHandler eventHandler;
 
 	private ConnectionStatus connectionStatus;
@@ -50,25 +47,23 @@ public class ConnectionManager {
 	private List<TCPRequest> tcpRequests;
 	private List<TCPRequest> tcpRequestsRemoved;
 
-	Pinger udpPinger;
-	Pinger tcpPinger;
+	private Pinger udpPinger;
+	private Pinger tcpPinger;
 
 	private TCPSocketHandler tcpSocketHandler;
 	private ByteIdentifier tcpIdentifier;
 	private ByteIdentifier udpIdentifier;
-	private InetAddress udpIPAddress;
 	private String uuid;
+	private GameServerData gameServerData;
 
-	public ConnectionManager(EventHandler eventHandler, String udpIP, int udpPort, Config config) {
+	public ConnectionManager(EventHandler eventHandler) {
 		this.eventHandler = eventHandler;
-		this.udpIP = udpIP;
-		this.udpPort = udpPort;
-		this.config = config;
+
 		tcpIdentifier = new ByteIdentifier();
 		udpIdentifier = new ByteIdentifier();
 		udpPinger = new Pinger();
 		tcpPinger = new Pinger();
-		udpServer = new UDPServer(udpIP, udpPort);
+		udpServer = new UDPServer();
 		username = "testclient";
 		token = "whatevertoken";
 		connectionStatus = ConnectionStatus.Disconnected;
@@ -78,9 +73,30 @@ public class ConnectionManager {
 		tcpRequestsRemoved = new ArrayList<TCPRequest>();
 	}
 
-	boolean joinServer(String serverIP, int serverPort) {
+	public boolean joinServer(GameServerData gameServerData) {
+		this.gameServerData = gameServerData;
+		InetAddress clientIP;
+
+		if (gameServerData.isOfficial() && token == null) {
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Tried to join an official server without being authenticated."));
+			return false;
+		}
+
 		try {
-			udpServer.startServer();
+			clientIP = NetworkFunctions.getIP(gameServerData.getIPType().asHost());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			return false;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		try {
+			udpServer.startServer(clientIP, 6028);
 		} catch (SocketException | UnknownHostException e) {
 			e.printStackTrace();
 			return false;
@@ -88,7 +104,7 @@ public class ConnectionManager {
 		boolean validated = true;
 		try {
 			connectionStatus = ConnectionStatus.Connecting;
-			tcpSocket = new TCPSocket(new Socket(serverIP, serverPort));
+			tcpSocket = new TCPSocket(new Socket(gameServerData.getIP(), gameServerData.getPort()));
 			tcpSocket.sendData((username + " " + token).getBytes());
 
 			byte[] data = tcpSocket.readData();
@@ -134,16 +150,9 @@ public class ConnectionManager {
 		dataPacket.addByte(identifier); // 1, Packet identifier
 		dataPacket.addString(uuid);
 		dataPacket.addByte((byte) 20); // 1, End data packet
-
-		try {
-			udpIPAddress = InetAddress.getByName(serverIP);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			disconnect();
-			return false;
-		}
-
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), udpIPAddress, config.gameServerDefaultPort);
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+				
+				
 		udpRequests.add(new UDPRequest(RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP, identifier, datagramPacket, true));
 		udpServer.sendData(datagramPacket);
 		connectionStatus = ConnectionStatus.Authenticating;
@@ -230,7 +239,7 @@ public class ConnectionManager {
 				break;
 			case CLIENT_REQUEST_PING: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
-//				System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
+				// System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
 				UDPRequest request = findMatchingUDPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -280,7 +289,7 @@ public class ConnectionManager {
 			RequestType requestType = RequestType.values()[type & 0xFF];
 			switch (requestType) {
 			case CLIENT_REQUEST_PING: {
-//				System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
+				// System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
 				TCPRequest request = findMatchingTCPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -345,7 +354,7 @@ public class ConnectionManager {
 		dataPacket.addString(uuid);
 		dataPacket.addInteger(udpPinger.getAverageMS());
 		dataPacket.addByte((byte) 20);
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), udpIPAddress, config.gameServerDefaultPort);
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
 		udpRequests.add(new UDPRequest(requestType, identifier, datagramPacket, false));
 		udpServer.sendData(datagramPacket);
 	}

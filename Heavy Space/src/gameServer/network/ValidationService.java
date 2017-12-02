@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import gameServer.ClientManager;
-import shared.functionality.TCPSocket;
+import shared.functionality.network.TCPSocket;
 
 public class ValidationService {
 	private IServerCommunicator serverCommuicator;
@@ -17,13 +17,11 @@ public class ValidationService {
 	private Set<ValidationTask> validationTasks = Collections.newSetFromMap(new ConcurrentHashMap<ValidationTask, Boolean>());
 	private int validationCounter;
 	private ClientManager clientManager;
-	private boolean local;
 
-	public ValidationService(IServerCommunicator serverCommuicator, ClientManager agentManager, int timeout, boolean local) {
+	public ValidationService(IServerCommunicator serverCommuicator, ClientManager agentManager, int timeout) {
 		this.serverCommuicator = serverCommuicator;
 		this.clientManager = agentManager;
 		this.timeout = timeout;
-		this.local = local;
 	}
 
 	public void handleNewConnection(Socket socket) {
@@ -133,7 +131,7 @@ public class ValidationService {
 			if (username == null || token == null) {
 				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
-			if (local || serverCommuicator.validateClient(token, username)) {
+			if (serverCommuicator == null || serverCommuicator.validateClient(token, username)) {
 				handleValidatedConnection(this, username, token);
 				return;
 			} else {

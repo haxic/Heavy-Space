@@ -14,8 +14,8 @@ import shared.components.HealthComponent;
 import shared.components.MovementComponent;
 import shared.components.UnitComponent;
 import shared.functionality.Globals;
-import shared.functionality.RequestType;
-import shared.functionality.UDPServer;
+import shared.functionality.network.RequestType;
+import shared.functionality.network.UDPServer;
 
 public class UDPRequestHandler {
 
@@ -109,7 +109,7 @@ public class UDPRequestHandler {
 					clientComponent.sendData(sendDataPacket.getData());
 					DatagramPacket sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.getCurrentDataSize(), datagramPacket.getAddress(), datagramPacket.getPort());
 					udpServer.sendData(sendDatagramPacket);
-//					System.out.println("SERVER UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
+					// System.out.println("SERVER UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
 				}
 					break;
 				default:

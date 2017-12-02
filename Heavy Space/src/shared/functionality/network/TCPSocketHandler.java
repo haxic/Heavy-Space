@@ -1,4 +1,4 @@
-package shared.functionality;
+package shared.functionality.network;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

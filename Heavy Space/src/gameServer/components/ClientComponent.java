@@ -6,8 +6,8 @@ import java.util.List;
 import hecs.Entity;
 import hecs.EntityComponent;
 import hecs.EntityContainer;
-import shared.functionality.TCPSocket;
-import shared.functionality.TCPSocketHandler;
+import shared.functionality.network.TCPSocket;
+import shared.functionality.network.TCPSocketHandler;
 
 public class ClientComponent extends EntityComponent implements EntityContainer {
 	private Entity player;
@@ -75,7 +75,6 @@ public class ClientComponent extends EntityComponent implements EntityContainer 
 
 	@Override
 	public void detach(Entity entity) {
-		entity.detach(this);
 	}
 
 	public void setPlayer(Entity player) {
@@ -85,7 +84,7 @@ public class ClientComponent extends EntityComponent implements EntityContainer 
 
 	@Override
 	protected void removeComponent() {
-		detach(player);
+		player = null;
 		disconnect();
 	}
 

@@ -1,4 +1,4 @@
-package shared.functionality;
+package shared.functionality.network;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

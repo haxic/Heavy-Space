@@ -1,4 +1,4 @@
-package shared.functionality;
+package shared.functionality.network;
 
 public enum RequestType {
 	CLIENT_REQUEST_AUTHENTICATE_UDP,

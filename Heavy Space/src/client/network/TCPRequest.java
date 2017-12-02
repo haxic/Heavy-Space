@@ -1,23 +1,18 @@
-package shared.functionality;
+package client.network;
 
-import java.net.DatagramPacket;
+import shared.functionality.network.RequestType;
 
-public class UDPRequest {
-
+public class TCPRequest {
 	private long timestamp;
 	private long renewedTimestamp;
 	private RequestType requestType;
 	private byte identifier;
-	private DatagramPacket datagramPacket;
-	private boolean resend;
 
-	public UDPRequest(RequestType requestType, byte identifier, DatagramPacket datagramPacket, boolean resend) {
-		timestamp = Globals.now;
+	public TCPRequest(RequestType requestType, byte identifier) {
+		timestamp = System.currentTimeMillis();
 		renewedTimestamp = timestamp;
 		this.requestType = requestType;
 		this.identifier = identifier;
-		this.datagramPacket = datagramPacket;
-		this.resend = resend;
 	}
 
 	public long getTimestamp() {
@@ -27,25 +22,17 @@ public class UDPRequest {
 	public long getRenewedTimestamp() {
 		return renewedTimestamp;
 	}
-
+	
 	public RequestType getRequestType() {
 		return requestType;
 	}
-
+	
 	public byte getIdentifier() {
 		return identifier;
 	}
 
-	public DatagramPacket getDatagramPacket() {
-		return datagramPacket;
-	}
-	
-	public boolean shouldResend() {
-		return resend;
-	}
-
 	public void renew() {
-		renewedTimestamp = Globals.now;
+		renewedTimestamp = System.currentTimeMillis();
 	}
 
 	public boolean matches(RequestType requestType, byte identifier) {

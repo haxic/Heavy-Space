@@ -14,6 +14,8 @@ public class Config {
 	public int gameServerDefaultPort;
 	public int gameClientDefaultPort;
 
+	public final int GAME_CLIENT_PORT = 6028;
+	
 	public Config() {
 		authenticationServerIP = "127.0.0.1";
 		authenticationServerPort = 5431;

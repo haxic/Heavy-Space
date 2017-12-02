@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import shared.functionality.UDPServer;
+import shared.functionality.network.UDPServer;
 import tests.LocalConfig;
 
 public class ServerTester {
