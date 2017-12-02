@@ -26,7 +26,7 @@ public class UDPServer {
 		InetSocketAddress serverAddress = new InetSocketAddress(ip, port);
 		serverSocket = new DatagramSocket(null);
 		serverSocket.bind(serverAddress);
-		System.out.println("UDP server started. " + ip + ":" + port);
+		System.out.println("UDP server started. " + ip.getHostAddress() + ":" + port);
 		outputHandler = new OutputHandler();
 		outputHandler.start();
 		inputHandler = new InputHandler();
