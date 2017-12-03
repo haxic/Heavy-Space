@@ -37,14 +37,14 @@ public class UDPRequestHandler {
 			// Pretend that this is the message reader
 			try {
 				DataPacket dataPacket = new DataPacket(datagramPacket.getData());
-				byte type = dataPacket.getByte();
-				byte identifier = dataPacket.getByte(); // Request identifier, used for response
+				byte type = dataPacket.getByte(); // 0
 				RequestType requestType = RequestType.values()[type & 0xFF];
 				switch (requestType) {
 				case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 					if (true)
 						System.out.println("CLIENT_REQUEST_AUTHENTICATE_UDP");
-					String uuid = dataPacket.getString(32);
+					String uuid = dataPacket.getString(32); // 1-65
+					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					boolean authenticated = clientManager.udpAuthenticationRequest(uuid, datagramPacket.getAddress(), datagramPacket.getPort());
 					DatagramPacket sendDatagramPacket;
 					DataPacket sendDataPacket = new DataPacket(new byte[6]);
@@ -63,7 +63,8 @@ public class UDPRequestHandler {
 					break;
 				}
 				case CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP: {
-					String uuid = dataPacket.getString(32);
+					String uuid = dataPacket.getString(32); // 1-65
+					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
 					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 					// TODO: tell client invalid uuid
@@ -85,6 +86,7 @@ public class UDPRequestHandler {
 				case CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP: {
 					System.out.println("CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP");
 					String uuid = dataPacket.getString(32);
+					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
 					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 					// TODO: tell client invalid uuid
@@ -96,6 +98,7 @@ public class UDPRequestHandler {
 					break;
 				case CLIENT_REQUEST_PING: {
 					String uuid = dataPacket.getString(32);
+					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
 					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 					// TODO: tell client invalid uuid

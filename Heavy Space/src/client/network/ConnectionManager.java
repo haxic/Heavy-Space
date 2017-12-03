@@ -148,8 +148,8 @@ public class ConnectionManager {
 		byte identifier = udpIdentifier.get();
 		DataPacket dataPacket = new DataPacket(new byte[67]);
 		dataPacket.addByte(requestType); // 0, requestType
-		dataPacket.addByte(identifier); // 1, Packet identifier
-		dataPacket.addString(uuid); // 2-65
+		dataPacket.addString(uuid); // 1-64
+		dataPacket.addByte(identifier); // 65, Packet identifier
 		dataPacket.addByte((byte) 20); // 66, End data packet
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
 
@@ -338,10 +338,11 @@ public class ConnectionManager {
 			return;
 		RequestType requestType = RequestType.CLIENT_REQUEST_PING;
 		byte identifier = tcpIdentifier.get();
-		DataPacket dataPacket = new DataPacket(new byte[3]);
-		dataPacket.addByte(requestType.asByte());
-		dataPacket.addByte(identifier);
-		dataPacket.addByte((byte) 20);
+		DataPacket dataPacket = new DataPacket(new byte[5]);
+		dataPacket.addByte(requestType.asByte()); // 0
+		dataPacket.addByte(identifier); // 1
+		dataPacket.addShort(udpPinger.getAverageMS()); // 2-3
+		dataPacket.addByte((byte) 20); // 4
 		tcpRequests.add(new TCPRequest(requestType, identifier));
 		tcpSocketHandler.sendData(dataPacket.getData());
 	}
@@ -351,12 +352,12 @@ public class ConnectionManager {
 			return;
 		RequestType requestType = RequestType.CLIENT_REQUEST_PING;
 		byte identifier = udpIdentifier.get();
-		DataPacket dataPacket = new DataPacket(new byte[71]);
-		dataPacket.addByte(requestType.asByte());
-		dataPacket.addByte(identifier);
-		dataPacket.addString(uuid);
-		dataPacket.addInteger(udpPinger.getAverageMS());
-		dataPacket.addByte((byte) 20);
+		DataPacket dataPacket = new DataPacket(new byte[69]);
+		dataPacket.addByte(requestType.asByte()); // 0
+		dataPacket.addString(uuid); // 1-64
+		dataPacket.addByte(identifier); // 65
+		dataPacket.addShort(udpPinger.getAverageMS()); // 66-67
+		dataPacket.addByte((byte) 20); // 68
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
 		udpRequests.add(new UDPRequest(requestType, identifier, datagramPacket, false));
 		udpServer.sendData(datagramPacket);
@@ -367,10 +368,9 @@ public class ConnectionManager {
 		byte identifier = udpIdentifier.get();
 
 		DataPacket dataPacket = new DataPacket(new byte[71]);
-		dataPacket.addByte(requestType.asByte()); // 1
-		dataPacket.addByte(identifier); // 2
-		dataPacket.addString(uuid); // 3-
-		dataPacket.addInteger(udpPinger.getAverageMS());
+		dataPacket.addByte(requestType.asByte()); // 0
+		dataPacket.addString(uuid); // 1-64
+		dataPacket.addByte(identifier); // 65
 		dataPacket.addByte((byte) 20);
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
 	}

@@ -108,8 +108,10 @@ public class ShipControls {
 			linearDirection.y++;
 		if (KeyboardHandler.kb_keyDown(KB_DECEND))
 			linearDirection.y--;
-		linearDirection.normalize();
-		
+
+		if (linearDirection.length() > 0)
+			linearDirection.normalize();
+
 		if (KeyboardHandler.kb_keyDown(KB_YAW_RIGHT))
 			angularDirection.x += KB_SENSITIVITY_YAW;
 		if (KeyboardHandler.kb_keyDown(KB_YAW_LEFT))

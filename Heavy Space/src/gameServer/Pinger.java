@@ -3,16 +3,16 @@ package gameServer;
 import shared.functionality.Globals;
 
 public class Pinger {
-	int[] ping = new int[15];
+	short[] ping = new short[15];
 	short[] tick = new short[15];
-	int pingPos = 0;
-	int pingAcc = 0;
-	int latestMS;
+	short pingPos = 0;
+	short pingAcc = 0;
+	short latestMS;
 	short latestTick;
-	int averageMS;
+	short averageMS;
 
 	public void handlePing(long timeSent, short receivedTick) {
-		int ms = (int) (Globals.now - timeSent);
+		short ms = (short) (Globals.now - timeSent);
 		latestMS = ms;
 		latestTick = receivedTick;
 		pingAcc -= ping[pingPos];
@@ -21,7 +21,7 @@ public class Pinger {
 		tick[pingPos] = receivedTick;
 		if (++pingPos == ping.length)
 			pingPos = 0;
-		averageMS = pingAcc / ping.length;
+		averageMS = (short) (pingAcc / ping.length);
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class Pinger {
 		return "LAST PING:" + latestMS + " AVG PING:" + averageMS + " TICK:" + latestTick;
 	}
 
-	public int getAverageMS() {
+	public short getAverageMS() {
 		return averageMS;
 	}
 }
