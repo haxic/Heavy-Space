@@ -61,7 +61,7 @@ public class GameClient {
 				if (gameController != null)
 					gameController.close();
 				if (connectionManager.joinServer(gameServerData)) {
-					gameController = new GameController(entityManager, eventHandler, gameFactory);
+					gameController = new GameController(entityManager, eventHandler, gameFactory, connectionManager);
 					currentController = gameController;
 				}
 				break;
@@ -76,10 +76,6 @@ public class GameClient {
 				currentController = menuController;
 				gameController = null;
 				System.out.println(event.type + ": " + event.data[0]);
-				break;
-			case CLIENT_EVENT_GAME_ACTION_FIRE:
-//				if (gameController != null)
-//					connectionManager.
 				break;
 			case CLIENT_EVENT_CREATE_UNIT:
 				if (gameController != null)
@@ -112,7 +108,7 @@ public class GameClient {
 			if (Globals.now - timer >= 500) {
 				connectionManager.ping();
 				timer += 500;
-//				System.out.println("TCP/UDP ping: " + tcpPinger.toString() + " " + udpPinger.toString());
+				// System.out.println("TCP/UDP ping: " + tcpPinger.toString() + " " + udpPinger.toString());
 				// System.out.println("Fps: " + frames + ". Entities:" +
 				// entityManager.numberOfEntities() + ". Components:" +
 				// entityManager.numberOfComponents() + ".");

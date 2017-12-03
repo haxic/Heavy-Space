@@ -35,11 +35,11 @@ public class MouseHandler extends GLFWMouseButtonCallback {
 	}
 
 	public static boolean mouseDown(int keyCode) {
-		return clicks[keyCode] == KeyState.ONCE || clicks[keyCode] == KeyState.PRESSED;
+		return keyCode != -1 && (clicks[keyCode] == KeyState.ONCE || clicks[keyCode] == KeyState.PRESSED);
 	}
 
 	public static boolean mouseDownOnce(int keyCode) {
-		return clicks[keyCode] == KeyState.ONCE;
+		return keyCode != -1 && (clicks[keyCode] == KeyState.ONCE);
 	}
 
 

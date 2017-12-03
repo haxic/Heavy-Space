@@ -1,28 +1,24 @@
 package client.main;
 
-import java.util.List;
+import java.net.DatagramPacket;
 
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import client.components.Snapshot;
 import client.components.SnapshotComponent;
-import client.display.DisplayManager;
 import client.entities.Light;
 import client.inputs.KeyboardHandler;
-import client.inputs.MouseHandler;
 import client.network.ConnectionManager;
 import client.systems.SnapshotSystem;
 import client.systems.SpawnSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.SpawnComponent;
-import shared.components.UnitComponent;
+import shared.functionality.DataPacket;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
-import shared.functionality.EventType;
 import shared.functionality.Globals;
+import shared.functionality.network.RequestType;
 
 public class GameController implements ClientController {
 	private Scene scene;
@@ -30,10 +26,9 @@ public class GameController implements ClientController {
 	private EventHandler eventHandler;
 	private GameFactory gameFactory;
 	private EntityManager entityManager;
+	private ConnectionManager connectionManager;
 	private GameModel gameModel;
 
-	private static final int KEY_SPAWN = GLFW.GLFW_KEY_SPACE;
-	private static final int KEY_FIRE = GLFW.GLFW_MOUSE_BUTTON_1;
 	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
 
 	boolean useSnapshotInterpolation;
@@ -41,11 +36,17 @@ public class GameController implements ClientController {
 	private SpawnSystem spawnSystem;
 	private SnapshotSystem snapshotSystem;
 
-	public GameController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory) {
+	private ShipControls shipControls;
+
+	public GameController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory, ConnectionManager connectionManager) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
 		this.gameFactory = gameFactory;
-		this.gameModel = new GameModel(entityManager);
+		this.connectionManager = connectionManager;
+
+		gameModel = new GameModel(entityManager);
+		shipControls = new ShipControls();
+		useSnapshotInterpolation = true;
 
 		scene = new Scene(entityManager);
 
@@ -55,60 +56,42 @@ public class GameController implements ClientController {
 		gameFactory.setSkybox(scene);
 		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 		scene.addLight(sun);
-		useSnapshotInterpolation = true;
 	}
 
-	float mouseSpeed = 0.25f;
-	float speed = 50f;
-	float currentSpeed = speed;
-	float rollSpeed = 2f;
-	int invertX = 1;
-	int invertY = -1;
+	Vector3f linearDirection = new Vector3f();
+	Vector3f angularDirection = new Vector3f();
 
 	@Override
 	public void processInputs() {
-		Vector2f mousePositionDelta = DisplayManager.getMousePositionDelta();
-		float hor = invertX * mouseSpeed * Globals.dt * mousePositionDelta.x;
-		float ver = invertY * mouseSpeed * Globals.dt * mousePositionDelta.y;
-		if (!DisplayManager.isCursorEnabled()) {
-			scene.camera.pitch(ver);
-			scene.camera.yaw(hor);
-		}
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_SPACE)) {
-			currentSpeed = speed * 4;
-		}
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_W))
-			scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed, new Vector3f()));
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_S))
-			scene.camera.position.sub(scene.camera.getForward().mul(Globals.dt * currentSpeed, new Vector3f()));
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_D))
-			scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed, new Vector3f()));
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_A))
-			scene.camera.position.sub(scene.camera.right.mul(Globals.dt * currentSpeed, new Vector3f()));
+		shipControls.process();
 
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_Q))
-			scene.camera.roll(Globals.dt * rollSpeed);
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_E))
-			scene.camera.roll(-Globals.dt * rollSpeed);
-
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_LEFT_CONTROL))
-			scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed, new Vector3f()));
-		if (KeyboardHandler.kb_keyDown(GLFW.GLFW_KEY_LEFT_SHIFT))
-			scene.camera.position.sub(scene.camera.up.mul(Globals.dt * currentSpeed, new Vector3f()));
-
-		if (MouseHandler.mouseDownOnce(KEY_FIRE))
-			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_FIRE));
-		if (KeyboardHandler.kb_keyDownOnce(KEY_SPAWN))
-			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_GAME_ACTION_SPAWN));
 		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_SNAPSHOT_INTERPOLATION))
 			useSnapshotInterpolation = !useSnapshotInterpolation;
+
 	}
 
 	private final float timestep = 100 / 1000.0f;
 	private float timestepCounter;
 
+	float speed = 50f;
+	float currentSpeed = speed;
+	Vector3f tempVector = new Vector3f();
+
 	@Override
 	public void update() {
+
+		scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().z, tempVector));
+		scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().x, tempVector));
+		scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().y, tempVector));
+
+		scene.camera.yaw(Globals.dt * shipControls.getAngularVelocity().y);
+		scene.camera.pitch(Globals.dt * shipControls.getAngularVelocity().x);
+		scene.camera.roll(Globals.dt * shipControls.getAngularVelocity().z);
+
+		if (shipControls.getFirePrimary()) {
+			connectionManager.sendControlShip();
+		}
+
 		if (!running)
 			return;
 		timestepCounter += Globals.dt;

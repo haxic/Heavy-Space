@@ -35,11 +35,11 @@ public class KeyboardHandler extends GLFWKeyCallback {
 	}
 
 	public static boolean kb_keyDown(int keyCode) {
-		return KB_keys[keyCode] == KeyState.ONCE || KB_keys[keyCode] == KeyState.PRESSED;
+		return keyCode != -1 && (KB_keys[keyCode] == KeyState.ONCE || KB_keys[keyCode] == KeyState.PRESSED);
 	}
 
 	public static boolean kb_keyDownOnce(int keyCode) {
-		return KB_keys[keyCode] == KeyState.ONCE;
+		return keyCode != -1 && (KB_keys[keyCode] == KeyState.ONCE);
 	}
 
 }
