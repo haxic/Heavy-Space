@@ -6,7 +6,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import shared.components.UnitComponent;
+import shared.components.ObjectComponent;
 
 public class MatrixUtils {
 	private static Matrix4f tempMatrix1 = new Matrix4f();
@@ -23,7 +23,7 @@ public class MatrixUtils {
 		return tempMatrix1;
 	}
 
-	public static Matrix4f createModelMatrix(UnitComponent unitComponent) {
+	public static Matrix4f createModelMatrix(ObjectComponent unitComponent) {
 		tempMatrix1.identity();
 		tempMatrix1.translate(unitComponent.getPosition());
 		tempMatrix1.mul(unitComponent.getRotationMatrix(new Matrix4f()));

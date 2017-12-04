@@ -6,19 +6,21 @@ import org.lwjgl.glfw.GLFW;
 import client.entities.Light;
 import client.inputs.KeyboardHandler;
 import client.network.GameServerData;
-import gameServer.systems.AIBotSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
 import shared.functionality.Globals;
+import shared.systems.AIBotSystem;
+import shared.systems.CollisionSystem;
+import shared.systems.MovementSystem;
 
 public class MenuController implements ClientController {
 	private Scene scene;
 
 	private EventHandler eventHandler;
-	private GameFactory gameFactory;
+	private ClientGameFactory clientGameFactory;
 	private EntityManager entityManager;
 
 	private GameServerData gameServerData;
@@ -31,27 +33,31 @@ public class MenuController implements ClientController {
 	Entity dragon;
 
 	private AIBotSystem aiBotSystem;
-
-	public MenuController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory, GameServerData gameServerData) {
+	private MovementSystem movementSystem;
+	private CollisionSystem collisionSystem;
+	
+	public MenuController(EntityManager entityManager, EventHandler eventHandler, ClientGameFactory clientGameFactory, GameServerData gameServerData) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
-		this.gameFactory = gameFactory;
+		this.clientGameFactory = clientGameFactory;
 		this.gameServerData = gameServerData;
 
 		shipControls = new ShipControls();
 
 		aiBotSystem = new AIBotSystem(entityManager);
-
+		movementSystem = new MovementSystem(entityManager);
+		collisionSystem = new CollisionSystem(entityManager);
+		
 		scene = new Scene(entityManager);
 		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 		scene.addLight(sun);
-		gameFactory.setSkybox(scene);
+		clientGameFactory.setSkybox(scene);
 
-		scene.addEntity(gameFactory.createBot(new Vector3f(0, -20, -10), new Vector3f(0, 0, -1), 10f));
-		scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20), new Vector3f(0, 0, 1), 15f));
-		scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), new Vector3f(0, 0, -1), 10f));
-		scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), new Vector3f(0, 0, 1), 15f));
-		scene.addEntity(gameFactory.createBot(new Vector3f(20, 0, 20), new Vector3f(0, 0, -1), 25f));
+//		scene.addEntity(gameFactory.createBot(new Vector3f(0, -20, -10), 10f, 1f));
+//		scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20),15f, -1f));
+//		scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), 10f, 1f));
+//		scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), 15f, -1f));
+		scene.addEntity(clientGameFactory.createBot(new Vector3f(20, 0, 20), 25f, 1f));
 	}
 
 	@Override
@@ -98,6 +104,8 @@ public class MenuController implements ClientController {
 		// create = !create;
 		// }
 		aiBotSystem.update();
+		movementSystem.process();
+		collisionSystem.process();
 	}
 
 	@Override

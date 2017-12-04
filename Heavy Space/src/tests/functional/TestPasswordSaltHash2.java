@@ -20,9 +20,9 @@ public class TestPasswordSaltHash2 {
 		System.out.println(uuid);
 		System.out.println(uuid.length());
 		System.out.println();
-		byte b = Byte.parseByte("00000111", 2);
-		for (int i = 0; i < 8; i++) {
-			System.out.println((b >> i) & 1);
-		}
+
+
 	}
+
+
 }

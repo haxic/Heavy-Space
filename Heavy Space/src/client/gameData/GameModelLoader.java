@@ -24,6 +24,6 @@ public class GameModelLoader {
 		fern.setHasTransparency(true);
 		fern.setAllowBackLighting(true);
 		particleAtlasTexture = loader.loadTexture("cosmic", 4, 1);
-		skybox = loader.loadSkybox("space", 500);
+		skybox = loader.loadSkybox("space", 10000);
 	}
 }

@@ -26,6 +26,7 @@ import shared.functionality.network.RequestType;
 import shared.functionality.network.TCPSocket;
 import shared.functionality.network.TCPSocketHandler;
 import shared.functionality.network.UDPServer;
+import utilities.BitConverter;
 import utilities.NetworkFunctions;
 
 public class ConnectionManager {
@@ -206,7 +207,6 @@ public class ConnectionManager {
 			}
 				break;
 			case SERVER_REPONSE_SPAWN_ENTITIES: {
-				System.out.println("CLIENT UDP RECEIVED: " + RequestType.SERVER_REPONSE_SPAWN_ENTITIES);
 				short tick = dataPacket.getShort(); // 1-2, Tick
 				int packetNumber = dataPacket.getByte(); // 3, Packet number
 				int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
@@ -218,7 +218,15 @@ public class ConnectionManager {
 					float positionY = dataPacket.getInteger() / 1000.0f; // 15-18, Position y
 					float positionZ = dataPacket.getInteger() / 1000.0f; // 19-22, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position));
+					if (entityType == 1) {
+						float velocityX = dataPacket.getShort(); // 23-24, Velocity x
+						float velocityY = dataPacket.getShort(); // 25-26, Velocity y
+						float velocityZ = dataPacket.getShort(); // 27-28, Velocity z
+						Vector3f velocity = new Vector3f(velocityX, velocityY, velocityZ);
+						eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position, velocity));
+					} else {
+						eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position));
+					}
 				}
 			}
 				break;
@@ -232,8 +240,6 @@ public class ConnectionManager {
 					float positionY = dataPacket.getInteger() / 1000.0f; // 13-16, Position y
 					float positionZ = dataPacket.getInteger() / 1000.0f; // 17-20, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					// System.out.println("SERVER_REPONSE_UPDATE_ENTITIES" + position.x + " " +
-					// position.y + " " + position.z + " " + end);
 					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, position));
 				}
 			}
@@ -363,16 +369,39 @@ public class ConnectionManager {
 		udpServer.sendData(datagramPacket);
 	}
 
-	public void sendControlShip() {
+	public void sendShipActions(boolean firePrimary, Vector3f position, Vector3f direction) {
 		RequestType requestType = RequestType.CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP;
 		byte identifier = udpIdentifier.get();
 
-		DataPacket dataPacket = new DataPacket(new byte[71]);
+		DataPacket dataPacket = new DataPacket(new byte[88]);
 		dataPacket.addByte(requestType.asByte()); // 0
 		dataPacket.addString(uuid); // 1-64
 		dataPacket.addByte(identifier); // 65
-		dataPacket.addByte((byte) 20);
+		dataPacket.addShort(Globals.tick); // 66-67
+		dataPacket.addByte(BitConverter.byteFromBooleanArray(new boolean[] { firePrimary, false, false, false, false, false, false, false })); // 68
+		dataPacket.addInteger((int) (position.x * 1000)); // 69-72, Position x
+		dataPacket.addInteger((int) (position.y * 1000)); // 73-76, Position y
+		dataPacket.addInteger((int) (position.z * 1000)); // 77-80, Position z
+		dataPacket.addShort((short) (direction.x * 100)); // 81-82, Direction x
+		dataPacket.addShort((short) (direction.y * 100)); // 83-84, Direction y
+		dataPacket.addShort((short) (direction.z * 100)); // 85-86, Direction z
+		dataPacket.addByte((byte) 20); // 87
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		udpServer.sendData(datagramPacket);
+	}
+
+	public void requestSpawnShip(Vector3f position) {
+		RequestType requestType = RequestType.CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP;
+		byte identifier = udpIdentifier.get();
+
+		DataPacket dataPacket = new DataPacket(new byte[69]);
+		dataPacket.addByte(requestType.asByte()); // 0
+		dataPacket.addString(uuid); // 1-64
+		dataPacket.addByte(identifier); // 65
+		dataPacket.addShort(Globals.tick); // 66-67
+		dataPacket.addByte((byte) 20); // 68
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		udpServer.sendData(datagramPacket);
 	}
 
 }

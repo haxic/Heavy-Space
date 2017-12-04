@@ -68,6 +68,7 @@ public class Scene extends EntitySystem implements EntityContainer {
 	
 	public void removeEntity(Entity entity) {
 		detach(entity);
+		entity.detach(this);
 	}
 
 	@Override
@@ -82,6 +83,5 @@ public class Scene extends EntitySystem implements EntityContainer {
 		batch.remove(entity);
 		if (batch.isEmpty())
 			actors.remove(model);
-		entity.detach(this);
 	}
 }

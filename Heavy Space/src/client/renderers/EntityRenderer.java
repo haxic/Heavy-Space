@@ -22,7 +22,7 @@ import client.shaders.EntityShader;
 import hecs.Entity;
 import hecs.EntityManager;
 import hecs.EntitySystem;
-import shared.components.UnitComponent;
+import shared.components.ObjectComponent;
 import utilities.MatrixUtils;
 
 public class EntityRenderer extends EntitySystem {
@@ -61,7 +61,7 @@ public class EntityRenderer extends EntitySystem {
 		Matrix4f projectionMatrix = camera.getProjectionMatrix();
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
-		UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(entity, UnitComponent.class);
+		ObjectComponent unitComponent = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
 		// TODO: Implement attachment placement.
 		// Vector3f position = new Vector3f();
 		// Vector3f rotation = new Vector3f();

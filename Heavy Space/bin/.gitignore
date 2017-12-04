@@ -1,7 +1,4 @@
-/client/
 /gameServer/
-/network/
+/client/
 /shared/
 /tests/
-/utilities/
-/systems/

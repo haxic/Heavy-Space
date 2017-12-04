@@ -1,7 +1,5 @@
 package client.main;
 
-import java.net.DatagramPacket;
-
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
@@ -13,35 +11,40 @@ import client.systems.SnapshotSystem;
 import client.systems.SpawnSystem;
 import hecs.Entity;
 import hecs.EntityManager;
-import shared.components.SpawnComponent;
-import shared.functionality.DataPacket;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.Globals;
-import shared.functionality.network.RequestType;
+import shared.systems.CollisionSystem;
+import shared.systems.MovementSystem;
+import shared.systems.ProjectileSystem;
 
 public class GameController implements ClientController {
+	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
+	private static final int TURBO = GLFW.GLFW_KEY_SPACE;
+	private static final int SPAWN_SHIP = GLFW.GLFW_KEY_T;
+
 	private Scene scene;
 
 	private EventHandler eventHandler;
-	private GameFactory gameFactory;
+	private ClientGameFactory clientGameFactory;
 	private EntityManager entityManager;
 	private ConnectionManager connectionManager;
 	private GameModel gameModel;
 
-	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
-
 	boolean useSnapshotInterpolation;
 
+	private MovementSystem movementSystem;
+	private CollisionSystem collisionSystem;
 	private SpawnSystem spawnSystem;
 	private SnapshotSystem snapshotSystem;
+	private ProjectileSystem projectileSystem;
 
 	private ShipControls shipControls;
 
-	public GameController(EntityManager entityManager, EventHandler eventHandler, GameFactory gameFactory, ConnectionManager connectionManager) {
+	public GameController(EntityManager entityManager, EventHandler eventHandler, ClientGameFactory clientGameFactory, ConnectionManager connectionManager) {
 		this.entityManager = entityManager;
 		this.eventHandler = eventHandler;
-		this.gameFactory = gameFactory;
+		this.clientGameFactory = clientGameFactory;
 		this.connectionManager = connectionManager;
 
 		gameModel = new GameModel(entityManager);
@@ -50,10 +53,13 @@ public class GameController implements ClientController {
 
 		scene = new Scene(entityManager);
 
+		movementSystem = new MovementSystem(entityManager);
+		collisionSystem = new CollisionSystem(entityManager);
+		projectileSystem = new ProjectileSystem(entityManager);
 		spawnSystem = new SpawnSystem(entityManager, scene);
 		snapshotSystem = new SnapshotSystem(entityManager);
 
-		gameFactory.setSkybox(scene);
+		clientGameFactory.setSkybox(scene);
 		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 		scene.addLight(sun);
 	}
@@ -64,13 +70,12 @@ public class GameController implements ClientController {
 	@Override
 	public void processInputs() {
 		shipControls.process();
-
 		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_SNAPSHOT_INTERPOLATION))
 			useSnapshotInterpolation = !useSnapshotInterpolation;
-
 	}
 
-	private final float timestep = 100 / 1000.0f;
+	private final int timestep = 100;
+	private final float timestepDT = timestep / 1000.0f;
 	private float timestepCounter;
 
 	float speed = 50f;
@@ -79,27 +84,35 @@ public class GameController implements ClientController {
 
 	@Override
 	public void update() {
+		float speeder = 1;
+		if (KeyboardHandler.kb_keyDown(TURBO))
+			speeder = 10;
 
-		scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().z, tempVector));
-		scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().x, tempVector));
-		scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().y, tempVector));
+		scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().z, tempVector));
+		scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().x, tempVector));
+		scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().y, tempVector));
 
 		scene.camera.yaw(Globals.dt * shipControls.getAngularVelocity().y);
 		scene.camera.pitch(Globals.dt * shipControls.getAngularVelocity().x);
 		scene.camera.roll(Globals.dt * shipControls.getAngularVelocity().z);
 
-		if (shipControls.getFirePrimary()) {
-			connectionManager.sendControlShip();
-		}
+		movementSystem.process();
+		collisionSystem.process();
+		projectileSystem.process();
 
 		if (!running)
 			return;
+
+		if (KeyboardHandler.kb_keyDownOnce(SPAWN_SHIP))
+			connectionManager.requestSpawnShip(scene.camera.position);
+		connectionManager.sendShipActions(shipControls.getFirePrimary(), scene.camera.position, scene.camera.getForward());
+
 		timestepCounter += Globals.dt;
-		while (timestepCounter > timestep) {
-			timestepCounter -= timestep;
+		while (timestepCounter > timestepDT) {
+			timestepCounter -= timestepDT;
 			Globals.tick++;
 		}
-		float dt = timestepCounter / timestep;
+		float dt = timestepCounter / timestepDT;
 
 		spawnSystem.process();
 		snapshotSystem.process(dt, useSnapshotInterpolation);
@@ -114,21 +127,8 @@ public class GameController implements ClientController {
 	public void close() {
 	}
 
-	public void createUnitFromEvent(Event event) {
-		short tick = (short) event.data[0];
-		int eeid = (int) event.data[1];
-		int entityType = (int) event.data[2];
-		int entityVariation = (int) event.data[3];
-		Vector3f position = (Vector3f) event.data[4];
-		Entity entity = gameModel.getEntity(eeid);
-		if (entity != null)
-			return;
-		// TODO: Check if eeid already exist!
-		System.out.println("Entity created: " + eeid + " " + entityType + " " + entityVariation + " " + position);
-		entity = gameFactory.createShip(position);
-		entityManager.addComponent(new SnapshotComponent(eeid, tick, position), entity);
-		entityManager.addComponent(new SpawnComponent(tick), entity);
-		gameModel.addEntity(eeid, entity);
+	public void createEntityFromEvent(Event event) {
+		clientGameFactory.createEntityFromEvent(event, gameModel);
 	}
 
 	public void updateUnitFromEvent(Event event) {
@@ -162,7 +162,7 @@ public class GameController implements ClientController {
 			int diff = lastTick - firstTick;
 			System.out.println("CHECK FOR TICK: " + diff);
 			if (diff > 3) {
-				Globals.tick = (short) (lastTick - 3);
+				Globals.tick = (short) (lastTick - 2);
 				running = true;
 				System.out.println(Globals.tick + " " + timestepCounter);
 			} else {

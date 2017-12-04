@@ -6,11 +6,9 @@ import client.network.ConnectionManager;
 import client.network.GameServerData;
 import client.renderers.RenderManager;
 import hecs.EntityManager;
-import shared.Config;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.Globals;
-import tests.LocalConfig;
 import utilities.Loader;
 
 public class GameClient {
@@ -27,19 +25,19 @@ public class GameClient {
 	private GameController gameController;
 	private ClientController currentController;
 	private EntityManager entityManager;
-	private GameFactory gameFactory;
+	private ClientGameFactory clientGameFactory;
 
 	public GameClient(GameServerData gameServerData) {
 		entityManager = new EntityManager();
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
-		gameFactory = new GameFactory(entityManager, gameModelLoader);
+		clientGameFactory = new ClientGameFactory(entityManager, gameModelLoader);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler);
 		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
 
-		menuController = new MenuController(entityManager, eventHandler, gameFactory, gameServerData);
+		menuController = new MenuController(entityManager, eventHandler, clientGameFactory, gameServerData);
 		currentController = menuController;
 
 		loop();
@@ -61,7 +59,7 @@ public class GameClient {
 				if (gameController != null)
 					gameController.close();
 				if (connectionManager.joinServer(gameServerData)) {
-					gameController = new GameController(entityManager, eventHandler, gameFactory, connectionManager);
+					gameController = new GameController(entityManager, eventHandler, clientGameFactory, connectionManager);
 					currentController = gameController;
 				}
 				break;
@@ -79,7 +77,7 @@ public class GameClient {
 				break;
 			case CLIENT_EVENT_CREATE_UNIT:
 				if (gameController != null)
-					gameController.createUnitFromEvent(event);
+					gameController.createEntityFromEvent(event);
 				break;
 			case CLIENT_EVENT_UPDATE_UNIT:
 				if (gameController != null)

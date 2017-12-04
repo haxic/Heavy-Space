@@ -8,7 +8,7 @@ import client.components.Snapshot;
 import client.components.SnapshotComponent;
 import hecs.Entity;
 import hecs.EntityManager;
-import shared.components.UnitComponent;
+import shared.components.ObjectComponent;
 import shared.functionality.Globals;
 
 public class SnapshotSystem {
@@ -27,7 +27,7 @@ public class SnapshotSystem {
 		if (entities.isEmpty())
 			return;
 		for (Entity entity : entities) {
-			UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(entity, UnitComponent.class);
+			ObjectComponent unitComponent = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
 			SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
 
 			Snapshot current = snapshotComponent.getCurrent();
@@ -62,7 +62,7 @@ public class SnapshotSystem {
 		}
 	}
 
-	private void interpolate(float dt, UnitComponent unitComponent, SnapshotComponent snapshotComponent) {
+	private void interpolate(float dt, ObjectComponent unitComponent, SnapshotComponent snapshotComponent) {
 		snapshotComponent.getDifference();
 		snapshotComponent.getNext().getPosition().sub(snapshotComponent.getCurrent().getPosition(), tempVector);
 		unitComponent.getPosition().set(snapshotComponent.getCurrent().getPosition()).fma(dt, tempVector);

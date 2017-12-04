@@ -7,7 +7,7 @@ import org.joml.Vector3f;
 
 import hecs.EntityComponent;
 
-public class UnitComponent extends EntityComponent {
+public class ObjectComponent extends EntityComponent {
 	private Vector3f position;
 	private Vector3f scale;
 
@@ -15,7 +15,7 @@ public class UnitComponent extends EntityComponent {
 	private Vector3f up;
 	private Vector3f right;
 
-	public UnitComponent(Vector3f position, Vector3f scale) {
+	public ObjectComponent(Vector3f position, Vector3f scale) {
 		this.position = position;
 		this.scale = scale;
 		forward = new Vector3f(0, 0, -1);

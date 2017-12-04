@@ -3,30 +3,25 @@ package gameServer;
 import java.net.DatagramPacket;
 
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
-import client.main.GameFactory;
 import gameServer.components.ClientComponent;
 import gameServer.components.PlayerComponent;
+import gameServer.components.ShipComponent;
 import hecs.Entity;
 import hecs.EntityManager;
-import shared.components.HealthComponent;
-import shared.components.MovementComponent;
-import shared.components.UnitComponent;
 import shared.functionality.DataPacket;
 import shared.functionality.Globals;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.UDPServer;
+import utilities.BitConverter;
 
 public class UDPRequestHandler {
 
 	private ClientManager clientManager;
 	private UDPServer udpServer;
 	private EntityManager entityManager;
-	private GameFactory gameFactory;
 
-	public UDPRequestHandler(EntityManager entityManager, GameFactory gameFactory, ClientManager clientManager, UDPServer udpServer) {
+	public UDPRequestHandler(EntityManager entityManager, ClientManager clientManager, UDPServer udpServer) {
 		this.entityManager = entityManager;
-		this.gameFactory = gameFactory;
 		this.clientManager = clientManager;
 		this.udpServer = udpServer;
 	}
@@ -63,24 +58,26 @@ public class UDPRequestHandler {
 					break;
 				}
 				case CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP: {
-					String uuid = dataPacket.getString(32); // 1-65
-					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
+					String uuid = dataPacket.getString(32); // 1-64
+					byte identifier = dataPacket.getByte(); // 65, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
 					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 					// TODO: tell client invalid uuid
 					if (client == null || clientComponent == null)
 						break;
-					System.out.println("CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP");
+					short tick = dataPacket.getShort(); // 66-67
+					byte actionsBinary = dataPacket.getByte(); // 68
+					boolean[] actions = BitConverter.booleanArrayFromByte(actionsBinary);
 					int intX = dataPacket.getInteger();
 					int intY = dataPacket.getInteger();
 					int intZ = dataPacket.getInteger();
 					Vector3f newPosition = new Vector3f(intX / 1000.0f, intY / 1000.0f, intZ / 1000.0f);
-					int intVelX = dataPacket.getShort();
-					int intVelY = dataPacket.getShort();
-					int intVelZ = dataPacket.getShort();
-					Vector3f newVel = new Vector3f(intVelX / 1000.0f, intVelY / 1000.0f, intVelZ / 1000.0f);
+					short shortDirX = dataPacket.getShort();
+					short shortDirY = dataPacket.getShort();
+					short shortDirZ = dataPacket.getShort();
+					Vector3f newDirection = new Vector3f(shortDirX / 100.0f, shortDirY / 100.0f, shortDirZ / 100.0f);
 					Entity player = clientComponent.getPlayer();
-					controlShip(player, newPosition, newVel);
+					controlShip(player, actions, newPosition, newDirection);
 				}
 					break;
 				case CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP: {
@@ -88,11 +85,15 @@ public class UDPRequestHandler {
 					String uuid = dataPacket.getString(32);
 					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
-					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 					// TODO: tell client invalid uuid
-					if (client == null || clientComponent == null)
+					if (client == null)
+						break;
+					ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
+					if (clientComponent == null)
 						break;
 					Entity player = clientComponent.getPlayer();
+					if (player == null)
+						break;
 					createShip(player);
 				}
 					break;
@@ -124,40 +125,31 @@ public class UDPRequestHandler {
 		}
 	}
 
-	private void controlShip(Entity player, Vector3fc newPosition, Vector3fc newVel) {
+	private void controlShip(Entity player, boolean[] actions, Vector3f newPosition, Vector3f newDirection) {
 		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
-		Entity ship = playerComponent.getShip();
-		// TODO: tell client that it cannot be done
-		if (ship == null)
+		Entity shipEntity = playerComponent.getShip();
+		if (shipEntity == null)
 			return;
-		HealthComponent healthComponent = (HealthComponent) entityManager.getComponentInEntity(ship, HealthComponent.class);
-		// TODO: tell client that ship is destroyed
-		if (healthComponent.coreIntegrity <= 0)
-			return;
-		UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(ship, UnitComponent.class);
-		MovementComponent movementComponent = (MovementComponent) entityManager.getComponentInEntity(ship, MovementComponent.class);
-		unitComponent.getPosition().set(newPosition);
-		movementComponent.getLinearVel().set(newVel);
+		ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(shipEntity, ShipComponent.class);
+		// Fire primary
+		if (actions[0])
+			shipComponent.requestFirePrimary();
+		try {
+			shipComponent.getPosition().set(newPosition);
+			if (newDirection.length() == 0)
+				newDirection = new Vector3f(0, 0, 1);
+			else
+				newDirection.normalize();
+			shipComponent.getDirection().set(newDirection);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 	}
 
 	private void createShip(Entity player) {
 		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
-		Entity ship = playerComponent.getShip();
-		// If player has no ship yet, create a new one
-		if (ship == null) {
-			ship = gameFactory.createShip(new Vector3f(0, 0, 0));
-			playerComponent.controlShip(ship);
-		} else {
-			HealthComponent healthComponent = (HealthComponent) entityManager.getComponentInEntity(ship, HealthComponent.class);
-			// TODO: tell client that current ship is still functional
-			if (healthComponent.coreIntegrity > 0)
-				return;
-			UnitComponent unitComponent = (UnitComponent) entityManager.getComponentInEntity(ship, UnitComponent.class);
-			MovementComponent movementComponent = (MovementComponent) entityManager.getComponentInEntity(ship, MovementComponent.class);
-			unitComponent.getPosition().set(new Vector3f(0, 0, 0));
-			movementComponent.getLinearVel().set(new Vector3f(0, 0, 0));
-			healthComponent.coreIntegrity = healthComponent.coreIntegrityMax;
-		}
+		playerComponent.requestSpawnShip();
 	}
 
 }
