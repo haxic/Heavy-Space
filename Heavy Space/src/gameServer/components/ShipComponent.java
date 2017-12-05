@@ -31,7 +31,6 @@ public class ShipComponent extends EntityComponent implements EntityContainer {
 	}
 
 	public void update(float dt) {
-		System.out.println(primaryRecharge + " " + secondaryRecharge);
 		if (primaryRecharge > 0)
 			primaryRecharge -= dt;
 		if (secondaryRecharge > 0)
