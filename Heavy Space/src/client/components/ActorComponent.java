@@ -41,11 +41,9 @@ public class ActorComponent extends EntityComponent {
 	public boolean attachAnObject(ActorComponent attachedActor, ModelAttachementTag modelAttachementTag) {
 		if (attachments.containsKey(modelAttachementTag)) {
 			// TODO: Don't use syso!
-			System.out.println("Warning: tried to attach to a busy attachment point!");
 			return false;
 		} else if (attachedTo != null) {
 			// TODO: Don't use syso!
-			System.out.println("Warning: tried to attach to an actor that is attached to something!");
 			return false;
 		}
 		ModelAttachment modelAttachment = new ModelAttachment(attachedActor, this, modelAttachementTag);

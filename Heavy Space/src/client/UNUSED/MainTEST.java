@@ -1,4 +1,4 @@
-package client.main;
+package client.UNUSED;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,9 +15,9 @@ import org.lwjgl.glfw.GLFW;
 import client.components.ActorComponent;
 import client.display.DisplayManager;
 import client.entities.Camera;
-import client.entities.Light;
+import client.entities.LightComponent;
 import client.gameData.GameModelLoader;
-import client.gameData.ParticleSystem;
+import client.gameData.ParticleComponent;
 import client.inputs.KeyboardHandler;
 import client.models.Model;
 import client.renderers.RenderManager;
@@ -38,15 +38,15 @@ public class MainTEST {
 		RenderManager renderManager = new RenderManager(displayManager, skybox, loader, gameModelLoader.particleAtlasTexture);
 		Camera camera = new Camera();
 
-		ParticleSystem plasmaParticleSystem = new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0, 0.01f, 1);
-		renderManager.addParticleSystem(plasmaParticleSystem);
-		renderManager.addParticleSystem(new ParticleSystem(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1, 0.1f, 3));
-		List<Light> lights = new ArrayList<Light>();
+		ParticleComponent plasmaParticleSystem = new ParticleComponent(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0, 0.01f, 1);
+		renderManager.addParticleEntity(plasmaParticleSystem);
+		renderManager.addParticleEntity(new ParticleComponent(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1, 0.1f, 3));
+		List<LightComponent> lights = new ArrayList<LightComponent>();
 
-		Light sun = new Light(new Vector3f(0, 1000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
+		LightComponent sun = new LightComponent(new Vector3f(0, 1000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
 
-		Light plasma1 = new Light(new Vector3f(10, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
-		Light plasma2 = new Light(new Vector3f(20, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
+		LightComponent plasma1 = new LightComponent(new Vector3f(10, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
+		LightComponent plasma2 = new LightComponent(new Vector3f(20, 0, -10), new Vector3f(0, 1f, 1f), new Vector3f(0.01f, 1, 1));
 		lights.add(sun);
 		lights.add(plasma1);
 		lights.add(plasma2);
@@ -113,7 +113,6 @@ public class MainTEST {
 				// Pretend that this is the message reader
 				dataPacket = new DataPacket(data);
 				Vector3f newPosition = new Vector3f(dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f, dataPacket.getInteger() / 1000.0f);
-//				System.out.println(newPosition.x + " " + newPosition.y + " " + newPosition.z);
 				camera.position = newPosition;
 			}
 			position.set(camera.position);
@@ -156,7 +155,6 @@ public class MainTEST {
 			dataPacket.addInteger((int) (position.y * 1000));
 			dataPacket.addInteger((int) (position.z * 1000));
 			dataPacket.addByte((byte) 20);
-//			System.out.println((int) (position.z * 1000) + " " + dataPacket.getIntegerAt(8));
 			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), address, config.gameServerDefaultPort);
 			udp.sendData(datagramPacket);
 			// Logic
@@ -165,8 +163,8 @@ public class MainTEST {
 				bounceFactor = -bounceFactor;
 			// dragonActor.getEntity().getRotation().y += 0.5f;
 			// fernActor.getEntity().getRotation().y += 0.5f;
-			plasma1.getPosition().set(0, bounceFactor * 20, -20);
-			plasmaParticleSystem.setPosition(plasma1.getPosition());
+			plasma1.getLinearThrust().set(0, bounceFactor * 20, -20);
+			plasmaParticleSystem.setPosition(plasma1.getLinearThrust());
 
 			renderManager.update(camera, dt);
 
@@ -180,13 +178,11 @@ public class MainTEST {
 			frames++;
 			if (System.currentTimeMillis() - timer >= 1000) {
 				timer += 1000;
-//				System.out.println("Fps: " + frames + "." + " " + renderManager.particleManager.size());
 				frames = 0;
 			}
 			// REMOVE ENTITIES PERIODICALLY - for testing purposes
 			// if (System.currentTimeMillis() - removeTimer >= 5000 && removeId
 			// < actors.size()) {
-			// System.out.println("ACTOR REMOVED");
 			// renderManager.removeActor(actors.get(removeId++));
 			// removeTimer += 2000;
 			// }

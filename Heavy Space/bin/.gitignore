@@ -2,3 +2,6 @@
 /client/
 /shared/
 /tests/
+/utilities/
+/hecs/
+/authenticationServer/

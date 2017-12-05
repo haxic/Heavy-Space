@@ -14,32 +14,30 @@ import org.lwjgl.opengl.GL30;
 
 import client.components.ActorComponent;
 import client.entities.Camera;
-import client.entities.Light;
+import client.entities.LightComponent;
 import client.models.Mesh;
 import client.models.Model;
 import client.models.Texture;
 import client.shaders.EntityShader;
 import hecs.Entity;
 import hecs.EntityManager;
-import hecs.EntitySystem;
 import shared.components.ObjectComponent;
 import utilities.MatrixUtils;
 
-public class EntityRenderer extends EntitySystem {
+public class EntityRenderer {
 	EntityShader entityShader;
 
-	public EntityRenderer(EntityManager hecsManager) {
-		super(hecsManager);
+	public EntityRenderer() {
 		entityShader = new EntityShader();
 	}
 
-	public void render(Camera camera, List<Light> lights, Map<Model, List<Entity>> entities) {
-		prepareEntityShader(camera, lights);
+	public void render(EntityManager entityManager, Camera camera, List<Entity> lights, Map<Model, List<Entity>> entities) {
+		prepareEntityShader(entityManager, camera, lights);
 		for (Model model : entities.keySet()) {
 			prepareModel(model);
 			List<Entity> batch = entities.get(model);
 			for (Entity entity : batch) {
-				prepareInstance(entity, camera);
+				prepareInstance(entityManager, entity, camera);
 				// Draw model.
 				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getMesh().getIndicesSize(), GL11.GL_UNSIGNED_INT, 0);
 			}
@@ -48,16 +46,16 @@ public class EntityRenderer extends EntitySystem {
 		entityShader.stop();
 	}
 
-	private void prepareEntityShader(Camera camera, List<Light> lights) {
+	private void prepareEntityShader(EntityManager entityManager, Camera camera, List<Entity> lights) {
 		entityShader.start();
 		entityShader.loadCameraPosition(camera);
 		entityShader.loadProjectionMatrix(camera.getProjectionMatrix());
 		entityShader.loadViewMatrix(camera.getViewMatrix());
 		entityShader.loadAmbientLight(0);
-		entityShader.loadLights(lights);
+		entityShader.loadLights(entityManager, lights);
 	}
 
-	private void prepareInstance(Entity entity, Camera camera) {
+	private void prepareInstance(EntityManager entityManager, Entity entity, Camera camera) {
 		Matrix4f projectionMatrix = camera.getProjectionMatrix();
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);

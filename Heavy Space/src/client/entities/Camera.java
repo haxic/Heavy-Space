@@ -71,6 +71,10 @@ public class Camera {
 	public void setUp(Vector3f up) {
 		this.up = up;
 	}
+	
+	public Vector3f getRight() {
+		return right;
+	}
 
 	public float getFov() {
 		return fov;

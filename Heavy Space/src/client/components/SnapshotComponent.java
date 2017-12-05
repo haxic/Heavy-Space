@@ -11,20 +11,24 @@ import shared.functionality.Globals;
 
 public class SnapshotComponent extends EntityComponent {
 
-	int eeid;
+	short playerID;
 	Deque<Snapshot> snapshots;
 	Snapshot current;
 	Snapshot next;
 
-	public SnapshotComponent(int eeid, short tick, Vector3f position) {
-		this.eeid = eeid;
+	public SnapshotComponent(short playerID, short tick, Vector3f position, Vector3f forward, Vector3f up) {
+		this.playerID = playerID;
 		snapshots = new LinkedList();
-		current = new Snapshot(tick, position);
+		current = new Snapshot(tick, position, forward, up);
 		next = current;
 	}
 
 	@Override
 	protected void removeComponent() {
+	}
+
+	public short getPlayerID() {
+		return playerID;
 	}
 
 	public Snapshot next() {
@@ -37,11 +41,11 @@ public class SnapshotComponent extends EntityComponent {
 		return snapshots.peekFirst();
 	}
 
-	public void add(short tick, Vector3f position) {
+	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up) {
 		Snapshot next = snapshots.peekLast();
 		// Add snapshot if new tick is after latest tick or if new tick is in minimum bracket while latest tick is in maximum bracket
-		if (isAfter(tick, current.tick) && (next == null || isAfter(tick, next.tick)))
-			snapshots.addLast(new Snapshot(tick, position));
+		if (isAfter(tick, current.getTick()) && (next == null || isAfter(tick, next.getTick())))
+			snapshots.addLast(new Snapshot(tick, position, forward, up));
 	}
 
 	public boolean isAfter(short newTick, short latestTick) {
@@ -61,10 +65,6 @@ public class SnapshotComponent extends EntityComponent {
 			return (Short.MAX_VALUE - next.getTick()) + (current.getTick() - Short.MIN_VALUE);
 		else
 			return next.getTick() - current.getTick();
-	}
-
-	public int getEEID() {
-		return eeid;
 	}
 
 	public Snapshot peekLatest() {

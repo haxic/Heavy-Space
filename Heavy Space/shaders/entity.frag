@@ -45,7 +45,7 @@ void main(){
 		float distanceToLight = length(toLightVector[i]);
 		
 		// Attenuation
-		float attenuation = 1.0 / (1.0 + attenuation[i].x * pow(distanceToLight, 2));
+		float attenuation = clamp(1.0 - ((distanceToLight*distanceToLight) / (attenuation[i].x*attenuation[i].x)), 0.0, 1.0);
 		
 		// Diffuse lighting
 		float diffuseCoefficient = max(dot(unitWorldNormal, unitToLightVector), 0.0);

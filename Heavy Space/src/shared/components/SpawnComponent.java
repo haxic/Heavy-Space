@@ -4,10 +4,15 @@ import hecs.EntityComponent;
 
 public class SpawnComponent extends EntityComponent {
 
-	short tick;
+	private short tick;
+	private boolean instant;
 
 	public SpawnComponent(short tick) {
 		this.tick = tick;
+	}
+	
+	public SpawnComponent() {
+		instant = true;
 	}
 
 	@Override
@@ -16,5 +21,9 @@ public class SpawnComponent extends EntityComponent {
 
 	public short getTick() {
 		return tick;
+	}
+	
+	public boolean instant() {
+		return instant;
 	}
 }

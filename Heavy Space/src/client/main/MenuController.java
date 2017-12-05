@@ -3,9 +3,14 @@ package client.main;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import client.entities.Light;
+import client.entities.LightComponent;
+import client.entities.Scene;
+import client.gameData.ClientGameFactory;
+import client.gameData.GameModelLoader;
 import client.inputs.KeyboardHandler;
+import client.inputs.ShipControls;
 import client.network.GameServerData;
+import gameServer.systems.ShipSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.functionality.Event;
@@ -16,7 +21,7 @@ import shared.systems.AIBotSystem;
 import shared.systems.CollisionSystem;
 import shared.systems.MovementSystem;
 
-public class MenuController implements ClientController {
+public class MenuController implements GameClientController {
 	private Scene scene;
 
 	private EventHandler eventHandler;
@@ -33,31 +38,35 @@ public class MenuController implements ClientController {
 	Entity dragon;
 
 	private AIBotSystem aiBotSystem;
+	private ShipSystem shipSystem;
 	private MovementSystem movementSystem;
 	private CollisionSystem collisionSystem;
-	
-	public MenuController(EntityManager entityManager, EventHandler eventHandler, ClientGameFactory clientGameFactory, GameServerData gameServerData) {
-		this.entityManager = entityManager;
+
+	public MenuController(EventHandler eventHandler, GameServerData gameServerData, GameModelLoader gameModelLoader) {
 		this.eventHandler = eventHandler;
-		this.clientGameFactory = clientGameFactory;
 		this.gameServerData = gameServerData;
+		entityManager = new EntityManager();
+		clientGameFactory = new ClientGameFactory(entityManager, gameModelLoader);
 
 		shipControls = new ShipControls();
 
 		aiBotSystem = new AIBotSystem(entityManager);
+		shipSystem = new ShipSystem(entityManager, null);
 		movementSystem = new MovementSystem(entityManager);
 		collisionSystem = new CollisionSystem(entityManager);
-		
+
 		scene = new Scene(entityManager);
-		Light sun = new Light(new Vector3f(10000, 10000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
-		scene.addLight(sun);
 		clientGameFactory.setSkybox(scene);
 
-//		scene.addEntity(gameFactory.createBot(new Vector3f(0, -20, -10), 10f, 1f));
-//		scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20),15f, -1f));
-//		scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), 10f, 1f));
-//		scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), 15f, -1f));
-		scene.addEntity(clientGameFactory.createBot(new Vector3f(20, 0, 20), 25f, 1f));
+		Entity sun = clientGameFactory.createSun(new Vector3f(1000, 1000, 1000), new Vector3f(1, 1, 0));
+		scene.addLightEntity(sun);
+		clientGameFactory.createLotsOfDebris(scene, 1000);
+		// scene.addEntity(gameFactory.createBot(new Vector3f(0, -20, -10), 10f, 1f));
+		// scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20),15f, -1f));
+		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), 10f, 1f));
+		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), 15f, -1f));
+		scene.addActorEntity(clientGameFactory.createBot(new Vector3f(50, 50, 20), 25f, 1f));
+		scene.addActorEntity(clientGameFactory.createBox(new Vector3f(0, 0, -50)));
 	}
 
 	@Override
@@ -86,13 +95,13 @@ public class MenuController implements ClientController {
 
 	@Override
 	public void update() {
-		scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().z, tempVector));
-		scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().x, tempVector));
-		scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().y, tempVector));
-
-		scene.camera.yaw(Globals.dt * shipControls.getAngularVelocity().y);
-		scene.camera.pitch(Globals.dt * shipControls.getAngularVelocity().x);
-		scene.camera.roll(Globals.dt * shipControls.getAngularVelocity().z);
+		// scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().z, tempVector));
+		// scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().x, tempVector));
+		// scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().y, tempVector));
+		//
+		// scene.camera.yaw(Globals.dt * shipControls.getAngularVelocity().y);
+		// scene.camera.pitch(Globals.dt * shipControls.getAngularVelocity().x);
+		// scene.camera.roll(Globals.dt * shipControls.getAngularVelocity().z);
 		// if (System.currentTimeMillis() - timer >= frequency) {
 		// timer += frequency;
 		// if (create) {
@@ -104,7 +113,8 @@ public class MenuController implements ClientController {
 		// create = !create;
 		// }
 		aiBotSystem.update();
-		movementSystem.process();
+		shipSystem.process(Globals.dt);
+		movementSystem.process(Globals.dt);
 		collisionSystem.process();
 	}
 

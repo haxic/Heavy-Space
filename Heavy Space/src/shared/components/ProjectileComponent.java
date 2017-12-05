@@ -6,32 +6,40 @@ import hecs.EntityContainer;
 import shared.functionality.Globals;
 
 public class ProjectileComponent extends EntityComponent implements EntityContainer {
-	long created;
-	int length;
+	private float length;
 	private Entity shipEntity;
+	private float damage;
+	private byte variation;
+	private float elapsed;
 
-	public ProjectileComponent(Entity shipEntity, int length) {
+	public ProjectileComponent(Entity shipEntity, byte variation, float length, float damage) {
 		if (shipEntity != null) {
 			this.shipEntity = shipEntity;
 			shipEntity.attach(this);
 		}
+		this.variation = variation;
 		this.length = length;
+		this.damage = damage;
 	}
 
 	@Override
 	protected void removeComponent() {
 	}
 
-	public void activate() {
-		created = Globals.now;
+	public byte getVariation() {
+		return variation;
+	}
+
+	public float getDamage() {
+		return damage;
 	}
 
 	public boolean hasElapsed() {
-		return Globals.now - created > length;
+		return elapsed > length;
 	}
 
-	public int remaining() {
-		return (int) (length - (Globals.now - created));
+	public float remaining() {
+		return length - elapsed;
 	}
 
 	public Entity getShipEntity() {
@@ -43,4 +51,9 @@ public class ProjectileComponent extends EntityComponent implements EntityContai
 		if (entity.equals(shipEntity))
 			shipEntity = null;
 	}
+
+	public void update(float dt) {
+		elapsed += dt;
+	}
+
 }

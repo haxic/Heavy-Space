@@ -4,7 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import client.display.DisplayManager;
-import client.gameData.ParticleSystem;
+import client.gameData.ParticleComponent;
 import client.models.Texture;
 
 public class Particle {
@@ -13,7 +13,7 @@ public class Particle {
 	private float rotation;
 	private float scale;
 	private boolean solid;
-	private ParticleSystem particleSystem;
+	private ParticleComponent particleSystem;
 
 	private float distanceToCamera;
 	private Vector2f texturePageOffset = new Vector2f();
@@ -26,7 +26,7 @@ public class Particle {
 	// Reuse this vector instead of creating a new one for every calculation.
 	private static Vector3f tempVector = new Vector3f();
 
-	public Particle(ParticleSystem particleSystem, Vector3f position, Vector3f velocity, float rotation, float scale, int texturePage, boolean solid) {
+	public Particle(ParticleComponent particleSystem, Vector3f position, Vector3f velocity, float rotation, float scale, int texturePage, boolean solid) {
 		this.particleSystem = particleSystem;
 		this.position = position;
 		this.velocity = velocity;

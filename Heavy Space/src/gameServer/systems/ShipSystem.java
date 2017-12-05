@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import client.main.ServerGameFactory;
+import gameServer.ServerGameFactory;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import hecs.Entity;
@@ -24,7 +24,7 @@ public class ShipSystem {
 		this.serverGameFactory = serverGameFactory;
 	}
 
-	public void process() {
+	public void process(float dt) {
 		List<Entity> entities = entityManager.getEntitiesContainingComponent(ShipComponent.class);
 		if (entities == null)
 			return;
@@ -32,17 +32,29 @@ public class ShipSystem {
 			return;
 		for (Entity entity : entities) {
 			ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(entity, ShipComponent.class);
+			ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
+			MovementComponent movementComponent = (MovementComponent) entityManager.getComponentInEntity(entity, MovementComponent.class);
+			shipComponent.update(dt);
 			if (shipComponent.isRequestFirePrimary()) {
-				Entity plasmaProjectile = serverGameFactory.createPlasmaProjectile(entity, new Vector3f(shipComponent.getPosition()), new Vector3f(shipComponent.getDirection()).mul(1000));
+				shipComponent.firePrimary();
+				Vector3f forward = new Vector3f((float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f).add(objectComponent.getForward())
+						.normalize();
+				Entity plasmaProjectile = serverGameFactory.createCannonProjectile(entity, new Vector3f(objectComponent.getPosition()), forward.mul(1200).add(movementComponent.getLinearVel()));
+				entityManager.addComponent(new SpawnComponent((short) 0), plasmaProjectile);
+			}
+			if (shipComponent.isRequestFireSecondary()) {
+				shipComponent.fireSecondary();
+				Entity plasmaProjectile = serverGameFactory.createPlasmaProjectile(entity, new Vector3f(objectComponent.getPosition()),
+						new Vector3f(objectComponent.getForward()).mul(750).add(movementComponent.getLinearVel()));
 				entityManager.addComponent(new SpawnComponent((short) 0), plasmaProjectile);
 			}
 
 			// HealthComponent healthComponent = (HealthComponent) entityManager.getComponentInEntity(entity, HealthComponent.class);
 			// if (healthComponent.coreIntegrity <= 0)
 			// return;
-			ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
 			// MovementComponent movementComponent = (MovementComponent) entityManager.getComponentInEntity(entity, MovementComponent.class);
-			objectComponent.getPosition().set(shipComponent.getPosition());
+			// System.out.println("SHIT SYSTEM: " + entity.getEID() + " " + shipComponent.getLinearThrust());
+			movementComponent.getLinearAcc().add(shipComponent.getLinearThrust().mul(2500, new Vector3f()));
 			shipComponent.resetRequests();
 		}
 	}

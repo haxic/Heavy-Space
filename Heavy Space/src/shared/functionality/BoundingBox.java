@@ -10,7 +10,7 @@ public class BoundingBox {
 
 	@Override
 	public String toString() {
-		return xMin + "-" + xMax + " " + yMin + "-" + yMax + " " + zMin + "-" + zMax;
+		return "(" +xMin + ":" + xMax + " " + yMin + ":" + yMax + " " + zMin + ":" + zMax + ")";
 	}
 
 	public String toStringAsInts() {

@@ -3,28 +3,20 @@ package client.entities;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class Light {
-	private Vector3f position;
+import hecs.EntityComponent;
+
+public class LightComponent extends EntityComponent {
 	private Vector3f color;
 	private Vector3f attenuation;
 	public Matrix4f lightMatrix;
 
-	public Light(Vector3f position, Vector3f color, Vector3f attenuation) {
-		this.setPosition(position);
+	public LightComponent(Vector3f color, Vector3f attenuation) {
 		this.setColor(color);
 		this.setAttenuation(attenuation);
 	}
 
 	private void setAttenuation(Vector3f attenuation) {
 		this.attenuation = attenuation;
-	}
-
-	public Vector3f getPosition() {
-		return position;
-	}
-
-	public void setPosition(Vector3f position) {
-		this.position = position;
 	}
 
 	public Vector3f getColor() {
@@ -37,5 +29,9 @@ public class Light {
 
 	public Vector3f getAttenuation() {
 		return attenuation;
+	}
+
+	@Override
+	protected void removeComponent() {
 	}
 }

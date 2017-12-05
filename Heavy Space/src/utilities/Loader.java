@@ -144,7 +144,8 @@ public class Loader {
 	}
 
 	/**
-	 * The index buffer is not stored in the VAO attribute list. The VAO got a specific storage for the index buffer, and may only have one associated with it.
+	 * The index buffer is not stored in the VAO attribute list. The VAO got a specific storage for the index buffer, and may only have one associated
+	 * with it.
 	 */
 	private void bindIndexBuffer(int vaoID, int[] indices) {
 		int vboID = GL15.glGenBuffers();
@@ -268,9 +269,67 @@ public class Loader {
 				-size, size, -size, size, size, -size, size, size, size, size, size, size, -size, size, size, -size, size, -size,
 
 				-size, -size, -size, -size, -size, size, size, -size, -size, size, -size, -size, -size, -size, size, size, -size, size };
-
 	}
 
+	public static float[] getCubeVertices(float size) {
+		return new float[] { 	
+				-size,size,-size,	// far upper left
+				-size,-size,-size,	// 
+				size,-size,-size,	
+				size,size,-size,		
+				
+				-size,size,size,	
+				-size,-size,size,	
+				size,-size,size,	
+				size,size,size,
+				
+				size,size,-size,	
+				size,-size,-size,	
+				size,-size,size,	
+				size,size,size,
+				
+				-size,size,-size,	
+				-size,-size,-size,	
+				-size,-size,size,	
+				-size,size,size,
+				
+				-size,size,size,
+				-size,size,-size,
+				size,size,-size,
+				size,size,size,
+				
+				-size,-size,size,
+				-size,-size,-size,
+				size,-size,-size,
+				size,-size,size
+				};
+	}
+
+	public static float[] getCubeUVs() {
+		return new float[] { 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0 };
+	}
+
+	public static float[] getCubeMapNormals() {
+		return new float[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+//		return new float[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+	}
+
+	public static int[] getCubeIndices() {
+		return new int[] { 
+				0, 1, 3, 
+				3, 1, 2, 
+				4, 5, 7, 
+				7, 5, 6, 
+				8, 9, 11,
+				11, 9, 10, 
+				12, 13, 15, 
+				15, 13, 14, 
+				16, 17, 19, 
+				19, 17, 18, 
+				20, 21, 23, 
+				23, 21, 22 };
+	}
+	
 	public void updateVBO(int vboID, float[] data, FloatBuffer buffer) {
 		buffer.clear();
 		buffer.put(data);
@@ -309,5 +368,9 @@ public class Loader {
 		// Unbind
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		return new ShadowMap(framebufferID, textureID, width, height);
+	}
+
+	public static ModelData createCube(float radius) {
+		return new ModelData(getCubeVertices(radius), getCubeUVs(), getCubeMapNormals(), getCubeIndices(), 0);
 	}
 }

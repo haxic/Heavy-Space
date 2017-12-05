@@ -6,8 +6,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 import client.entities.Camera;
-import client.entities.Light;
+import client.entities.LightComponent;
 import client.models.Model;
+import hecs.Entity;
+import hecs.EntityManager;
+import shared.components.ObjectComponent;
 
 public class EntityShader extends ShaderProgram {
 	private static final String VERTEX_FILE = "shaders/entity.vert";
@@ -108,13 +111,16 @@ public class EntityShader extends ShaderProgram {
 		super.loadFloat(location_ambientLight, ambientLight);
 	}
 
-	public void loadLights(List<Light> lights) {
+	public void loadLights(EntityManager entityManager, List<Entity> lights) {
 		int numberOfLights = lights.size() < MAX_LIGHTS ? lights.size() : MAX_LIGHTS;
 		super.loadInt(location_numberOfLights, numberOfLights);
 		for (int i = 0; i < MAX_LIGHTS && i < numberOfLights; i++) {
-			super.loadVector3f(location_lightPosition[i], lights.get(i).getPosition());
-			super.loadVector3f(location_lightColor[i], lights.get(i).getColor());
-			super.loadVector3f(location_attenuation[i], lights.get(i).getAttenuation());
+			Entity entity = lights.get(i);
+			ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
+			LightComponent lightComponent = (LightComponent) entityManager.getComponentInEntity(entity, LightComponent.class);
+			super.loadVector3f(location_lightPosition[i], objectComponent.getPosition());
+			super.loadVector3f(location_lightColor[i], lightComponent.getColor());
+			super.loadVector3f(location_attenuation[i], lightComponent.getAttenuation());
 		}
 	}
 	

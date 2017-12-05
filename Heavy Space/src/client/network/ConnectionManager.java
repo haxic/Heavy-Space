@@ -15,13 +15,14 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import gameServer.Pinger;
+import client.inputs.ShipControls;
 import shared.functionality.ByteIdentifier;
 import shared.functionality.DataPacket;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
 import shared.functionality.Globals;
+import shared.functionality.Pinger;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.TCPSocket;
 import shared.functionality.network.TCPSocketHandler;
@@ -56,6 +57,7 @@ public class ConnectionManager {
 	private ByteIdentifier udpIdentifier;
 	private String uuid;
 	private GameServerData gameServerData;
+	private short playerID;
 
 	public ConnectionManager(EventHandler eventHandler) {
 		this.eventHandler = eventHandler;
@@ -105,7 +107,6 @@ public class ConnectionManager {
 		boolean validated = true;
 		try {
 			connectionStatus = ConnectionStatus.Connecting;
-			System.out.println("Connecting to server: " + gameServerData.getIP().getHostAddress() + ":" + gameServerData.getPort());
 			tcpSocket = new TCPSocket(new Socket(gameServerData.getIP(), gameServerData.getPort()));
 			tcpSocket.sendData((username + " " + token).getBytes());
 
@@ -183,16 +184,16 @@ public class ConnectionManager {
 			switch (requestType) {
 			case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
-				System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP + " " + identifier);
 				UDPRequest request = findMatchingUDPRequest(requestType, identifier);
 				if (request == null)
 					break;
 				udpRequests.remove(request);
-				short tick = dataPacket.getShort(); // 2-3, Tick
-				udpPinger.handlePing(request.getTimestamp(), tick);
-				byte response = dataPacket.getByte(); // 4, Request identifier
+				byte response = dataPacket.getByte(); // 2, Request identifier
 				if (response == 1) {
-					System.out.println("ACCEPTED, SENDING TCP PACKET: " + RequestType.CLIENT_REQUEST_READY);
+					short tick = dataPacket.getShort(); // 3-4, Tick
+					udpPinger.handlePing(request.getTimestamp(), tick);
+					short playerID = dataPacket.getShort(); // 5-6, Player id
+					this.playerID = playerID;
 					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_CONNECT, "Connected to server."));
 					DataPacket sendDataPacket = new DataPacket(new byte[3]);
 					sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_READY.ordinal());
@@ -201,7 +202,6 @@ public class ConnectionManager {
 					tcpSocketHandler.sendData(sendDataPacket.getData());
 					break;
 				}
-				System.out.println("FAILED " + RequestType.CLIENT_REQUEST_READY);
 				disconnect();
 				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Failed to authenticate UDP."));
 			}
@@ -214,19 +214,33 @@ public class ConnectionManager {
 					int eeid = dataPacket.getInteger(); // 5, Entity id
 					int entityType = dataPacket.getByte(); // 9, Entity type (obstacle, ship, projectile etc)
 					int entityVariation = dataPacket.getByte(); // 10, Entity variation (what variation of the type)
-					float positionX = dataPacket.getInteger() / 1000.0f; // 11-14, Position x
-					float positionY = dataPacket.getInteger() / 1000.0f; // 15-18, Position y
-					float positionZ = dataPacket.getInteger() / 1000.0f; // 19-22, Position z
+					short playerID = 0;
+					if (entityType != 2)
+						playerID = dataPacket.getShort(); // 11-12, Entity variation (what variation of the type)
+					float positionX = dataPacket.getInteger() / 1000.0f; // 13-16, Position x
+					float positionY = dataPacket.getInteger() / 1000.0f; // 17-20, Position y
+					float positionZ = dataPacket.getInteger() / 1000.0f; // 21-24, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
+					Vector3f forward = null;
+					Vector3f up = null;
+					Vector3f velocity = null;
 					if (entityType == 1) {
-						float velocityX = dataPacket.getShort(); // 23-24, Velocity x
-						float velocityY = dataPacket.getShort(); // 25-26, Velocity y
-						float velocityZ = dataPacket.getShort(); // 27-28, Velocity z
-						Vector3f velocity = new Vector3f(velocityX, velocityY, velocityZ);
-						eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position, velocity));
-					} else {
-						eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, position));
+						float velocityX = dataPacket.getInteger() / 1000.0f; // 25-28, Velocity x
+						float velocityY = dataPacket.getInteger() / 1000.0f; // 29-32, Velocity y
+						float velocityZ = dataPacket.getInteger() / 1000.0f; // 33-36, Velocity z
+						velocity = new Vector3f(velocityX, velocityY, velocityZ);
 					}
+					if (entityType != 1) {
+						float forwardX = dataPacket.getShort() / 100.0f; // 25-26, Forward x
+						float forwardY = dataPacket.getShort() / 100.0f; // 27-28, Forward y
+						float forwardZ = dataPacket.getShort() / 100.0f; // 29-30, Forward z
+						forward = new Vector3f(forwardX, forwardY, forwardZ);
+						float upX = dataPacket.getShort() / 100.0f; // 31-32, Up x
+						float upY = dataPacket.getShort() / 100.0f; // 33-34, Up y
+						float upZ = dataPacket.getShort() / 100.0f; // 35-36, Up z
+						up = new Vector3f(upX, upY, upZ);
+					}
+					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, playerID, position, forward, up, velocity));
 				}
 			}
 				break;
@@ -236,18 +250,43 @@ public class ConnectionManager {
 				int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
 				for (int i = 0; i < numberOfEntities; i++) {
 					int eeid = dataPacket.getInteger(); // 5-8, Entity id
-					float positionX = dataPacket.getInteger() / 1000.0f; // 9-12, Position x
-					float positionY = dataPacket.getInteger() / 1000.0f; // 13-16, Position y
-					float positionZ = dataPacket.getInteger() / 1000.0f; // 17-20, Position z
-					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, position));
+					byte flagsByte = dataPacket.getByte(); // 9, Flags
+
+					boolean[] flags = BitConverter.booleanArrayFromByte(flagsByte);
+					Vector3f position = null;
+					Vector3f forward = null;
+					Vector3f up = null;
+					int killingEeid = 0;
+
+					if (flags[0]) {
+						float positionX = dataPacket.getInteger() / 1000.0f; // 10-13, Position x
+						float positionY = dataPacket.getInteger() / 1000.0f; // 14-17, Position y
+						float positionZ = dataPacket.getInteger() / 1000.0f; // 18-21, Position z
+						position = new Vector3f(positionX, positionY, positionZ);
+						float forwardX = dataPacket.getShort() / 100.0f; // 10-13, Forward x
+						float forwardY = dataPacket.getShort() / 100.0f; // 14-17, Forward y
+						float forwardZ = dataPacket.getShort() / 100.0f; // 18-21, Forward z
+						forward = new Vector3f(forwardX, forwardY, forwardZ);
+						float upX = dataPacket.getShort() / 100.0f; // 10-13, Up x
+						float upY = dataPacket.getShort() / 100.0f; // 14-17, Up y
+						float upZ = dataPacket.getShort() / 100.0f; // 18-21, Up z
+						up = new Vector3f(upX, upY, upZ);
+					}
+					if (flags[2]) {
+						killingEeid = dataPacket.getInteger(); // 22-25, Killing entity id
+					}
+					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, flags, position, forward, up, killingEeid));
 				}
+				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_SNAPSHOT, tick));
+			}
+				break;
+			case SERVER_REPONSE_UPDATE: {
+				short tick = dataPacket.getShort(); // 1-2, Tick
+				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_SNAPSHOT, tick));
 			}
 				break;
 			case CLIENT_REQUEST_PING: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
-				// System.out.println("CLIENT UDP RECEIVED: " + RequestType.CLIENT_REQUEST_PING
-				// + " " + identifier);
 				UDPRequest request = findMatchingUDPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -297,8 +336,6 @@ public class ConnectionManager {
 			RequestType requestType = RequestType.values()[type & 0xFF];
 			switch (requestType) {
 			case CLIENT_REQUEST_PING: {
-				// System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING
-				// + " " + identifier);
 				TCPRequest request = findMatchingTCPRequest(requestType, identifier);
 				if (request == null)
 					break;
@@ -308,7 +345,6 @@ public class ConnectionManager {
 			}
 				break;
 			case CLIENT_REQUEST_READY: {
-				System.out.println("CLIENT TCP RECEIVED: " + RequestType.CLIENT_REQUEST_READY + " " + identifier);
 			}
 				break;
 			default:
@@ -369,23 +405,21 @@ public class ConnectionManager {
 		udpServer.sendData(datagramPacket);
 	}
 
-	public void sendShipActions(boolean firePrimary, Vector3f position, Vector3f direction) {
+	public void sendShipActions(ShipControls shipControls) {
 		RequestType requestType = RequestType.CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP;
 		byte identifier = udpIdentifier.get();
 
-		DataPacket dataPacket = new DataPacket(new byte[88]);
+		DataPacket dataPacket = new DataPacket(new byte[85]);
 		dataPacket.addByte(requestType.asByte()); // 0
 		dataPacket.addString(uuid); // 1-64
 		dataPacket.addByte(identifier); // 65
 		dataPacket.addShort(Globals.tick); // 66-67
-		dataPacket.addByte(BitConverter.byteFromBooleanArray(new boolean[] { firePrimary, false, false, false, false, false, false, false })); // 68
-		dataPacket.addInteger((int) (position.x * 1000)); // 69-72, Position x
-		dataPacket.addInteger((int) (position.y * 1000)); // 73-76, Position y
-		dataPacket.addInteger((int) (position.z * 1000)); // 77-80, Position z
-		dataPacket.addShort((short) (direction.x * 100)); // 81-82, Direction x
-		dataPacket.addShort((short) (direction.y * 100)); // 83-84, Direction y
-		dataPacket.addShort((short) (direction.z * 100)); // 85-86, Direction z
-		dataPacket.addByte((byte) 20); // 87
+		dataPacket.addByte(BitConverter.byteFromBooleanArray(new boolean[] { shipControls.forwardThrust, shipControls.reverseThrust, shipControls.starboardThrust, shipControls.portThrust,
+				shipControls.ascend, shipControls.decend, shipControls.primary, shipControls.secondary })); // 68
+		dataPacket.addInteger((int) (shipControls.angularDirection.x * 1000)); // 69-72, Rotation x
+		dataPacket.addInteger((int) (shipControls.angularDirection.y * 1000)); // 73-76, Rotation y
+		dataPacket.addInteger((int) (shipControls.angularDirection.z * 1000)); // 77-80, Rotation z
+		dataPacket.addInteger((int) (Globals.dt * 10000)); // 81-84, Rotation z
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
 		udpServer.sendData(datagramPacket);
 	}
@@ -404,4 +438,7 @@ public class ConnectionManager {
 		udpServer.sendData(datagramPacket);
 	}
 
+	public short getPlayerID() {
+		return playerID;
+	}
 }

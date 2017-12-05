@@ -131,7 +131,6 @@ public class DisplayManager {
 		cursorEnabled = true;
 		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		// TODO: Don't use syso!
-		System.out.println("ENABLE CURSOR " + cursorEnabled);
 //		MousePositionHandler.setCursorVisibility(cursorEnabled);
 	}
 
@@ -140,7 +139,6 @@ public class DisplayManager {
 		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetCursorPos(windowID, getWidth() / 2, getHeight() / 2);
 		// TODO: Don't use syso!
-		System.out.println("DISABLE CURSOR " + cursorEnabled);
 //		MousePositionHandler.setCursorVisibility(cursorEnabled);
 	}
 

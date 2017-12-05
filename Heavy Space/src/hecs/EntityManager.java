@@ -30,7 +30,6 @@ public class EntityManager {
 	 * This method generates and returns a unique entity ID.
 	 */
 	private long generateEntityID() {
-		// System.out.println(lowestUnassignedEntityID);
 		if (lowestUnassignedEntityID < Integer.MAX_VALUE) {
 			return lowestUnassignedEntityID++;
 		} else {

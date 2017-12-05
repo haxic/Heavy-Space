@@ -22,4 +22,9 @@ public class Entity {
 		return eid;
 	}
 
+	@Override
+	public String toString() {
+		return "(" + eid + ")";
+	}
+
 }

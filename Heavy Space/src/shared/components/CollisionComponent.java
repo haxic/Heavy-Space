@@ -10,9 +10,9 @@ public class CollisionComponent extends EntityComponent {
 	private float radius;
 	private BoundingBox boundingBox;
 
-	public CollisionComponent(float radius) {
+	public CollisionComponent(Vector3f position, float radius) {
 		this.radius = radius;
-		previousPosition = new Vector3f();
+		previousPosition = position;
 		boundingBox = new BoundingBox();
 	}
 

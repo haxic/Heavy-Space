@@ -30,6 +30,7 @@ public class OBJFileLoader {
 		List<Vector2f> textures = new ArrayList<Vector2f>();
 		List<Vector3f> normals = new ArrayList<Vector3f>();
 		List<Integer> indices = new ArrayList<Integer>();
+		
 		try {
 			while (true) {
 				line = reader.readLine();
@@ -74,11 +75,9 @@ public class OBJFileLoader {
 		float[] verticesArray = new float[vertices.size() * 3];
 		float[] texturesArray = new float[vertices.size() * 2];
 		float[] normalsArray = new float[vertices.size() * 3];
-		float furthest = convertDataToArrays(vertices, textures, normals, verticesArray,
-				texturesArray, normalsArray);
+		float furthest = convertDataToArrays(vertices, textures, normals, verticesArray, texturesArray, normalsArray);
 		int[] indicesArray = convertIndicesListToArray(indices);
-		ModelData data = new ModelData(verticesArray, texturesArray, normalsArray, indicesArray,
-				furthest);
+		ModelData data = new ModelData(verticesArray, texturesArray, normalsArray, indicesArray, furthest);
 		return data;
 	}
 
@@ -92,8 +91,7 @@ public class OBJFileLoader {
 			currentVertex.setNormalIndex(normalIndex);
 			indices.add(index);
 		} else {
-			dealWithAlreadyProcessedVertex(currentVertex, textureIndex, normalIndex, indices,
-					vertices);
+			dealWithAlreadyProcessedVertex(currentVertex, textureIndex, normalIndex, indices, vertices);
 		}
 	}
 

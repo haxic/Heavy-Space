@@ -5,11 +5,11 @@ import hecs.EntityComponent;
 import hecs.EntityContainer;
 
 public class PlayerComponent extends EntityComponent implements EntityContainer {
-	private int playerID;
+	private short playerID;
 	private Entity ship;
 	private boolean requestSpawnShip;
 
-	public PlayerComponent(int playerID) {
+	public PlayerComponent(short playerID) {
 		this.playerID = playerID;
 	}
 
@@ -22,6 +22,10 @@ public class PlayerComponent extends EntityComponent implements EntityContainer 
 	@Override
 	public void removeComponent() {
 		ship = null;
+	}
+	
+	public short getPlayerID() {
+		return playerID;
 	}
 
 	public Entity getShip() {

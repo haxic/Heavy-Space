@@ -5,13 +5,11 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
-import client.components.ActorComponent;
 import client.display.DisplayManager;
 import client.entities.Camera;
-import client.entities.Light;
+import client.entities.LightComponent;
 import client.entities.Particle;
-import client.gameData.ParticleSystem;
-import client.main.Scene;
+import client.entities.Scene;
 import client.models.Model;
 import client.models.Texture;
 import hecs.Entity;
@@ -26,20 +24,21 @@ public class RenderManager {
 
 	Scene current;
 
-	public RenderManager(EntityManager entityManager, DisplayManager displayManager, Loader loader, Texture particleAtlasTexture) {
+	public RenderManager(DisplayManager displayManager, Loader loader, Texture particleAtlasTexture) {
 		this.displayManager = displayManager;
-		entityRenderer = new EntityRenderer(entityManager);
+		entityRenderer = new EntityRenderer();
 		skyboxRenderer = new SkyboxRenderer();
 		particleRenderer = new ParticleRenderer(loader, particleAtlasTexture);
 
 		enableBackCulling();
 	}
 
-	public void render(Scene scene) {
+	public void render(Scene scene, float dt) {
+		scene.update(dt);
 		Camera camera = scene.camera;
 		Model skybox = scene.skybox;
 		List<Particle> particles = scene.particleManager.getParticles();
-		List<Light> lights = scene.lights;
+		List<Entity> lights = scene.lights;
 		Map<Model, List<Entity>> actors = scene.actors;
 		boolean renderSolidParticles = scene.particleManager.isRenderSolidParticles();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -47,7 +46,7 @@ public class RenderManager {
 		GL11.glClearColor(0.3f, 0, 0.3f, 1);
 		camera.updateProjectionMatrix(displayManager.getAspectRatio());
 		camera.updateViewMatrix();
-		entityRenderer.render(camera, lights, actors);
+		entityRenderer.render(scene.getEntityManager(), camera, lights, actors);
 		skyboxRenderer.render(camera, skybox);
 		particleRenderer.render(particles, camera, renderSolidParticles);
 	}

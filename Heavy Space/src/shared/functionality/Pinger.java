@@ -1,6 +1,4 @@
-package gameServer;
-
-import shared.functionality.Globals;
+package shared.functionality;
 
 public class Pinger {
 	short[] ping = new short[15];

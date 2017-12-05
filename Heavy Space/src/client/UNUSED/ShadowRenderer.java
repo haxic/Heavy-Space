@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL30;
 import client.components.ActorComponent;
 import client.display.DisplayManager;
 import client.entities.Camera;
-import client.entities.Light;
+import client.entities.LightComponent;
 import client.models.Mesh;
 import client.models.Model;
 import client.models.ModelAttachmentPoint;
@@ -38,7 +38,7 @@ public class ShadowRenderer {
 		shadowMap = Loader.createShadowMap(1024, 1024);
 	}
 
-	public void render(Camera camera, List<Light> lights, Map<Model, List<ActorComponent>> actors) {
+	public void render(Camera camera, List<LightComponent> lights, Map<Model, List<ActorComponent>> actors) {
 		prepareShadowShader(camera, lights.get(0));
 		for (Model model : actors.keySet()) {
 			prepareModel(model);
@@ -53,7 +53,7 @@ public class ShadowRenderer {
 		shadowShader.stop();
 	}
 
-	private void prepareShadowShader(Camera camera, Light light) {
+	private void prepareShadowShader(Camera camera, LightComponent light) {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, shadowMap.getFramebufferID());
 		GL11.glViewport(0, 0, shadowMap.getWidth(), shadowMap.getHeight());
@@ -70,7 +70,7 @@ public class ShadowRenderer {
 		float nearHeight = nearWidth / displayHeight;
 		
 		light.lightMatrix.setPerspective((float) Math.toRadians(45.0f), 1.0f, 0.1f, shadowDistance)
-	     .lookAt(light.getPosition(), new Vector3f(0, 0, 0), camera.getUp());
+	     .lookAt(light.getLinearThrust(), new Vector3f(0, 0, 0), camera.getUp());
 //		Matrix4f orthoProjMatrix = new Matrix4f().ortho(left, right, bottom, top, zNear, zFar)
 		shadowShader.start();
 	}
@@ -79,7 +79,7 @@ public class ShadowRenderer {
 		Matrix4f projectionMatrix = camera.getProjectionMatrix();
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		Entity entity = actor.getEntity();
-		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+		Matrix4f modelMatrix = MatrixUtils.createModelMatrix(entity.getLinearThrust(), entity.getRotation(), entity.getScale());
 		Matrix4f mvpMatrix = projectionMatrix.mul(viewMatrix, new Matrix4f()).mul(modelMatrix);
 		shadowShader.loadModelViewProjectionMatrix(mvpMatrix);
 	}

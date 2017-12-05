@@ -8,12 +8,12 @@ import org.joml.Vector3f;
 import client.entities.Camera;
 import client.entities.Particle;
 import client.models.Texture;
+import hecs.EntityComponent;
 
-public class ParticleSystem {
+public class ParticleComponent extends EntityComponent {
 
 	private int texturePage;
 	private Vector2f texturePageOffset;
-	private Vector3f position;
 
 	int particleCounter;
 	private float lifeLength;
@@ -21,13 +21,15 @@ public class ParticleSystem {
 	float timeCounter;
 	private boolean removeThis;
 	private Texture texture;
-
-	public ParticleSystem(Texture texture, Vector3f position, int texturePage, float cooldown, float lifeLength) {
+	private Vector3f tempVector = new Vector3f();
+	private float scale;
+	
+	public ParticleComponent(Texture texture, int texturePage, float cooldown, float lifeLength, float scale) {
 		this.texture = texture;
-		this.position = position;
 		this.texturePage = texturePage;
 		this.lifeLength = lifeLength;
 		this.cooldown = cooldown;
+		this.scale = scale;
 		texturePageOffset = new Vector2f(calculateTexturePageXOffset(), calculateTexturePageYOffset());
 	}
 
@@ -41,28 +43,21 @@ public class ParticleSystem {
 		return (float) row / (float) texture.getAtlasSize();
 	}
 
-	public void update(List<Particle> particles, Camera camera, float dt) {
+	public void update(Vector3f position, Vector3f velocity, List<Particle> particles, Camera camera, float dt) {
 		timeCounter += dt;
 		if (timeCounter >= cooldown && !removeThis) {
 			timeCounter -= cooldown;
 			float dirX = (float) Math.random() * 2f - 1f;
 			float dirZ = (float) Math.random() * 2f - 1f;
 			float dirY = (float) Math.random() * 2f - 1f;
-			Vector3f velocity = new Vector3f(dirX, dirY, dirZ);
-			velocity.normalize();
-			velocity.mul(1);
-			particles.add(new Particle(this, new Vector3f(position), velocity, (float) (Math.random() * 360), 1, texturePage, false));
+			tempVector.set(dirX, dirY, dirZ).normalize().mul(10);
+			velocity.mul(0.5f).add(tempVector);
+			particles.add(new Particle(this, position, velocity, (float) (Math.random() * 360), scale, texturePage, false));
 		}
 	}
 
-	private Vector3f tempVector = new Vector3f();
-	
-	public void setPosition(Vector3f position) {
-		this.position.set(position);
-	}
-
 	public boolean update(Particle particle, Camera camera, float delta) {
-		particle.getPosition().add(particle.getVelocity().mul(delta, tempVector));
+		particle.getPosition().fma(delta, particle.getVelocity());
 		particle.setElapsedTime(particle.getElapsedTime() + delta);
 		particle.setDistanceToCamera(camera.getPosition().sub(particle.getPosition(), tempVector).lengthSquared());
 		updateTextureCoordinate(particle);
@@ -85,6 +80,10 @@ public class ParticleSystem {
 		int row = index / texture.getAtlasSize();
 		offset.x = (float) column / texture.getAtlasSize() / texture.getTexturePages() + texturePageOffset.x;
 		offset.y = (float) row / texture.getAtlasSize() / texture.getTexturePages() + texturePageOffset.y;
+	}
+
+	@Override
+	protected void removeComponent() {
 	}
 
 }

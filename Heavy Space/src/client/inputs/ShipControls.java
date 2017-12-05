@@ -1,12 +1,10 @@
-package client.main;
+package client.inputs;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import client.display.DisplayManager;
-import client.inputs.KeyboardHandler;
-import client.inputs.MouseHandler;
 
 public class ShipControls {
 	private static final int Horitonzal = 0, Vertical = 1, Null = -1;
@@ -29,8 +27,8 @@ public class ShipControls {
 	private float KB_SENSITIVITY_PITCH = 1f;
 	private float KB_SENSITIVITY_ROLL = 1f;
 
-	private static int KB_FIRE_PRIMARY = GLFW.GLFW_KEY_E;
-	private static int KB_FIRE_SECONDARY = GLFW.GLFW_KEY_E;
+	private static int KB_FIRE_PRIMARY = Null;
+	private static int KB_FIRE_SECONDARY = Null;
 
 	private static int MB_FIRE_PRIMARY = GLFW.GLFW_MOUSE_BUTTON_1;
 	private static int MB_FIRE_SECONDARY = GLFW.GLFW_MOUSE_BUTTON_2;
@@ -45,15 +43,28 @@ public class ShipControls {
 	private float MOUSE_INVERT_HORIZONTAL = 1f;
 	private float MOUSE_INVERT_VERTICAL = -1f;
 
-	private Vector3f linearDirection = new Vector3f();
-	private Vector3f angularDirection = new Vector3f();
+	// public Vector3f linearDirection = new Vector3f();
+	public Vector3f angularDirection = new Vector3f();
 
-	private boolean primary;
-	private boolean secondary;
+	public boolean primary;
+	public boolean secondary;
+
+	public boolean forwardThrust;
+	public boolean reverseThrust;
+	public boolean starboardThrust;
+	public boolean portThrust;
+	public boolean ascend;
+	public boolean decend;
 
 	public void process() {
-		linearDirection.set(0, 0, 0);
+		// linearDirection.set(0, 0, 0);
 		angularDirection.set(0, 0, 0);
+		forwardThrust = false;
+		reverseThrust = false;
+		starboardThrust = false;
+		portThrust = false;
+		ascend = false;
+		decend = false;
 		primary = false;
 		secondary = false;
 
@@ -93,24 +104,53 @@ public class ShipControls {
 
 		if (MouseHandler.mouseDown(MB_FIRE_PRIMARY))
 			primary = true;
-		if (MouseHandler.mouseDown(MB_FIRE_SECONDARY))
+		if (MouseHandler.mouseDownOnce(MB_FIRE_SECONDARY))
 			secondary = true;
 
-		if (KeyboardHandler.kb_keyDown(KB_FORWARD_THRUST))
-			linearDirection.z++;
-		if (KeyboardHandler.kb_keyDown(KB_REVERSE_THRUST))
-			linearDirection.z--;
-		if (KeyboardHandler.kb_keyDown(KB_STARBOARD_THRUST))
-			linearDirection.x++;
-		if (KeyboardHandler.kb_keyDown(KB_PORT_THRUST))
-			linearDirection.x--;
-		if (KeyboardHandler.kb_keyDown(KB_ASCEND))
-			linearDirection.y++;
-		if (KeyboardHandler.kb_keyDown(KB_DECEND))
-			linearDirection.y--;
+		// if (KeyboardHandler.kb_keyDown(KB_FORWARD_THRUST))
+		// linearDirection.z++;
+		// if (KeyboardHandler.kb_keyDown(KB_REVERSE_THRUST))
+		// linearDirection.z---;
+		// if (KeyboardHandler.kb_keyDown(KB_STARBOARD_THRUST))
+		// linearDirection.x++;
+		// if (KeyboardHandler.kb_keyDown(KB_PORT_THRUST))
+		// linearDirection.x--;
+		// if (KeyboardHandler.kb_keyDown(KB_ASCEND))
+		// linearDirection.y++;
+		// if (KeyboardHandler.kb_keyDown(KB_DECEND))
+		// linearDirection.y--;
+		//
+		// if (linearDirection.length() > 0)
+		// linearDirection.normalize();
+		//
+		// if (KeyboardHandler.kb_keyDown(KB_YAW_RIGHT))
+		// angularDirection.x += KB_SENSITIVITY_YAW;
+		// if (KeyboardHandler.kb_keyDown(KB_YAW_LEFT))
+		// angularDirection.x -= KB_SENSITIVITY_YAW;
+		// if (KeyboardHandler.kb_keyDown(KB_PITCH_UP))
+		// angularDirection.y += KB_SENSITIVITY_PITCH;
+		// if (KeyboardHandler.kb_keyDown(KB_PITCH_DOWN))
+		// angularDirection.y -= KB_SENSITIVITY_PITCH;
+		// if (KeyboardHandler.kb_keyDown(KB_ROLL_RIGHT))
+		// angularDirection.z += KB_SENSITIVITY_ROLL;
+		// if (KeyboardHandler.kb_keyDown(KB_ROLL_LEFT))
+		// angularDirection.z -= KB_SENSITIVITY_ROLL;
 
-		if (linearDirection.length() > 0)
-			linearDirection.normalize();
+		if (KeyboardHandler.kb_keyDown(KB_FORWARD_THRUST))
+			forwardThrust = true;
+		if (KeyboardHandler.kb_keyDown(KB_REVERSE_THRUST))
+			reverseThrust = true;
+		if (KeyboardHandler.kb_keyDown(KB_STARBOARD_THRUST))
+			starboardThrust = true;
+		if (KeyboardHandler.kb_keyDown(KB_PORT_THRUST))
+			portThrust = true;
+		if (KeyboardHandler.kb_keyDown(KB_ASCEND))
+			ascend = true;
+		if (KeyboardHandler.kb_keyDown(KB_DECEND))
+			decend = true;
+
+		// if (linearDirection.length() > 0)
+		// linearDirection.normalize();
 
 		if (KeyboardHandler.kb_keyDown(KB_YAW_RIGHT))
 			angularDirection.x += KB_SENSITIVITY_YAW;
@@ -127,24 +167,12 @@ public class ShipControls {
 
 		if (KeyboardHandler.kb_keyDown(KB_FIRE_PRIMARY))
 			primary = true;
-		if (KeyboardHandler.kb_keyDown(KB_FIRE_SECONDARY))
+		if (KeyboardHandler.kb_keyDownOnce(KB_FIRE_SECONDARY))
 			secondary = true;
 	}
 
-	public Vector3f getLinearDirection() {
-		return linearDirection;
-	}
-
-	public Vector3f getAngularVelocity() {
-		return angularDirection;
-	}
-
-	public boolean getFirePrimary() {
-		return primary;
-	}
-
-	public boolean getFireSecondary() {
-		return secondary;
-	}
+	// public Vector3f getLinearDirection() {
+	// return linearDirection;
+	// }
 
 }

@@ -41,7 +41,6 @@ public class ClientManager implements EntityContainer {
 		clients.put(uuid, client);
 		uuids.put(client, uuid);
 		client.attach(this);
-		System.out.println("Connection with client \"" + username + "\" established.");
 		clientComponent.start();
 	}
 
@@ -64,16 +63,14 @@ public class ClientManager implements EntityContainer {
 		ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(client, ClientComponent.class);
 
 		// Add existing or create new player for client
-		Entity player = playerManager.getPlayerByUUID(uuid);
+		Entity player = playerManager.getPlayer(clientComponent.getUsername());
 		if (player == null)
-			player = playerManager.createPlayer(uuid);
+			player = playerManager.createPlayer(clientComponent.getUsername());
 		// Add client as active
 		clients.put(uuid, client);
 		clientComponent.setPlayer(player);
 		clientComponent.setUDPInetAddress(address);
 		clientComponent.setUDPPort(port);
-
-		System.out.println("Client \"" + clientComponent.getUsername() + "\" authenticated.");
 		return true;
 	}
 
@@ -97,8 +94,6 @@ public class ClientManager implements EntityContainer {
 			ClientValidatedComponent clientValidatedComponent = (ClientValidatedComponent) entityManager.getComponentInEntity(entity, ClientValidatedComponent.class);
 			ClientPendingComponent pendingValidationComponent = (ClientPendingComponent) entityManager.getComponentInEntity(entity, ClientPendingComponent.class);
 			if (clientComponent.isDisconnected() || (pendingValidationComponent != null && Globals.now - pendingValidationComponent.getTimestamp() > 2000)) {
-				System.out.println(
-						"DISCONNECT PLAYER " + clientComponent.isDisconnected() + " " + (pendingValidationComponent != null && Globals.now - pendingValidationComponent.getTimestamp() > 2000));
 				clientComponent.disconnect();
 				removed.add(entity);
 				continue;
@@ -118,11 +113,9 @@ public class ClientManager implements EntityContainer {
 					sendDataPacket.addShort(Globals.tick);
 					sendDataPacket.addByte((byte) 20);
 					clientComponent.sendData(sendDataPacket.getData());
-//					System.out.println("SERVER TCP RECEIVED: " + RequestType.CLIENT_REQUEST_PING + " " + identifier);
 				}
 					break;
 				case CLIENT_REQUEST_READY: {
-					System.out.println("SERVER TCP RECEIVED: " + RequestType.CLIENT_REQUEST_READY + " " + identifier);
 					if (pendingValidationComponent != null) {
 						if (pendingValidationComponent.isValidated()) {
 							entityManager.removeComponentAll(ClientPendingComponent.class, entity);
@@ -152,7 +145,6 @@ public class ClientManager implements EntityContainer {
 	@Override
 	public void detach(Entity entity) {
 		ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(entity, ClientComponent.class);
-		System.out.println("Player " + clientComponent.getUsername() + " disconnected.");
 		uuids.remove(entity);
 		clients.remove(clientComponent.getUuid());
 	}

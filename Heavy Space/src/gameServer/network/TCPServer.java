@@ -39,7 +39,6 @@ public class TCPServer implements Runnable {
 		InetSocketAddress serverAddress = new InetSocketAddress(ip, port);
 		serverSocket = new ServerSocket();
 		serverSocket.bind(serverAddress);
-		System.out.println("TCP server started. " + ip.getHostAddress() + ":" + port);
 		acceptNewConnections();
 		thread = new Thread(this);
 		thread.start();

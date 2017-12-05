@@ -1,6 +1,8 @@
 package client.main;
 
-public interface ClientController {
+import client.entities.Scene;
+
+public interface GameClientController {
 
 	public void processInputs();
 

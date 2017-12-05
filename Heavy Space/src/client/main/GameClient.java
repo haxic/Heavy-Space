@@ -1,6 +1,7 @@
 package client.main;
 
 import client.display.DisplayManager;
+import client.gameData.ClientGameFactory;
 import client.gameData.GameModelLoader;
 import client.network.ConnectionManager;
 import client.network.GameServerData;
@@ -23,21 +24,18 @@ public class GameClient {
 
 	private MenuController menuController;
 	private GameController gameController;
-	private ClientController currentController;
-	private EntityManager entityManager;
-	private ClientGameFactory clientGameFactory;
+	private GameClientController currentController;
 
 	public GameClient(GameServerData gameServerData) {
-		entityManager = new EntityManager();
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
 		gameModelLoader = new GameModelLoader(loader);
-		clientGameFactory = new ClientGameFactory(entityManager, gameModelLoader);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler);
-		renderManager = new RenderManager(entityManager, displayManager, loader, gameModelLoader.particleAtlasTexture);
+		renderManager = new RenderManager(displayManager, loader, gameModelLoader.particleAtlasTexture);
 
-		menuController = new MenuController(entityManager, eventHandler, clientGameFactory, gameServerData);
+		
+		menuController = new MenuController(eventHandler, gameServerData, gameModelLoader);
 		currentController = menuController;
 
 		loop();
@@ -59,7 +57,7 @@ public class GameClient {
 				if (gameController != null)
 					gameController.close();
 				if (connectionManager.joinServer(gameServerData)) {
-					gameController = new GameController(entityManager, eventHandler, clientGameFactory, connectionManager);
+					gameController = new GameController(eventHandler, connectionManager, gameModelLoader);
 					currentController = gameController;
 				}
 				break;
@@ -73,7 +71,6 @@ public class GameClient {
 			case CLIENT_EVENT_SERVER_FAILED_TO_CONNECT:
 				currentController = menuController;
 				gameController = null;
-				System.out.println(event.type + ": " + event.data[0]);
 				break;
 			case CLIENT_EVENT_CREATE_UNIT:
 				if (gameController != null)
@@ -83,6 +80,14 @@ public class GameClient {
 				if (gameController != null)
 					gameController.updateUnitFromEvent(event);
 				break;
+			case CLIENT_EVENT_UPDATE_SNAPSHOT:
+				if (gameController != null)
+					gameController.updateSnapshotFromEvent(event);
+				break;
+			case CLIENT_EVENT_SPAWN_PLAYER_SHIP:
+				if (gameController != null)
+					gameController.spawnPlayerShipFromEvent(event);
+				break;
 			default:
 				break;
 			}
@@ -90,7 +95,8 @@ public class GameClient {
 	}
 
 	private void loop() {
-		long timer = System.currentTimeMillis();
+		long fpsTimer = System.currentTimeMillis();
+		long pingTimer = fpsTimer;
 		// long removeTimer = timer;
 		// int removeId = 0;
 		int frames = 0;
@@ -100,16 +106,16 @@ public class GameClient {
 			currentController.processInputs();
 			handleEvents();
 			currentController.update();
-			renderManager.render(currentController.getScene());
+			renderManager.render(currentController.getScene(), Globals.dt);
 			displayManager.updateDisplay();
 			frames++;
-			if (Globals.now - timer >= 500) {
+			if (Globals.now - pingTimer >= 500) {
 				connectionManager.ping();
-				timer += 500;
-				// System.out.println("TCP/UDP ping: " + tcpPinger.toString() + " " + udpPinger.toString());
-				// System.out.println("Fps: " + frames + ". Entities:" +
-				// entityManager.numberOfEntities() + ". Components:" +
-				// entityManager.numberOfComponents() + ".");
+				pingTimer += 500;
+			}
+			if (Globals.now - fpsTimer >= 1000) {
+				fpsTimer += 1000;
+				System.out.println("Fps: " + frames);
 				frames = 0;
 			}
 		}

@@ -14,7 +14,7 @@ import hecs.EntityManager;
 
 public class PlayerManager implements EntityContainer {
 	public Map<String, Entity> players;
-	private int playerCounter;
+	private short playerCounter;
 	private EntityManager entityManager;
 
 	public PlayerManager(EntityManager entityManager) {
@@ -22,14 +22,14 @@ public class PlayerManager implements EntityContainer {
 		players = new HashMap<>();
 	}
 
-	public Entity getPlayerByUUID(String uuid) {
+	public Entity getPlayer(String uuid) {
 		return players.get(uuid);
 	}
 
 	public Entity createPlayer(String uuid) {
 		Entity player = entityManager.createEntity();
 		players.put(uuid, player);
-		entityManager.addComponent(new PlayerComponent(playerCounter++), player);
+		entityManager.addComponent(new PlayerComponent(++playerCounter), player);
 		player.attach(this);
 		return player;
 	}
