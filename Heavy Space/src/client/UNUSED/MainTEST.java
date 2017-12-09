@@ -155,7 +155,7 @@ public class MainTEST {
 			dataPacket.addInteger((int) (position.y * 1000));
 			dataPacket.addInteger((int) (position.z * 1000));
 			dataPacket.addByte((byte) 20);
-			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), address, config.gameServerDefaultPort);
+			DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), address, config.gameServerDefaultPort);
 			udp.sendData(datagramPacket);
 			// Logic
 			float bounceFactor = (float) Math.cos(((currentTimeMillis % 6100.0) / 1000.0));

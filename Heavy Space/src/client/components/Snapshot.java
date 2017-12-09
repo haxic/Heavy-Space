@@ -7,12 +7,14 @@ public class Snapshot {
 	private Vector3f position;
 	private Vector3f forward;
 	private Vector3f up;
+	private Vector3f right;
 
-	public Snapshot(short tick, Vector3f position, Vector3f forward, Vector3f up) {
+	public Snapshot(short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
 		this.tick = tick;
 		this.position = position;
 		this.forward = forward;
 		this.up = up;
+		this.right = right;
 	}
 
 	public short getTick() {
@@ -29,5 +31,9 @@ public class Snapshot {
 	
 	public Vector3f getUp() {
 		return up;
+	}
+	
+	public Vector3f getRight() {
+		return right;
 	}
 }

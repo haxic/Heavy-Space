@@ -184,15 +184,16 @@ public class GameController implements GameClientController {
 			Vector3f position = (Vector3f) event.data[3];
 			Vector3f forward = (Vector3f) event.data[4];
 			Vector3f up = (Vector3f) event.data[5];
+			Vector3f right = (Vector3f) event.data[6];
 			SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
-			snapshotComponent.add(tick, position, forward, up);
+			snapshotComponent.add(tick, position, forward, up, right);
 		} else {
 			// System.out.println("UPDATE WITHOUT SNAPSHOT " + eeid);
 		}
 		if (flags[1]) {
 			DeathComponent deathComponent = null;
 			if (flags[2]) {
-				int killingEEID = (int) event.data[6];
+				int killingEEID = (int) event.data[7];
 				Entity killingEntity = gameModel.getEntity(killingEEID);
 				if (killingEntity != null) {
 					deathComponent = new DeathComponent(tick, killingEntity);
@@ -228,7 +229,7 @@ public class GameController implements GameClientController {
 				lastTick = tick;
 			int diff = lastTick - firstTick;
 			if (diff > 3) {
-				Globals.tick = (short) (lastTick - 2);
+				Globals.tick = (short) (lastTick - 1);
 				running = true;
 				System.out.println("RUN");
 			} else {

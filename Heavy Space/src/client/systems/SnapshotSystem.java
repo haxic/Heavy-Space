@@ -65,7 +65,6 @@ public class SnapshotSystem {
 	private void interpolate(float dt, ObjectComponent unitComponent, SnapshotComponent snapshotComponent) {
 		// TODO: figure out why this is here?
 		snapshotComponent.getDifference();
-		
 		snapshotComponent.getNext().getPosition().sub(snapshotComponent.getCurrent().getPosition(), tempVector);
 		unitComponent.getPosition().set(snapshotComponent.getCurrent().getPosition()).fma(dt, tempVector);
 		
@@ -74,6 +73,9 @@ public class SnapshotSystem {
 		
 		snapshotComponent.getNext().getUp().sub(snapshotComponent.getCurrent().getUp(), tempVector);
 		unitComponent.getUp().set(snapshotComponent.getCurrent().getUp()).fma(dt, tempVector);
+		
+		snapshotComponent.getNext().getRight().sub(snapshotComponent.getCurrent().getRight(), tempVector);
+		unitComponent.getRight().set(snapshotComponent.getCurrent().getRight()).fma(dt, tempVector);
 	}
 
 }

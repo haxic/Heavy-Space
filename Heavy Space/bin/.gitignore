@@ -1,7 +1,8 @@
-/gameServer/
 /client/
+/gameServer/
+/hecs/
+/masterServer/
+/security/
 /shared/
 /tests/
 /utilities/
-/hecs/
-/authenticationServer/

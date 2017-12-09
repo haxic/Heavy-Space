@@ -57,14 +57,14 @@ public class UDPRequestHandler {
 						PlayerComponent player = (PlayerComponent) entityManager.getComponentInEntity(playerEntity, PlayerComponent.class);
 						sendDataPacket.addShort(player.getPlayerID()); // 5-6, Request identifier
 						sendDataPacket.addByte((byte) 20); // 7, End data packet
-						sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.getCurrentDataSize(), datagramPacket.getAddress(), datagramPacket.getPort());
+						sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.size(), datagramPacket.getAddress(), datagramPacket.getPort());
 					} else {
 						DataPacket sendDataPacket = new DataPacket(new byte[4]);
 						sendDataPacket.addByte(type); // 0, requestType
 						sendDataPacket.addByte(identifier); // 1, Request identifier
 						sendDataPacket.addByte((byte) 0); // 2, Response, 0 = not authenticated
 						sendDataPacket.addByte((byte) 20); // 3, End data packet
-						sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.getCurrentDataSize(), datagramPacket.getAddress(), datagramPacket.getPort());
+						sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.size(), datagramPacket.getAddress(), datagramPacket.getPort());
 					}
 					udpServer.sendData(sendDatagramPacket);
 					break;
@@ -120,7 +120,7 @@ public class UDPRequestHandler {
 					sendDataPacket.addShort(Globals.tick); // 2-3
 					sendDataPacket.addByte((byte) 20); // 4
 					clientComponent.sendData(sendDataPacket.getData());
-					DatagramPacket sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.getCurrentDataSize(), datagramPacket.getAddress(), datagramPacket.getPort());
+					DatagramPacket sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.size(), datagramPacket.getAddress(), datagramPacket.getPort());
 					udpServer.sendData(sendDatagramPacket);
 				}
 					break;

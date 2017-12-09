@@ -16,10 +16,10 @@ public class SnapshotComponent extends EntityComponent {
 	Snapshot current;
 	Snapshot next;
 
-	public SnapshotComponent(short playerID, short tick, Vector3f position, Vector3f forward, Vector3f up) {
+	public SnapshotComponent(short playerID, short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
 		this.playerID = playerID;
 		snapshots = new LinkedList();
-		current = new Snapshot(tick, position, forward, up);
+		current = new Snapshot(tick, position, forward, up, right);
 		next = current;
 	}
 
@@ -41,11 +41,11 @@ public class SnapshotComponent extends EntityComponent {
 		return snapshots.peekFirst();
 	}
 
-	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up) {
+	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
 		Snapshot next = snapshots.peekLast();
 		// Add snapshot if new tick is after latest tick or if new tick is in minimum bracket while latest tick is in maximum bracket
 		if (isAfter(tick, current.getTick()) && (next == null || isAfter(tick, next.getTick())))
-			snapshots.addLast(new Snapshot(tick, position, forward, up));
+			snapshots.addLast(new Snapshot(tick, position, forward, up, right));
 	}
 
 	public boolean isAfter(short newTick, short latestTick) {

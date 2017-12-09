@@ -128,18 +128,19 @@ public class ClientGameFactory {
 		Vector3f position = (Vector3f) event.data[5];
 		Vector3f forward = (Vector3f) event.data[6];
 		Vector3f up = (Vector3f) event.data[7];
+		Vector3f right = (Vector3f) event.data[8];
 		
 		switch (entityType) {
 		case 0: {
 			short ownerEntityID = (short) event.data[4];
 			entity = createShip(entityVariation, position);
-			entityManager.addComponent(new SnapshotComponent(ownerEntityID, tick, position, forward, up), entity);
+			entityManager.addComponent(new SnapshotComponent(ownerEntityID, tick, position, forward, up, right), entity);
 			entityManager.addComponent(new SpawnComponent(tick), entity);
 		}
 			break;
 		case 1: {
 			short ownerEntityID = (short) event.data[4];
-			Vector3f velocity = (Vector3f) event.data[8];
+			Vector3f velocity = (Vector3f) event.data[9];
 			switch (entityVariation) {
 			case 0:
 				entity = createCannonProjectile(ownerEntityID, position, velocity);

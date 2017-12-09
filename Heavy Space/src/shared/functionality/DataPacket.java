@@ -1,5 +1,7 @@
 package shared.functionality;
 
+import java.nio.ByteBuffer;
+
 public class DataPacket {
 
 	byte[] data;
@@ -26,6 +28,14 @@ public class DataPacket {
 		data[adder++] = (byte) (value >> Byte.SIZE * 3);
 	}
 
+	public void addFloat(float value) {
+		byte[] bytes = ByteBuffer.allocate(4).putFloat(value).array();
+
+		for (int i = 0; i < bytes.length; i++) {
+			data[adder++] = bytes[i];
+		}
+	}
+
 	public void addString(String string) {
 		for (int i = 0; i < string.length(); i++) {
 			char value = string.charAt(i);
@@ -38,11 +48,6 @@ public class DataPacket {
 		data[position] = value;
 	}
 
-	// public void shortToByteArray(short value) {
-	// data[1] = (byte) (value >> Byte.SIZE);
-	// data[0] = (byte) value;
-	// }
-
 	public String getStringAt(int start, int length) {
 		String string = "";
 		for (int i = 0; i < length; i++) {
@@ -51,7 +56,13 @@ public class DataPacket {
 		}
 		return string;
 	}
-	
+
+	public float getFloatAt(int start) {
+		byte[] bytes = new byte[] { data[start], data[start + 1], data[start + 2], data[start + 3] };
+		float value = ByteBuffer.wrap(bytes).getFloat();
+		return value;
+	}
+
 	public int getIntegerAt(int start) {
 		int value = (data[start + 3] << (Byte.SIZE * 3));
 		value |= (data[start + 2] & 0xFF) << (Byte.SIZE * 2);
@@ -86,6 +97,12 @@ public class DataPacket {
 		return string;
 	}
 
+	public float getFloat() {
+		float value = getFloatAt(getter);
+		getter += 4;
+		return value;
+	}
+
 	public int getInteger() {
 		int value = getIntegerAt(getter);
 		getter += 4;
@@ -111,14 +128,18 @@ public class DataPacket {
 	}
 
 	public byte[] getData() {
+//		byte[] data = new byte[adder];
+//		for (int i = 0; i < data.length; i++) {
+//			data[i] = this.data[i];
+//		}
 		return data;
 	}
 
-	public int getCurrentDataSize() {
+	public int size() {
 		return adder;
 	}
 
-	public int getMaxDataSize() {
+	public int maxSize() {
 		return data.length;
 	}
 

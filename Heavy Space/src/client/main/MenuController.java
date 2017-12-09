@@ -65,7 +65,7 @@ public class MenuController implements GameClientController {
 		// scene.addEntity(gameFactory.createBot(new Vector3f(-20, 0, -20),15f, -1f));
 		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), 10f, 1f));
 		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), 15f, -1f));
-		scene.addActorEntity(clientGameFactory.createBot(new Vector3f(50, 50, 20), 25f, 1f));
+		scene.addActorEntity(clientGameFactory.createBot(new Vector3f(50, 50, 20), 1f, 1f));
 		scene.addActorEntity(clientGameFactory.createBox(new Vector3f(0, 0, -50)));
 	}
 

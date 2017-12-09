@@ -26,7 +26,7 @@ public class DataPacketTest {
 		Vector3f orientation = new Vector3f(orientationX, orientationY, orientationZ);
 
 		// Check data packet size before adding anything
-		assertEquals(0, dataPacket.getCurrentDataSize());
+		assertEquals(0, dataPacket.size());
 
 		// Add message type
 		dataPacket.addByte(messageType);
@@ -35,7 +35,7 @@ public class DataPacketTest {
 		// Add position
 		dataPacket.addInteger((int) (position.x * 1000));
 		dataPacket.addInteger((int) (position.y * 1000));
-		dataPacket.addInteger((int) (position.z * 1000));
+		dataPacket.addFloat(position.z);
 		// Add orientation
 		dataPacket.addShort((short) (orientation.x * 100));
 		dataPacket.addShort((short) (orientation.y * 100));
@@ -46,7 +46,7 @@ public class DataPacketTest {
 		dataPacket.addByte(finish);
 
 		// Check data packet size after filling it
-		assertEquals(81, dataPacket.getCurrentDataSize());
+		assertEquals(81, dataPacket.size());
 
 		// System.out.println("--------------------------------------");
 		// ----------- Serial data extraction -----------
@@ -54,7 +54,7 @@ public class DataPacketTest {
 		byte size1 = dataPacket.getByte();
 		float posX1 = dataPacket.getInteger() / 1000.0f;
 		float posY1 = dataPacket.getInteger() / 1000.0f;
-		float posZ1 = dataPacket.getInteger() / 1000.0f;
+		float posZ1 = dataPacket.getFloat();
 		float oriX1 = dataPacket.getShort() / 100.0f;
 		float oriY1 = dataPacket.getShort() / 100.0f;
 		float oriZ1 = dataPacket.getShort() / 100.0f;
@@ -90,7 +90,7 @@ public class DataPacketTest {
 		byte size2 = dataPacket.getByteAt(1);
 		float posX2 = dataPacket.getIntegerAt(2) / 1000.0f;
 		float posY2 = dataPacket.getIntegerAt(6) / 1000.0f;
-		float posZ2 = dataPacket.getIntegerAt(10) / 1000.0f;
+		float posZ2 = dataPacket.getFloatAt(10);
 		float oriX2 = dataPacket.getShortAt(14) / 100.0f;
 		float oriY2 = dataPacket.getShortAt(16) / 100.0f;
 		float oriZ2 = dataPacket.getShortAt(18) / 100.0f;

@@ -153,7 +153,7 @@ public class ConnectionManager {
 		dataPacket.addString(uuid); // 1-64
 		dataPacket.addByte(identifier); // 65, Packet identifier
 		dataPacket.addByte((byte) 20); // 66, End data packet
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), gameServerData.getIP(), gameServerData.getPort());
 
 		udpRequests.add(new UDPRequest(RequestType.CLIENT_REQUEST_AUTHENTICATE_UDP, identifier, datagramPacket, true));
 		udpServer.sendData(datagramPacket);
@@ -217,30 +217,36 @@ public class ConnectionManager {
 					short playerID = 0;
 					if (entityType != 2)
 						playerID = dataPacket.getShort(); // 11-12, Entity variation (what variation of the type)
-					float positionX = dataPacket.getInteger() / 1000.0f; // 13-16, Position x
-					float positionY = dataPacket.getInteger() / 1000.0f; // 17-20, Position y
-					float positionZ = dataPacket.getInteger() / 1000.0f; // 21-24, Position z
+					float positionX = dataPacket.getFloat(); // 13-16, Position x
+					float positionY = dataPacket.getFloat(); // 17-20, Position y
+					float positionZ = dataPacket.getFloat(); // 21-24, Position z
 					Vector3f position = new Vector3f(positionX, positionY, positionZ);
 					Vector3f forward = null;
 					Vector3f up = null;
+					Vector3f right = null;
 					Vector3f velocity = null;
 					if (entityType == 1) {
-						float velocityX = dataPacket.getInteger() / 1000.0f; // 25-28, Velocity x
-						float velocityY = dataPacket.getInteger() / 1000.0f; // 29-32, Velocity y
-						float velocityZ = dataPacket.getInteger() / 1000.0f; // 33-36, Velocity z
+						float velocityX = dataPacket.getFloat(); // 25-28, Velocity x
+						float velocityY = dataPacket.getFloat(); // 29-32, Velocity y
+						float velocityZ = dataPacket.getFloat(); // 33-36, Velocity z
 						velocity = new Vector3f(velocityX, velocityY, velocityZ);
 					}
 					if (entityType != 1) {
-						float forwardX = dataPacket.getShort() / 100.0f; // 25-26, Forward x
-						float forwardY = dataPacket.getShort() / 100.0f; // 27-28, Forward y
-						float forwardZ = dataPacket.getShort() / 100.0f; // 29-30, Forward z
+						float forwardX = dataPacket.getFloat(); // 22-25, Forward x
+						float forwardY = dataPacket.getFloat(); // 26-29, Forward y
+						float forwardZ = dataPacket.getFloat(); // 30-33, Forward z
 						forward = new Vector3f(forwardX, forwardY, forwardZ);
-						float upX = dataPacket.getShort() / 100.0f; // 31-32, Up x
-						float upY = dataPacket.getShort() / 100.0f; // 33-34, Up y
-						float upZ = dataPacket.getShort() / 100.0f; // 35-36, Up z
+						float upX = dataPacket.getFloat(); // 34-29, Up x
+						float upY = dataPacket.getFloat(); // 38-41, Up y
+						float upZ = dataPacket.getFloat(); // 42-45, Up z
 						up = new Vector3f(upX, upY, upZ);
+						float rightX = dataPacket.getFloat(); // 46-49, Right x
+						float rightY = dataPacket.getFloat(); // 50-53, Right y
+						float rightZ = dataPacket.getFloat(); // 54-57, Right z
+						right = new Vector3f(rightX, rightY, rightZ);
+						System.out.println(right);
 					}
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, playerID, position, forward, up, velocity));
+					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, playerID, position, forward, up, right, velocity));
 				}
 			}
 				break;
@@ -256,26 +262,31 @@ public class ConnectionManager {
 					Vector3f position = null;
 					Vector3f forward = null;
 					Vector3f up = null;
+					Vector3f right = null;
 					int killingEeid = 0;
 
 					if (flags[0]) {
-						float positionX = dataPacket.getInteger() / 1000.0f; // 10-13, Position x
-						float positionY = dataPacket.getInteger() / 1000.0f; // 14-17, Position y
-						float positionZ = dataPacket.getInteger() / 1000.0f; // 18-21, Position z
+						float positionX = dataPacket.getFloat(); // 10-13, Position x
+						float positionY = dataPacket.getFloat(); // 14-17, Position y
+						float positionZ = dataPacket.getFloat(); // 18-21, Position z
 						position = new Vector3f(positionX, positionY, positionZ);
-						float forwardX = dataPacket.getShort() / 100.0f; // 10-13, Forward x
-						float forwardY = dataPacket.getShort() / 100.0f; // 14-17, Forward y
-						float forwardZ = dataPacket.getShort() / 100.0f; // 18-21, Forward z
+						float forwardX = dataPacket.getFloat(); // 22-25, Forward x
+						float forwardY = dataPacket.getFloat(); // 26-29, Forward y
+						float forwardZ = dataPacket.getFloat(); // 30-33, Forward z
 						forward = new Vector3f(forwardX, forwardY, forwardZ);
-						float upX = dataPacket.getShort() / 100.0f; // 10-13, Up x
-						float upY = dataPacket.getShort() / 100.0f; // 14-17, Up y
-						float upZ = dataPacket.getShort() / 100.0f; // 18-21, Up z
+						float upX = dataPacket.getFloat(); // 34-29, Up x
+						float upY = dataPacket.getFloat(); // 38-41, Up y
+						float upZ = dataPacket.getFloat(); // 42-45, Up z
 						up = new Vector3f(upX, upY, upZ);
+						float rightX = dataPacket.getFloat(); // 46-49, Right x
+						float rightY = dataPacket.getFloat(); // 50-53, Right y
+						float rightZ = dataPacket.getFloat(); // 54-57, Right z
+						right = new Vector3f(rightX, rightY, rightZ);
 					}
 					if (flags[2]) {
 						killingEeid = dataPacket.getInteger(); // 22-25, Killing entity id
 					}
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, flags, position, forward, up, killingEeid));
+					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, flags, position, forward, up, right, killingEeid));
 				}
 				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_SNAPSHOT, tick));
 			}
@@ -400,7 +411,7 @@ public class ConnectionManager {
 		dataPacket.addByte(identifier); // 65
 		dataPacket.addShort(udpPinger.getAverageMS()); // 66-67
 		dataPacket.addByte((byte) 20); // 68
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), gameServerData.getIP(), gameServerData.getPort());
 		udpRequests.add(new UDPRequest(requestType, identifier, datagramPacket, false));
 		udpServer.sendData(datagramPacket);
 	}
@@ -420,7 +431,7 @@ public class ConnectionManager {
 		dataPacket.addInteger((int) (shipControls.angularDirection.y * 1000)); // 73-76, Rotation y
 		dataPacket.addInteger((int) (shipControls.angularDirection.z * 1000)); // 77-80, Rotation z
 		dataPacket.addInteger((int) (Globals.dt * 10000)); // 81-84, Rotation z
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), gameServerData.getIP(), gameServerData.getPort());
 		udpServer.sendData(datagramPacket);
 	}
 
@@ -434,7 +445,7 @@ public class ConnectionManager {
 		dataPacket.addByte(identifier); // 65
 		dataPacket.addShort(Globals.tick); // 66-67
 		dataPacket.addByte((byte) 20); // 68
-		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.getCurrentDataSize(), gameServerData.getIP(), gameServerData.getPort());
+		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), gameServerData.getIP(), gameServerData.getPort());
 		udpServer.sendData(datagramPacket);
 	}
 
