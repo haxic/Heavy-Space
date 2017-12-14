@@ -123,7 +123,7 @@ public class SnapshotTransmitterClass {
 				// unit.getPosition().y+ ":" + unit.getPosition().z);
 				// 4 ints = 16 bytes
 				dataPacket.addInteger((int) (updateEntity.getEID())); // 5-8, Entity id
-				dataPacket.addByte(BitConverter.byteFromBooleanArray(tempBools)); // 9, Entity id
+				dataPacket.addByte(BitConverter.byteFromBooleanArray(tempBools)); // 9, Flags id
 				if (tempBools[0]) {
 					dataPacket.addFloat(objectComponent.getPosition().x); // 10-13, Position x
 					dataPacket.addFloat(objectComponent.getPosition().y); // 14-17, Position y
@@ -132,7 +132,7 @@ public class SnapshotTransmitterClass {
 					dataPacket.addFloat(objectComponent.getForward().x); // 22-25, Forward x
 					dataPacket.addFloat(objectComponent.getForward().y); // 26-29, Forward y
 					dataPacket.addFloat(objectComponent.getForward().z); // 30-33, Forward z
-					System.out.println(objectComponent.getForward().x + " " + objectComponent.getForward().y + " " + objectComponent.getForward().z);
+
 					dataPacket.addFloat(objectComponent.getUp().x); // 34-29, Up x
 					dataPacket.addFloat(objectComponent.getUp().y); // 38-41, Up y
 					dataPacket.addFloat(objectComponent.getUp().z); // 42-45, Up z

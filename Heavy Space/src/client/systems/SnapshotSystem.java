@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import client.components.Snapshot;
 import client.components.SnapshotComponent;
+import client.gameData.Snapshot;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.ObjectComponent;

@@ -3,9 +3,9 @@ package client.gameData;
 import org.joml.Vector3f;
 
 import client.components.ActorComponent;
+import client.components.LightComponent;
+import client.components.ParticleComponent;
 import client.components.SnapshotComponent;
-import client.entities.LightComponent;
-import client.entities.Scene;
 import gameServer.components.ShipComponent;
 import hecs.Entity;
 import hecs.EntityManager;
@@ -22,21 +22,21 @@ import shared.functionality.EventType;
 public class ClientGameFactory {
 
 	private EntityManager entityManager;
-	private GameModelLoader gameModelLoader;
+	private GameAssetLoader gameAssetLoader;
 
-	public ClientGameFactory(EntityManager entityManager, GameModelLoader gameModelLoader) {
+	public ClientGameFactory(EntityManager entityManager, GameAssetLoader gameAssetLoader) {
 		this.entityManager = entityManager;
-		this.gameModelLoader = gameModelLoader;
+		this.gameAssetLoader = gameAssetLoader;
 	}
 
 	public void setSkybox(Scene scene) {
-		scene.setSkybox(gameModelLoader.skybox);
+		scene.setSkybox(gameAssetLoader.skybox);
 	}
 	
 	public Entity createDebris(Vector3f position, Vector3f scale) {
 		Entity entity = entityManager.createEntity();
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -44,7 +44,7 @@ public class ClientGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -52,7 +52,7 @@ public class ClientGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(200, 200, 200);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -63,7 +63,7 @@ public class ClientGameFactory {
 		entityManager.addComponent(new AIBotComponent(speed, direction), entity);
 		entityManager.addComponent(new ShipComponent(), entity);
 		entityManager.addComponent(new MovementComponent(), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -73,7 +73,7 @@ public class ClientGameFactory {
 		entityManager.addComponent(new HealthComponent(), entity);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
 		entityManager.addComponent(new ShipComponent(), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -87,7 +87,7 @@ public class ClientGameFactory {
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
 		return entity;
 	}
 
@@ -102,7 +102,7 @@ public class ClientGameFactory {
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
-		entityManager.addComponent(new ParticleComponent(gameModelLoader.particleAtlasTexture, 0, 0.01f, 1, 20), entity);
+		entityManager.addComponent(new ParticleComponent(gameAssetLoader.particleAtlasTexture, 0, 0.01f, 1, 20), entity);
 		entityManager.addComponent(new LightComponent(new Vector3f(0f, 0.5f, 0.5f), new Vector3f(1000f, 0f, 0f)), entity);
 		return entity;
 	}
@@ -111,7 +111,7 @@ public class ClientGameFactory {
 		Entity entity = entityManager.createEntity();
 		entityManager.addComponent(new ObjectComponent(position, new Vector3f(2000, 2000, 2000)), entity);
 		entityManager.addComponent(new LightComponent(color, new Vector3f(10000000, 0, 0)), entity);
-		entityManager.addComponent(new ActorComponent(gameModelLoader.cube), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.cube), entity);
 		return entity;
 	}
 

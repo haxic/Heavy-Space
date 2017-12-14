@@ -1,4 +1,4 @@
-package client.components;
+package client.gameData;
 
 import org.joml.Vector3f;
 

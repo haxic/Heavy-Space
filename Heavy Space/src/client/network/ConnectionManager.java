@@ -274,7 +274,7 @@ public class ConnectionManager {
 						float forwardY = dataPacket.getFloat(); // 26-29, Forward y
 						float forwardZ = dataPacket.getFloat(); // 30-33, Forward z
 						forward = new Vector3f(forwardX, forwardY, forwardZ);
-						float upX = dataPacket.getFloat(); // 34-29, Up x
+						float upX = dataPacket.getFloat(); // 34-37, Up x
 						float upY = dataPacket.getFloat(); // 38-41, Up y
 						float upZ = dataPacket.getFloat(); // 42-45, Up z
 						up = new Vector3f(upX, upY, upZ);

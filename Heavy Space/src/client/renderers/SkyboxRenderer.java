@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import client.entities.Camera;
+import client.gameData.Camera;
 import client.models.Model;
 import client.shaders.SkyboxShader;
 import hecs.EntityManager;

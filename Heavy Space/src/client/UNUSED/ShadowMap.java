@@ -1,4 +1,4 @@
-package client.models;
+package client.UNUSED;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;

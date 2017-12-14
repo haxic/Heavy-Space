@@ -8,7 +8,7 @@ import client.models.Texture;
 import utilities.Loader;
 import utilities.OBJFileLoader;
 
-public class GameModelLoader {
+public class GameAssetLoader {
 	public Model dragon;
 	public Model stall;
 	public Model fern;
@@ -17,7 +17,7 @@ public class GameModelLoader {
 	public Model cube;
 	public Model sphere;
 
-	public GameModelLoader(Loader loader) {
+	public GameAssetLoader(Loader loader) {
 		dragon = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("dragon")), loader.loadTexture("dragon", 1, 1));
 		
 		dragon.putAttachmentPoint(ModelAttachementTag.FRONT, new ModelAttachmentPoint(new Vector3f(10, 0, 0), new Vector3f(0, 0, 0)));

@@ -1,4 +1,4 @@
-package client.entities;
+package client.gameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import client.components.ActorComponent;
+import client.components.LightComponent;
 import client.models.Model;
-import client.renderers.ParticleManager;
 import hecs.Entity;
 import hecs.EntityContainer;
 import hecs.EntityManager;
 
 public class Scene implements EntityContainer {
 
-	public Camera camera;
-	public List<Entity> lights;
-	public Map<Model, List<Entity>> actors;
-	public Model skybox;
-	public ParticleManager particleManager;
+	private Camera camera;
+	private List<Entity> lights;
+	private Map<Model, List<Entity>> actors;
+	private Model skybox;
+	private ParticleManager particleManager;
 	private EntityManager entityManager;
 
 	public Scene(EntityManager entityManager) {
@@ -92,6 +92,26 @@ public class Scene implements EntityContainer {
 		if (lightComponent != null) {
 			lights.remove(entity);
 		}
+	}
+	
+	public Camera getCamera() {
+		return camera;
+	}
+
+	public List<Entity> getLights() {
+		return lights;
+	}
+
+	public Map<Model, List<Entity>> getActors() {
+		return actors;
+	}
+
+	public Model getSkybox() {
+		return skybox;
+	}
+
+	public ParticleManager getParticleManager() {
+		return particleManager;
 	}
 
 	public EntityManager getEntityManager() {

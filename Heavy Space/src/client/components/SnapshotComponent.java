@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import client.gameData.Snapshot;
 import hecs.EntityComponent;
 import shared.functionality.Globals;
 

@@ -1,10 +1,10 @@
-package client.entities;
+package client.gameData;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import client.components.ParticleComponent;
 import client.display.DisplayManager;
-import client.gameData.ParticleComponent;
 import client.models.Texture;
 
 public class Particle {

@@ -1,8 +1,8 @@
-package client.main;
+package client.controllers;
 
 import client.display.DisplayManager;
 import client.gameData.ClientGameFactory;
-import client.gameData.GameModelLoader;
+import client.gameData.GameAssetLoader;
 import client.network.ConnectionManager;
 import client.network.GameServerData;
 import client.renderers.RenderManager;
@@ -12,10 +12,10 @@ import shared.functionality.EventHandler;
 import shared.functionality.Globals;
 import utilities.Loader;
 
-public class GameClient {
+public class MainController {
 	private DisplayManager displayManager;
 	private Loader loader;
-	private GameModelLoader gameModelLoader;
+	private GameAssetLoader gameAssetLoader;
 	private RenderManager renderManager;
 
 	private ConnectionManager connectionManager;
@@ -24,18 +24,18 @@ public class GameClient {
 
 	private MenuController menuController;
 	private GameController gameController;
-	private GameClientController currentController;
+	private IController currentController;
 
-	public GameClient(GameServerData gameServerData) {
+	public MainController(GameServerData gameServerData) {
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
-		gameModelLoader = new GameModelLoader(loader);
+		gameAssetLoader = new GameAssetLoader(loader);
 		eventHandler = new EventHandler();
 		connectionManager = new ConnectionManager(eventHandler);
-		renderManager = new RenderManager(displayManager, loader, gameModelLoader.particleAtlasTexture);
+		renderManager = new RenderManager(displayManager, loader, gameAssetLoader.particleAtlasTexture);
 
 		
-		menuController = new MenuController(eventHandler, gameServerData, gameModelLoader);
+		menuController = new MenuController(eventHandler, gameServerData, gameAssetLoader);
 		currentController = menuController;
 
 		loop();
@@ -57,7 +57,7 @@ public class GameClient {
 				if (gameController != null)
 					gameController.close();
 				if (connectionManager.joinServer(gameServerData)) {
-					gameController = new GameController(eventHandler, connectionManager, gameModelLoader);
+					gameController = new GameController(eventHandler, connectionManager, gameAssetLoader);
 					currentController = gameController;
 				}
 				break;
@@ -106,7 +106,8 @@ public class GameClient {
 			currentController.processInputs();
 			handleEvents();
 			currentController.update();
-			renderManager.render(currentController.getScene(), Globals.dt);
+			currentController.getScene().update(Globals.dt);
+			renderManager.render(currentController.getScene());
 			displayManager.updateDisplay();
 			frames++;
 			if (Globals.now - pingTimer >= 500) {

@@ -13,8 +13,8 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import client.components.ActorComponent;
-import client.entities.Camera;
-import client.entities.LightComponent;
+import client.components.LightComponent;
+import client.gameData.Camera;
 import client.models.Mesh;
 import client.models.Model;
 import client.models.Texture;

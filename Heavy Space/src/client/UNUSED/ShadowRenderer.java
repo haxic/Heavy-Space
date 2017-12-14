@@ -15,13 +15,12 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import client.components.ActorComponent;
+import client.components.LightComponent;
 import client.display.DisplayManager;
-import client.entities.Camera;
-import client.entities.LightComponent;
+import client.gameData.Camera;
 import client.models.Mesh;
 import client.models.Model;
 import client.models.ModelAttachmentPoint;
-import client.models.ShadowMap;
 import client.models.Texture;
 import client.shaders.EntityShader;
 import shared.game.Entity;

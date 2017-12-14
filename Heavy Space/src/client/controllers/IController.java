@@ -1,8 +1,8 @@
-package client.main;
+package client.controllers;
 
-import client.entities.Scene;
+import client.gameData.Scene;
 
-public interface GameClientController {
+public interface IController {
 
 	public void processInputs();
 

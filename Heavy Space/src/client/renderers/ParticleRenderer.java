@@ -10,8 +10,8 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 
-import client.entities.Camera;
-import client.entities.Particle;
+import client.gameData.Camera;
+import client.gameData.Particle;
 import client.models.Mesh;
 import client.models.Texture;
 import client.shaders.ParticleShader;
@@ -63,8 +63,9 @@ public class ParticleRenderer {
 		pointer = 0;
 		float[] vboData = new float[particles.size() * INSTANCE_DATA_LENGTH];
 		for (Particle particle : particles) {
-			updateModelViewMatrix(particle, viewMatrix, vboData);
-			updateTextureCoordinateData(particle, vboData);
+			Matrix4f modelViewMatrix = updateModelViewMatrix(particle, viewMatrix, vboData);
+			storeMatrixData(modelViewMatrix, vboData);
+			updateUVCoordinateData(particle, vboData);
 		}
 		loader.updateVBO(vboID, vboData, buffer);
 		GL31.glDrawArraysInstanced(GL11.GL_TRIANGLE_STRIP, 0, quad.getIndicesSize(), particles.size());
@@ -80,7 +81,7 @@ public class ParticleRenderer {
 
 	private static Matrix4f tempMatrix = new Matrix4f();
 
-	private void updateModelViewMatrix(Particle particle, Matrix4f viewMatrix, float[] vboData) {
+	private Matrix4f updateModelViewMatrix(Particle particle, Matrix4f viewMatrix, float[] vboData) {
 		Matrix4f modelMatrix = tempMatrix.identity();
 		modelMatrix.translate(particle.getPosition());
 		modelMatrix.m00(viewMatrix.m00());
@@ -95,7 +96,7 @@ public class ParticleRenderer {
 		Matrix4f modelViewMatrix = viewMatrix.mul(modelMatrix, tempMatrix);
 		modelViewMatrix.rotateZ((float) Math.toRadians(particle.getRotation()));
 		modelViewMatrix.scale(particle.getScale());
-		storeMatrixData(modelViewMatrix, vboData);
+		return modelViewMatrix;
 	}
 
 	private void storeMatrixData(Matrix4f matrix, float[] vboData) {
@@ -117,7 +118,7 @@ public class ParticleRenderer {
 		vboData[pointer++] = matrix.m33();
 	}
 
-	private void updateTextureCoordinateData(Particle particle, float[] data) {
+	private void updateUVCoordinateData(Particle particle, float[] data) {
 		data[pointer++] = particle.getTextureOffset1().x;
 		data[pointer++] = particle.getTextureOffset1().y;
 		data[pointer++] = particle.getTextureOffset2().x;

@@ -3,7 +3,7 @@ package hecs;
 import java.util.ArrayList;
 
 public class Entity {
-	ArrayList<EntityContainer> references = new ArrayList<EntityContainer>();
+	protected ArrayList<EntityContainer> references = new ArrayList<EntityContainer>();
 	private long eid;
 
 	public Entity(long eid) {

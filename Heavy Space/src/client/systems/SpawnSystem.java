@@ -3,10 +3,10 @@ package client.systems;
 import java.util.List;
 
 import client.components.ActorComponent;
+import client.components.LightComponent;
+import client.components.ParticleComponent;
 import client.components.SnapshotComponent;
-import client.entities.LightComponent;
-import client.entities.Scene;
-import client.gameData.ParticleComponent;
+import client.gameData.Scene;
 import client.network.ConnectionManager;
 import hecs.Entity;
 import hecs.EntityManager;

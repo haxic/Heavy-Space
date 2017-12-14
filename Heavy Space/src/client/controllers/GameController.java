@@ -1,13 +1,13 @@
-package client.main;
+package client.controllers;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import client.components.SnapshotComponent;
-import client.entities.Scene;
 import client.gameData.ClientGameFactory;
 import client.gameData.GameModel;
-import client.gameData.GameModelLoader;
+import client.gameData.GameAssetLoader;
+import client.gameData.Scene;
 import client.inputs.KeyboardHandler;
 import client.inputs.ShipControls;
 import client.network.ConnectionManager;
@@ -25,7 +25,7 @@ import shared.functionality.Globals;
 import shared.systems.MovementSystem;
 import shared.systems.ProjectileSystem;
 
-public class GameController implements GameClientController {
+public class GameController implements IController {
 	private static final int KEY_TOGGLE_SNAPSHOT_INTERPOLATION = GLFW.GLFW_KEY_I;
 	private static final int TURBO = GLFW.GLFW_KEY_SPACE;
 	private static final int SPAWN_SHIP = GLFW.GLFW_KEY_T;
@@ -49,10 +49,10 @@ public class GameController implements GameClientController {
 
 	private ShipControls shipControls;
 
-	public GameController(EventHandler eventHandler, ConnectionManager connectionManager, GameModelLoader gameModelLoader) {
+	public GameController(EventHandler eventHandler, ConnectionManager connectionManager, GameAssetLoader gameAssetLoader) {
 		this.connectionManager = connectionManager;
 		entityManager = new EntityManager();
-		clientGameFactory = new ClientGameFactory(entityManager, gameModelLoader);
+		clientGameFactory = new ClientGameFactory(entityManager, gameAssetLoader);
 
 		gameModel = new GameModel(entityManager);
 		shipControls = new ShipControls();
@@ -128,7 +128,7 @@ public class GameController implements GameClientController {
 		if (running) {
 
 			if (KeyboardHandler.kb_keyDownOnce(SPAWN_SHIP))
-				connectionManager.requestSpawnShip(scene.camera.position);
+				connectionManager.requestSpawnShip(scene.getCamera().position);
 			connectionManager.sendShipActions(shipControls);
 
 			spawnSystem.process();
@@ -143,10 +143,10 @@ public class GameController implements GameClientController {
 		// }
 		ObjectComponent object = (ObjectComponent) entityManager.getComponentInEntity(shipEntity, ObjectComponent.class);
 		if (object != null) {
-			scene.camera.getPosition().set(object.getPosition());
-			scene.camera.getForward().set(object.getForward());
-			scene.camera.getUp().set(object.getUp());
-			scene.camera.getRight().set(object.getForward().cross(object.getUp(), scene.camera.getRight()));
+			scene.getCamera().getPosition().set(object.getPosition());
+			scene.getCamera().getForward().set(object.getForward());
+			scene.getCamera().getUp().set(object.getUp());
+			scene.getCamera().getRight().set(object.getForward().cross(object.getUp(), scene.getCamera().getRight()));
 		}
 	}
 
@@ -162,7 +162,7 @@ public class GameController implements GameClientController {
 	public void spawnPlayerShipFromEvent(Event event) {
 		shipEntity = (Entity) event.data[0];
 		ObjectComponent object = (ObjectComponent) entityManager.getComponentInEntity(shipEntity, ObjectComponent.class);
-		scene.camera.getPosition().set((Vector3f) object.getPosition());
+		scene.getCamera().getPosition().set((Vector3f) object.getPosition());
 	}
 
 	public void createEntityFromEvent(Event event) {

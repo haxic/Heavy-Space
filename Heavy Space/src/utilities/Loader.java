@@ -23,9 +23,9 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
+import client.UNUSED.ShadowMap;
 import client.models.Mesh;
 import client.models.Model;
-import client.models.ShadowMap;
 import client.models.Texture;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;

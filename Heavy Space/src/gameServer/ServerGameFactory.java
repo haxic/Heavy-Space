@@ -2,7 +2,7 @@ package gameServer;
 
 import org.joml.Vector3f;
 
-import client.gameData.GameModelLoader;
+import client.gameData.GameAssetLoader;
 import gameServer.components.ShipComponent;
 import hecs.Entity;
 import hecs.EntityManager;
@@ -16,7 +16,7 @@ import shared.components.ProjectileComponent;
 public class ServerGameFactory {
 	EntityManager entityManager;
 
-	public ServerGameFactory(EntityManager entityManager, GameModelLoader gameModelLoader) {
+	public ServerGameFactory(EntityManager entityManager, GameAssetLoader gameAssetLoader) {
 		this.entityManager = entityManager;
 	}
 

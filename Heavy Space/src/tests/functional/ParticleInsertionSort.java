@@ -3,7 +3,7 @@ package tests.functional;
 import java.util.ArrayList;
 import java.util.List;
 
-import client.entities.Particle;
+import client.gameData.Particle;
 import utilities.InsertionSort;
 
 public class ParticleInsertionSort {

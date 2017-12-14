@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import client.controllers.MainController;
 import client.network.GameServerData;
 import gameServer.IPType;
 import utilities.NetworkFunctions;
@@ -32,7 +33,7 @@ public class MainGameClient {
 				System.exit(0);
 			}
 		}
-		new GameClient(new GameServerData(serverIP, serverPort, serverIPType, false));
+		new MainController(new GameServerData(serverIP, serverPort, serverIPType, false));
 	}
 
 }

@@ -138,7 +138,7 @@ public class GameServer {
 				Globals.dt = timestepDT;
 				Globals.now = now;
 				Globals.tick = tickIdentifier.get();
-				update();
+				tick();
 			}
 			try {
 				Thread.sleep(1);
@@ -148,11 +148,11 @@ public class GameServer {
 		}
 	}
 
-	private void update() {
+	private void tick() {
 		processInputs();
 		processAI();
 		updateGameState();
-		sendGameSate();
+		sendSnapshot();
 	}
 
 
@@ -175,7 +175,7 @@ public class GameServer {
 	}
 
 
-	private void sendGameSate() {
+	private void sendSnapshot() {
 		snapshotTransmitterSystem.process();
 	}
 

@@ -5,8 +5,8 @@ import java.util.List;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
-import client.entities.Camera;
-import client.entities.LightComponent;
+import client.components.LightComponent;
+import client.gameData.Camera;
 import client.models.Model;
 import hecs.Entity;
 import hecs.EntityManager;

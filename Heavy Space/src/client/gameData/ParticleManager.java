@@ -1,4 +1,4 @@
-package client.renderers;
+package client.gameData;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import client.entities.Camera;
-import client.entities.Particle;
-import client.gameData.ParticleComponent;
+import client.components.ParticleComponent;
 import hecs.Entity;
 import hecs.EntityContainer;
 import hecs.EntityManager;

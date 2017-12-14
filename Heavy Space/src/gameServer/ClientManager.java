@@ -93,6 +93,7 @@ public class ClientManager implements EntityContainer {
 			ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(entity, ClientComponent.class);
 			ClientValidatedComponent clientValidatedComponent = (ClientValidatedComponent) entityManager.getComponentInEntity(entity, ClientValidatedComponent.class);
 			ClientPendingComponent pendingValidationComponent = (ClientPendingComponent) entityManager.getComponentInEntity(entity, ClientPendingComponent.class);
+			
 			if (clientComponent.isDisconnected() || (pendingValidationComponent != null && Globals.now - pendingValidationComponent.getTimestamp() > 2000)) {
 				clientComponent.disconnect();
 				removed.add(entity);

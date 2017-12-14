@@ -14,6 +14,7 @@ public class ClientPendingComponent extends EntityComponent {
 
 	@Override
 	protected void removeComponent() {
+		System.out.println("REMOVE ME");
 	}
 
 	public long getTimestamp() {

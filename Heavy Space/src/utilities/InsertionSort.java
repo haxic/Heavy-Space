@@ -2,7 +2,7 @@ package utilities;
 
 import java.util.List;
 
-import client.entities.Particle;
+import client.gameData.Particle;
 
 /**
  * A simple implementation of an insertion sort. I implemented this very quickly

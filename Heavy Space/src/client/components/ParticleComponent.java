@@ -1,12 +1,12 @@
-package client.gameData;
+package client.components;
 
 import java.util.List;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import client.entities.Camera;
-import client.entities.Particle;
+import client.gameData.Camera;
+import client.gameData.Particle;
 import client.models.Texture;
 import hecs.EntityComponent;
 

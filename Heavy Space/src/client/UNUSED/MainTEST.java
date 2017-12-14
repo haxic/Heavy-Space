@@ -13,11 +13,11 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import client.components.ActorComponent;
+import client.components.LightComponent;
+import client.components.ParticleComponent;
 import client.display.DisplayManager;
-import client.entities.Camera;
-import client.entities.LightComponent;
-import client.gameData.GameModelLoader;
-import client.gameData.ParticleComponent;
+import client.gameData.Camera;
+import client.gameData.GameAssetLoader;
 import client.inputs.KeyboardHandler;
 import client.models.Model;
 import client.renderers.RenderManager;
@@ -34,13 +34,13 @@ public class MainTEST {
 		Loader loader = new Loader();
 		DisplayManager displayManager = new DisplayManager(1200, 800);
 		Model skybox = loader.loadSkybox("space", 500);
-		GameModelLoader gameModelLoader = new GameModelLoader(loader);
-		RenderManager renderManager = new RenderManager(displayManager, skybox, loader, gameModelLoader.particleAtlasTexture);
+		GameAssetLoader gameAssetLoader = new GameAssetLoader(loader);
+		RenderManager renderManager = new RenderManager(displayManager, skybox, loader, gameAssetLoader.particleAtlasTexture);
 		Camera camera = new Camera();
 
-		ParticleComponent plasmaParticleSystem = new ParticleComponent(gameModelLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0, 0.01f, 1);
+		ParticleComponent plasmaParticleSystem = new ParticleComponent(gameAssetLoader.particleAtlasTexture, new Vector3f(10, 0, -10), 0, 0.01f, 1);
 		renderManager.addParticleEntity(plasmaParticleSystem);
-		renderManager.addParticleEntity(new ParticleComponent(gameModelLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1, 0.1f, 3));
+		renderManager.addParticleEntity(new ParticleComponent(gameAssetLoader.particleAtlasTexture, new Vector3f(20, 0, -10), 1, 0.1f, 3));
 		List<LightComponent> lights = new ArrayList<LightComponent>();
 
 		LightComponent sun = new LightComponent(new Vector3f(0, 1000, 10000), new Vector3f(1, 1, 0), new Vector3f(0, 0, 0));
@@ -83,11 +83,11 @@ public class MainTEST {
 		// actors.add(new Actor(new Entity(new Vector3f(-25, 0, 0), new
 		// Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.stall));
 
-		ActorComponent dragonActor = new ActorComponent(new Entity(new Vector3f(0, 0, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.dragon);
+		ActorComponent dragonActor = new ActorComponent(new Entity(new Vector3f(0, 0, -20), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameAssetLoader.dragon);
 		actors.add(dragonActor);
-		ActorComponent fernActor = new ActorComponent(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern);
+		ActorComponent fernActor = new ActorComponent(new Entity(new Vector3f(10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameAssetLoader.fern);
 		actors.add(fernActor);
-		ActorComponent fernActor2 = new ActorComponent(new Entity(new Vector3f(-10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameModelLoader.fern, 3);
+		ActorComponent fernActor2 = new ActorComponent(new Entity(new Vector3f(-10, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)), gameAssetLoader.fern, 3);
 		actors.add(fernActor2);
 
 		for (ActorComponent actor : actors) {

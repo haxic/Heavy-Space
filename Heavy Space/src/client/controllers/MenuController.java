@@ -1,12 +1,12 @@
-package client.main;
+package client.controllers;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import client.entities.LightComponent;
-import client.entities.Scene;
+import client.components.LightComponent;
 import client.gameData.ClientGameFactory;
-import client.gameData.GameModelLoader;
+import client.gameData.GameAssetLoader;
+import client.gameData.Scene;
 import client.inputs.KeyboardHandler;
 import client.inputs.ShipControls;
 import client.network.GameServerData;
@@ -21,7 +21,7 @@ import shared.systems.AIBotSystem;
 import shared.systems.CollisionSystem;
 import shared.systems.MovementSystem;
 
-public class MenuController implements GameClientController {
+public class MenuController implements IController {
 	private Scene scene;
 
 	private EventHandler eventHandler;
@@ -42,11 +42,11 @@ public class MenuController implements GameClientController {
 	private MovementSystem movementSystem;
 	private CollisionSystem collisionSystem;
 
-	public MenuController(EventHandler eventHandler, GameServerData gameServerData, GameModelLoader gameModelLoader) {
+	public MenuController(EventHandler eventHandler, GameServerData gameServerData, GameAssetLoader gameAssetLoader) {
 		this.eventHandler = eventHandler;
 		this.gameServerData = gameServerData;
 		entityManager = new EntityManager();
-		clientGameFactory = new ClientGameFactory(entityManager, gameModelLoader);
+		clientGameFactory = new ClientGameFactory(entityManager, gameAssetLoader);
 
 		shipControls = new ShipControls();
 
@@ -74,7 +74,7 @@ public class MenuController implements GameClientController {
 		// if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_LEFT_ALT))
 		// DisplayManager.toggleCursor();
 		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_Z))
-			scene.camera.toggleLockUp();
+			scene.getCamera().toggleLockUp();
 
 		if (KeyboardHandler.kb_keyDownOnce(KEY_JOIN)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_JOIN, gameServerData));
