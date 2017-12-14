@@ -2,7 +2,7 @@ package client.network;
 
 import java.net.InetAddress;
 
-import gameServer.IPType;
+import shared.functionality.network.IPType;
 
 public class GameServerData {
 	private InetAddress ip;

@@ -1,3 +1,10 @@
-/hecs/
-/client/
+/authenticationServer/
 /gameServer/
+/client/
+/tests/
+/utilities/
+/shared/
+/masterServer/
+/entity.frag
+/entity.txt
+/config.txt

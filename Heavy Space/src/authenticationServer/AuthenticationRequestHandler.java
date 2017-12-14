@@ -25,15 +25,12 @@ public class AuthenticationRequestHandler {
 			e.printStackTrace();
 			return null;
 		}
-
 		// Check that an account was retrieved
 		if (account == null)
 			return null;
-
 		// Check password
 		if (!Authenticater.checkPassword(password, account.getPassword()))
 			return null;
-
 		// Update account authentication token
 		AuthenticationToken authenticationToken = null;
 		try {
@@ -46,7 +43,7 @@ public class AuthenticationRequestHandler {
 
 		// Create authentication token
 		String token = Authenticater.getAuthenticationTokenAsHashedString(authenticationToken);
-		return config.masterServerIP + ":" + config.masterServerPort + " " + token + " " + username;
+		return config.masterServerIP + " " + config.masterServerPort + " " + token + " " + username;
 	}
 
 	public boolean createAccount(String username, String password, String ip) {

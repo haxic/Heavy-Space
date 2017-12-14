@@ -19,8 +19,9 @@ public class ServerTester {
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
-		UDPServer udpServer = new UDPServer("localhost", 6028);
-		udpServer.startServer();
+		InetAddress ip = InetAddress.getByName("localhost");
+		UDPServer udpServer = new UDPServer();
+		udpServer.startServer(ip, 6028);
 		InetAddress address = InetAddress.getByName("localhost");
 		byte[] data1 = "TEST1111".getBytes();
 		DatagramPacket datagramPacket1 = new DatagramPacket(data1, data1.length, address, config.gameServerDefaultPort);

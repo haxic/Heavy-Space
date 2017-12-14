@@ -1,4 +1,4 @@
-package gameServer;
+package gameServer.components;
 
 import hecs.EntityComponent;
 

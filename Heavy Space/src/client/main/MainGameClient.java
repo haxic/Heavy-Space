@@ -1,39 +1,32 @@
 package client.main;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import client.controllers.MainController;
 import client.network.GameServerData;
-import gameServer.IPType;
-import utilities.NetworkFunctions;
+import gameServer.core.ServerConfig;
+import utilities.FileUtils;
 
 public class MainGameClient {
 	public static void main(String[] args) {
+		ServerConfig serverConfig = new ServerConfig();
+		serverConfig.authenticationServerPort = 6031;
+		String configString = FileUtils.loadAsString("config/config.txt");
+		System.out.println(configString);
+		String[] splitResult = configString.split("\\s+");
 		InetAddress serverIP = null;
-		int serverPort = 6029;
-
-		IPType serverIPType = IPType.LAN;
-
 		try {
-			serverIP = InetAddress.getByName("5.186.147.73");
+			serverConfig.authenticationServerIP = InetAddress.getByName(splitResult[0]);
+			serverIP = InetAddress.getByName(splitResult[1]);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			System.out.println("Could not retrieve hosting ip!");
 			System.exit(0);
 		}
-		serverIP = null;
-		if (serverIP == null) {
-			try {
-				serverIP = NetworkFunctions.getIP(serverIPType);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("Could not retrieve hosting ip!");
-				System.exit(0);
-			}
-		}
-		new MainController(new GameServerData(serverIP, serverPort, serverIPType, false));
+		int serverPort = Integer.parseInt(splitResult[2]);
+		String username = splitResult[3];
+		String password = splitResult[4];
+		
+		new MainController(new GameServerData(serverIP, serverPort, null, false), serverConfig, username, password);
 	}
 
 }

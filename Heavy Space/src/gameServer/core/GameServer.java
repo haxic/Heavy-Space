@@ -1,4 +1,4 @@
-package gameServer;
+package gameServer.core;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -19,7 +19,7 @@ import gameServer.network.ValidationService;
 import gameServer.systems.RemoveSystem;
 import gameServer.systems.PlayerSystem;
 import gameServer.systems.ShipSystem;
-import gameServer.systems.SnapshotTransmitterClass;
+import gameServer.systems.SnapshotTransmitterSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.DeathComponent;
@@ -43,7 +43,7 @@ public class GameServer {
 
 	private PlayerManager playerManager;
 	private ClientManager clientManager;
-	private IServerCommunicator serverCommunicator;
+	private ServerCommunicator serverCommunicator;
 	private ValidationService validationService;
 	private TCPServer tcpServer;
 	private UDPServer udpServer;
@@ -62,11 +62,11 @@ public class GameServer {
 	private CollisionSystem collisionSystem;
 	private ProjectileSystem projectileSystem;
 	private RemoveSystem removeSystem;
-	private SnapshotTransmitterClass snapshotTransmitterSystem;
+	private SnapshotTransmitterSystem snapshotTransmitterSystem;
 	
 	private ServerConfig serverConfig;
 
-	public GameServer(ServerConfig serverConfig) {
+	public GameServer(ServerConfig serverConfig, String username, String password) {
 		this.serverConfig = serverConfig;
 		entityManager = new EntityManager();
 		eventHandler = new EventHandler();
@@ -75,8 +75,7 @@ public class GameServer {
 		clientManager = new ClientManager(entityManager, playerManager);
 		if (serverConfig.official) {
 			serverCommunicator = new ServerCommunicator(serverConfig);
-			serverCommunicator.createAccount("testserver", "testserver");
-			serverCommunicator.authenticate("testserver", "testserver");
+			serverCommunicator.authenticate(username, password);
 		}
 		validationService = new ValidationService(serverCommunicator, clientManager, 5000);
 		tcpServer = new TCPServer(validationService);
@@ -91,7 +90,7 @@ public class GameServer {
 		collisionSystem = new CollisionSystem(entityManager);
 		projectileSystem = new ProjectileSystem(entityManager);
 		removeSystem = new RemoveSystem(entityManager);
-		snapshotTransmitterSystem = new SnapshotTransmitterClass(entityManager, udpServer);
+		snapshotTransmitterSystem = new SnapshotTransmitterSystem(entityManager, udpServer);
 		initializeWorld();
 		initializeServer();
 		loop();
@@ -167,9 +166,9 @@ public class GameServer {
 
 	private void updateGameState() {
 		removeSystem.process();
-		movementSystem.process(Globals.dt);
 		playerSystem.process();
 		shipSystem.process(Globals.dt);
+		movementSystem.process(Globals.dt);
 		collisionSystem.process();
 		projectileSystem.process(Globals.dt);
 	}

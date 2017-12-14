@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import gameServer.ServerGameFactory;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
+import gameServer.core.ServerGameFactory;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.HealthComponent;

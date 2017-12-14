@@ -1,4 +1,4 @@
-package gameServer;
+package gameServer.core;
 
 import java.net.InetAddress;
 import java.util.ArrayList;

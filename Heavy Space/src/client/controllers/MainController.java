@@ -1,14 +1,20 @@
 package client.controllers;
 
+import org.lwjgl.glfw.GLFW;
+
 import client.display.DisplayManager;
 import client.gameData.ClientGameFactory;
 import client.gameData.GameAssetLoader;
+import client.inputs.KeyboardHandler;
 import client.network.ConnectionManager;
 import client.network.GameServerData;
 import client.renderers.RenderManager;
+import gameServer.core.ServerConfig;
+import gameServer.network.ServerCommunicator;
 import hecs.EntityManager;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
+import shared.functionality.EventType;
 import shared.functionality.Globals;
 import utilities.Loader;
 
@@ -25,32 +31,58 @@ public class MainController {
 	private MenuController menuController;
 	private GameController gameController;
 	private IController currentController;
+	ServerCommunicator serverCommunicator;
+	String username;
+	String password;
 
-	public MainController(GameServerData gameServerData) {
+	public MainController(GameServerData gameServerData, ServerConfig serverConfig, String username, String password) {
 		loader = new Loader();
 		displayManager = new DisplayManager(1200, 800);
 		gameAssetLoader = new GameAssetLoader(loader);
 		eventHandler = new EventHandler();
+		this.username = username;
+		this.password = password;
+		serverCommunicator = new ServerCommunicator(serverConfig);
+
 		connectionManager = new ConnectionManager(eventHandler);
 		renderManager = new RenderManager(displayManager, loader, gameAssetLoader.particleAtlasTexture);
-
-		
 		menuController = new MenuController(eventHandler, gameServerData, gameAssetLoader);
 		currentController = menuController;
-
 		loop();
 	}
 
 	public void handleEvents() {
+		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_X)) {
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_ACCOUNT, username, password));
+		}
+		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_Z)) {
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_AUTHENTICATE, username, password));
+		}
 		connectionManager.handleUDPRequests();
 		connectionManager.handleTCPRequests();
 		Event event;
 		while ((event = eventHandler.poll()) != null) {
 			switch (event.type) {
-			case CLIENT_EVENT_AUTHENTICATE:
+			case CLIENT_EVENT_AUTHENTICATE: {
 				String username = (String) event.data[0];
 				String password = (String) event.data[1];
-				// gameController.authenticate
+				boolean authenticated = serverCommunicator.authenticate(username, password);
+				connectionManager.setUser(serverCommunicator.getUsername(), serverCommunicator.getToken());
+				if (authenticated)
+					System.out.println("Successfully authenticated: " + username + " " + password);
+				else
+					System.out.println("Failed to authenticate!");
+			}
+				break;
+			case CLIENT_EVENT_CREATE_ACCOUNT: {
+				String username = (String) event.data[0];
+				String password = (String) event.data[1];
+				boolean created = serverCommunicator.createAccount(username, password);
+				if (created)
+					System.out.println("Successfully created account: " + username + " " + password);
+				else
+					System.out.println("Failed to create account!");
+			}
 				break;
 			case CLIENT_EVENT_SERVER_JOIN:
 				GameServerData gameServerData = (GameServerData) event.data[0];
@@ -59,6 +91,7 @@ public class MainController {
 				if (connectionManager.joinServer(gameServerData)) {
 					gameController = new GameController(eventHandler, connectionManager, gameAssetLoader);
 					currentController = gameController;
+					displayManager.disableCursor();
 				}
 				break;
 			case CLIENT_EVENT_SERVER_DISCONNECT:
@@ -67,6 +100,7 @@ public class MainController {
 				connectionManager.disconnect();
 				currentController = menuController;
 				gameController = null;
+				displayManager.enableCursor();
 				break;
 			case CLIENT_EVENT_SERVER_FAILED_TO_CONNECT:
 				currentController = menuController;

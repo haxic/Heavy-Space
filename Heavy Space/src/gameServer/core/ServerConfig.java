@@ -1,6 +1,8 @@
-package gameServer;
+package gameServer.core;
 
 import java.net.InetAddress;
+
+import shared.functionality.network.IPType;
 
 public class ServerConfig {
 	public InetAddress authenticationServerIP;

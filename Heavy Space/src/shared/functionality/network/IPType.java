@@ -1,4 +1,4 @@
-package gameServer;
+package shared.functionality.network;
 
 public enum IPType {
 	Localhost, LAN, External;

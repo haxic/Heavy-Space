@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import gameServer.ServerConfig;
+import gameServer.core.ServerConfig;
 import shared.Config;
 
 public class TCPServer implements Runnable {

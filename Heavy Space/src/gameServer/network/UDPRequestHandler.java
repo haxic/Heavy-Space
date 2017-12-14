@@ -4,10 +4,10 @@ import java.net.DatagramPacket;
 
 import org.joml.Vector3f;
 
-import gameServer.ClientManager;
 import gameServer.components.ClientComponent;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
+import gameServer.core.ClientManager;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.MovementComponent;

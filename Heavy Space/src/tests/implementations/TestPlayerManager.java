@@ -1,7 +1,12 @@
 package tests.implementations;
 
-import gameServer.PlayerManager;
+import gameServer.core.PlayerManager;
+import hecs.EntityManager;
 
 public class TestPlayerManager extends PlayerManager {
+
+	public TestPlayerManager(EntityManager entityManager) {
+		super(entityManager);
+	}
 
 }

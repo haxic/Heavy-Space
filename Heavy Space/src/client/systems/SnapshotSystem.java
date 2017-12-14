@@ -34,7 +34,6 @@ public class SnapshotSystem {
 			Snapshot next = snapshotComponent.getNext();
 			if (current.getTick() == Globals.tick) {
 				interpolate(dt, unitComponent, snapshotComponent);
-
 			} else if (current.getTick() < Globals.tick) {
 				if (next.getTick() > Globals.tick) {
 					interpolate(dt, unitComponent, snapshotComponent);

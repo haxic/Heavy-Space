@@ -24,14 +24,14 @@ public class MasterServer {
 			masterServerRMI = new MasterServerRMI(config.masterServerPort, dal);
 			Registry registry = LocateRegistry.createRegistry(config.masterServerPort);
 			registry.bind("master", masterServerRMI);
-			System.out.println("Master server RMI bound.");
+			System.out.println("Master server RMI bound on: " + config.masterServerPort);
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
 
 		long timer = System.currentTimeMillis();
-		int intervals = 5000;
-		// int intervals = 60000;
+//		int intervals = 5000;
+		 int intervals = 60000000;
 
 		while (true) {
 			try {

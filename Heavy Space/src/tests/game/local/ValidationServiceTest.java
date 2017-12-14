@@ -3,6 +3,8 @@ package tests.game.local;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.Socket;
 
 import org.junit.Test;
@@ -11,11 +13,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.mindrot.jbcrypt.BCrypt;
 
-import gameServer.ClientManager;
-import gameServer.PlayerManager;
+import gameServer.core.ClientManager;
+import gameServer.core.PlayerManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
+import hecs.EntityManager;
 import shared.Config;
 import tests.LocalConfig;
 import tests.dbsetup.OnlineUserData;
@@ -25,8 +28,10 @@ import tests.implementations.TestPlayerManager;
 
 public class ValidationServiceTest {
 
-	private static final int NUMBER_OF_THREADS = 18;
-	private static final int CONNECTIONS_PER_THREAD = 20;
+//	private static final int NUMBER_OF_THREADS = 18;
+	private static final int NUMBER_OF_THREADS = 1;
+//	private static final int CONNECTIONS_PER_THREAD = 20;
+	private static final int CONNECTIONS_PER_THREAD = 1;
 	private String ip = "localhost";
 	Config config = new LocalConfig();
 
@@ -35,17 +40,17 @@ public class ValidationServiceTest {
 		IServerCommunicator serverCommunicator = new ServerCommunicatorLocal();
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
-		PlayerManager playerManager = new TestPlayerManager();
-		ClientManager agentManager = new TestAgentManager(playerManager);
-		ValidationService validationService = new ValidationService(serverCommunicator, agentManager, 500, false);
-		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
+		EntityManager entityManager = new EntityManager();
+		PlayerManager playerManager = new TestPlayerManager(entityManager);
+		ClientManager agentManager = new TestAgentManager(playerManager, entityManager);
+		ValidationService validationService = new ValidationService(serverCommunicator, agentManager, 500);
+		TCPServer tcpServer = new TCPServer(validationService);
 		try {
-			tcpServer.startServer();
+			tcpServer.startServer(InetAddress.getByName("localhost"), config.gameServerDefaultPort);
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail();
 		}
-
 		while (!tcpServer.isAccepting()) {
 			try {
 				Thread.sleep(1);

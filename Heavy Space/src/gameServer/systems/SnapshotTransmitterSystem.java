@@ -4,9 +4,9 @@ import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.List;
 
-import gameServer.ObstacleComponent;
 import gameServer.components.ClientComponent;
 import gameServer.components.ClientGameDataTransferComponent;
+import gameServer.components.ObstacleComponent;
 import gameServer.components.PlayerComponent;
 import gameServer.components.RemoveComponent;
 import gameServer.components.ShipComponent;
@@ -23,12 +23,12 @@ import shared.functionality.network.RequestType;
 import shared.functionality.network.UDPServer;
 import utilities.BitConverter;
 
-public class SnapshotTransmitterClass {
+public class SnapshotTransmitterSystem {
 
 	private EntityManager entityManager;
 	private UDPServer udpServer;
 
-	public SnapshotTransmitterClass(EntityManager entityManager, UDPServer udpServer) {
+	public SnapshotTransmitterSystem(EntityManager entityManager, UDPServer udpServer) {
 		this.entityManager = entityManager;
 		this.udpServer = udpServer;
 	}

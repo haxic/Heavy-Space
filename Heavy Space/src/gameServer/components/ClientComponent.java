@@ -84,7 +84,8 @@ public class ClientComponent extends EntityComponent implements EntityContainer 
 
 	@Override
 	protected void removeComponent() {
-		player = null;
+		if (player != null)
+			player.detach(this);
 		disconnect();
 	}
 

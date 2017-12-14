@@ -26,17 +26,9 @@ public class AuthenticationServer {
 			authenticationServerRMI = new AuthenticationServerRMI(config.authenticationServerPort, dal, config);
 			Registry registry = LocateRegistry.createRegistry(config.authenticationServerPort);
 			registry.bind("authenticate", authenticationServerRMI);
+			System.out.println("Authentication server RMI bound on: " + config.authenticationServerPort + " " + registry);
 		} catch (RemoteException | AlreadyBoundException e) {
 			e.printStackTrace();
 		}
-
-		while (true) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 	}
-
 }

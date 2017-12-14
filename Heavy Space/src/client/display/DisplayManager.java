@@ -74,7 +74,7 @@ public class DisplayManager {
 		GLFW.glfwSwapInterval(1);
 		// GLFW.glfwSetInputMode(windowID, GLFW.GLFW_STICKY_KEYS, GL11.GL_TRUE);
 		// setBasicAntialising(4);
-		disableCursor();
+		// disableCursor();
 	}
 
 	public void pollInputs() {

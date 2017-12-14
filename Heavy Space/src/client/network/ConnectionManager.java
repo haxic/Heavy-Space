@@ -67,18 +67,20 @@ public class ConnectionManager {
 		udpPinger = new Pinger();
 		tcpPinger = new Pinger();
 		udpServer = new UDPServer();
-		username = "testclient";
-		token = "whatevertoken";
 		connectionStatus = ConnectionStatus.Disconnected;
 		udpRequests = new ArrayList<UDPRequest>();
 		tcpRequests = new ArrayList<TCPRequest>();
 		udpRequestsRemoved = new ArrayList<UDPRequest>();
 		tcpRequestsRemoved = new ArrayList<TCPRequest>();
 	}
+	
+	public void setUser(String username, String token) {
+		this.username = username;
+		this.token = token;
+	}
 
 	public boolean joinServer(GameServerData gameServerData) {
 		this.gameServerData = gameServerData;
-		InetAddress clientIP;
 
 		if (gameServerData.isOfficial() && token == null) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Tried to join an official server without being authenticated."));
@@ -86,20 +88,7 @@ public class ConnectionManager {
 		}
 
 		try {
-			clientIP = NetworkFunctions.getIP(gameServerData.getIPType().asHost());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return false;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		try {
-			udpServer.startServer(clientIP, 6028);
+			udpServer.startServer(InetAddress.getLocalHost(), 6028);
 		} catch (SocketException | UnknownHostException e) {
 			e.printStackTrace();
 			return false;

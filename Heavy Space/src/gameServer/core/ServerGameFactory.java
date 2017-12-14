@@ -1,8 +1,9 @@
-package gameServer;
+package gameServer.core;
 
 import org.joml.Vector3f;
 
 import client.gameData.GameAssetLoader;
+import gameServer.components.ObstacleComponent;
 import gameServer.components.ShipComponent;
 import hecs.Entity;
 import hecs.EntityManager;

@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import gameServer.ClientManager;
+import gameServer.core.ClientManager;
 import shared.functionality.network.TCPSocket;
 
 public class ValidationService {
@@ -131,6 +131,7 @@ public class ValidationService {
 			if (username == null || token == null) {
 				handleInvalidConnection(this, "Failed to join: invalid credentials.");
 			}
+			System.out.println(token + " " + username);
 			if (serverCommuicator == null || serverCommuicator.validateClient(token, username)) {
 				handleValidatedConnection(this, username, token);
 				return;

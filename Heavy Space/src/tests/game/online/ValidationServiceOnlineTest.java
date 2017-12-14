@@ -10,7 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import gameServer.ClientManager;
+import gameServer.core.ClientManager;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;

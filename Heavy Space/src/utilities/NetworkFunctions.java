@@ -8,7 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
-import gameServer.IPType;
+import shared.functionality.network.IPType;
 
 public class NetworkFunctions {
 
