@@ -72,7 +72,7 @@ public class GameController implements IController {
 		scene.addLightEntity(sun1);
 		Entity sun2 = clientGameFactory.createSun(new Vector3f(-7000, -7000, 7000), new Vector3f(1, 1, 1));
 		scene.addLightEntity(sun2);
-		
+
 		clientGameFactory.createLotsOfDebris(scene, 1000);
 	}
 
@@ -111,7 +111,6 @@ public class GameController implements IController {
 			}
 			dt = timestepCounter / timestepDT;
 		}
-
 
 		// velocity.set(scene.camera.getForward().mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().z, tempVector));
 		// velocity.add(scene.camera.right.mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().x, tempVector));
@@ -236,12 +235,11 @@ public class GameController implements IController {
 		}
 
 		int tickDiff;
-
-		// If new tick is in min bracket and current tick in max bracket
-		if (tick < Short.MIN_VALUE / 2 && Globals.tick > Short.MAX_VALUE / 2)
-			tickDiff = (Short.MAX_VALUE - Globals.tick) + (tick - Short.MIN_VALUE);
-		else
+		// || (newTick < 1000 && latestTick > 8000
+		if (tick > Globals.tick && !(tick > 8000 && Globals.tick < 1000) || Globals.tick > tick  && !(Globals.tick  > 8000 && tick < 1000))
 			tickDiff = Globals.tick - tick;
+		else
+			tickDiff = 0;
 
 		// Ignore ticks that are too far away from the current tick
 		if (tickDiff < -8 || tickDiff > 8)

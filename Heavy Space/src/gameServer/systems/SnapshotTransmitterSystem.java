@@ -36,8 +36,8 @@ public class SnapshotTransmitterSystem {
 	}
 
 	public void process() {
-		short nextSnapshot = (short) ((Globals.tick % Short.MAX_VALUE) / 3);
-//		short nextSnapshot = (short) (Globals.tick  / 3);
+		short nextSnapshot = (short) (((Globals.tick / 3) % Short.MAX_VALUE));
+		// short nextSnapshot = (short) (Globals.tick / 3);
 		if (nextSnapshot == Globals.snapshotTick)
 			return;
 		Globals.snapshotTick = nextSnapshot;
@@ -69,10 +69,10 @@ public class SnapshotTransmitterSystem {
 			}
 
 			cgdtComponent.clear();
-//			System.out.println("SEND DATA " + Globals.snapshotTick);
+			// System.out.println("SEND DATA " + Globals.snapshotTick);
 			for (DataPacket dataPacket : dataPackets) {
 				DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), clientComponent.getUDPAddress(), clientComponent.getUDPPort());
-//				System.out.println(datagramPacket.getLength());
+				// System.out.println(datagramPacket.getLength());
 				udpServer.sendData(datagramPacket);
 			}
 		}
@@ -82,7 +82,6 @@ public class SnapshotTransmitterSystem {
 				entityManager.removeComponentAll(SpawnComponent.class, spawnedEntity);
 			}
 	}
-
 
 	boolean[] tempBools = new boolean[8];
 
@@ -211,14 +210,14 @@ public class SnapshotTransmitterSystem {
 					position = spawnComponent.getPosition();
 					forward = spawnComponent.getForward();
 					up = spawnComponent.getUp();
-					right = spawnComponent.getRight();					
+					right = spawnComponent.getRight();
 				} else {
 					position = objectComponent.getPosition();
 					forward = objectComponent.getForward();
 					up = objectComponent.getUp();
-					right = objectComponent.getRight();	
+					right = objectComponent.getRight();
 				}
-				
+
 				// 4 ints + 2 bytes = 18 bytes
 				dataPacket.addInteger((int) (createEntity.getEID())); // 5, Entity id
 				dataPacket.addByte(entityType); // 9, Entity type (ship, projectile, obstacle etc)

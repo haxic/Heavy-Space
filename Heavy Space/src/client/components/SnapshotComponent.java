@@ -43,14 +43,15 @@ public class SnapshotComponent extends EntityComponent {
 	}
 
 	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
-		Snapshot next = snapshots.peekLast();
+		Snapshot last = snapshots.peekLast();
 		// Add snapshot if new tick is after latest tick or if new tick is in minimum bracket while latest tick is in maximum bracket
-		if (isAfter(tick, current.getTick()) && (next == null || isAfter(tick, next.getTick())))
+		if (isAfter(tick, next.getTick()) && (last == null || last != null && isAfter(tick, last.getTick()))) {
 			snapshots.addLast(new Snapshot(tick, position, forward, up, right));
+		}
 	}
 
 	public boolean isAfter(short newTick, short latestTick) {
-		return newTick > latestTick || (newTick < latestTick && newTick < (Short.MIN_VALUE / 2) && latestTick > (Short.MAX_VALUE / 2));
+		return (newTick > latestTick && !(newTick > 8000 && latestTick < 1000)) || (newTick < 1000 && latestTick > 8000);
 	}
 
 	public Snapshot getCurrent() {
@@ -62,13 +63,17 @@ public class SnapshotComponent extends EntityComponent {
 	}
 
 	public int getDifference() {
-		if (current.getTick() < Short.MIN_VALUE / 2 && next.getTick() > Short.MAX_VALUE / 2)
-			return (Short.MAX_VALUE - next.getTick()) + (current.getTick() - Short.MIN_VALUE);
-		else
+		if (current.getTick() > next.getTick() && !(current.getTick() > 8000 && next.getTick() < 1000) || next.getTick() > current.getTick() && !(next.getTick() > 8000 && current.getTick() < 1000))
 			return next.getTick() - current.getTick();
+		else
+			return 0;
 	}
 
 	public Snapshot peekLatest() {
 		return snapshots.peekLast();
+	}
+
+	public int size() {
+		return snapshots.size();
 	}
 }

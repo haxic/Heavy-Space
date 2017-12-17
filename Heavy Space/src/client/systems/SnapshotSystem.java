@@ -32,16 +32,15 @@ public class SnapshotSystem {
 
 			Snapshot current = snapshotComponent.getCurrent();
 			Snapshot next = snapshotComponent.getNext();
-			
+
 			if (current.getTick() == Globals.tick) {
 				interpolate(dt, unitComponent, snapshotComponent);
 			} else if (current.getTick() < Globals.tick || (Globals.tick < 1000 && current.getTick() > 8000)) {
-				if (next.getTick() > Globals.tick || (next.getTick() < 1000 && Globals.tick > 8000)) {
+				if ((next.getTick() > Globals.tick && !(next.getTick() > 8000 && Globals.tick < 1000)) || (next.getTick() < 1000 && Globals.tick > 8000)) {
 					interpolate(dt, unitComponent, snapshotComponent);
 				} else if (snapshotComponent.peekNext() != null) {
 					// Interpolating on next set
-					current = snapshotComponent.next();
-					next = snapshotComponent.getNext();
+					snapshotComponent.next();
 
 					interpolate(dt, unitComponent, snapshotComponent);
 				} else {
@@ -59,7 +58,7 @@ public class SnapshotSystem {
 					latestPosition = latestSnapshot.getPosition();
 				unitComponent.getPosition().set(latestPosition);
 			}
-//			System.out.println(unitComponent.getPosition().x + " , " + Globals.tick + " , " + dt);
+			// System.out.println(unitComponent.getPosition().x + " , " + Globals.tick + " , " + dt);
 		}
 	}
 
@@ -68,13 +67,13 @@ public class SnapshotSystem {
 		snapshotComponent.getDifference();
 		snapshotComponent.getNext().getPosition().sub(snapshotComponent.getCurrent().getPosition(), tempVector);
 		unitComponent.getPosition().set(snapshotComponent.getCurrent().getPosition()).fma(dt, tempVector);
-		
+
 		snapshotComponent.getNext().getForward().sub(snapshotComponent.getCurrent().getForward(), tempVector);
 		unitComponent.getForward().set(snapshotComponent.getCurrent().getForward()).fma(dt, tempVector);
-		
+
 		snapshotComponent.getNext().getUp().sub(snapshotComponent.getCurrent().getUp(), tempVector);
 		unitComponent.getUp().set(snapshotComponent.getCurrent().getUp()).fma(dt, tempVector);
-		
+
 		snapshotComponent.getNext().getRight().sub(snapshotComponent.getCurrent().getRight(), tempVector);
 		unitComponent.getRight().set(snapshotComponent.getCurrent().getRight()).fma(dt, tempVector);
 	}

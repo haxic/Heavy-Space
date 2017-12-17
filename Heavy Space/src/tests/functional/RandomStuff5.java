@@ -1,11 +1,12 @@
 package tests.functional;
 
+import shared.functionality.Globals;
+
 public class RandomStuff5 {
 
 	public static void main(String[] args) {
-		short nextSnapshot = (short) ((1000 % Short.MAX_VALUE) / 3);
-		
-		System.out.println(nextSnapshot);
+		Globals.tick = (short) (10940 % Short.MAX_VALUE);
+		System.out.println(Globals.tick);
 	}
 
 }

@@ -1,7 +1,7 @@
 package shared.functionality;
 
 public class IntegerIdentifier {
-	private int identifier;
+	private int identifier = 32767*3-500;
 
 	public int get() {
 		int i = identifier++;
