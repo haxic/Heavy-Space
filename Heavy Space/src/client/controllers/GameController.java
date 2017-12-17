@@ -227,7 +227,7 @@ public class GameController implements IController {
 				lastTick = tick;
 			int diff = lastTick - firstTick;
 			if (diff > 3) {
-				Globals.tick = (short) (lastTick -1);
+				Globals.tick = (short) (lastTick - 2);
 				running = true;
 				System.out.println("RUN");
 			} else {
