@@ -24,7 +24,7 @@ public class Pinger {
 
 	@Override
 	public String toString() {
-		return "LAST PING:" + latestMS + " AVG PING:" + averageMS + " TICK:" + latestTick;
+		return "avg:"+latestMS + " last:" + latestTick;
 	}
 
 	public short getAverageMS() {

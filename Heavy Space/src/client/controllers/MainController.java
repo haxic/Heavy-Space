@@ -151,7 +151,7 @@ public class MainController {
 			}
 			if (Globals.now - fpsTimer >= 1000) {
 				fpsTimer += 1000;
-//				System.out.println("Fps: " + frames + " " + connectionManager.tcpPinger + " " + connectionManager.udpPinger);
+				System.out.println("Fps: " + frames + " " + connectionManager.tcpPinger + " " + connectionManager.udpPinger + " Snapshot tick:" + Globals.snapshotTick);
 				frames = 0;
 			}
 		}

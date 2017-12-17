@@ -148,7 +148,8 @@ public class GameServer {
 				int shipEntities = entityManager.sizeEntitiesContainingComponent(ShipComponent.class);
 				int projectileEntities = entityManager.sizeEntitiesContainingComponent(ProjectileComponent.class);
 				int obstacleEntities = entityManager.sizeEntitiesContainingComponent(ObstacleComponent.class);
-				System.out.println("Tick: " + Globals.tick + ". Entities total: " + entityManager.getSize()
+				System.out.println("Tick: " + Globals.tick + ". Snapshot tick: " + Globals.snapshotTick
+				+ ". Entities total: " + entityManager.getSize()
 				+ ". Players: " + playerManager.getSize() + ":" + playerEntities
 				+ ". Clients: " + clientManager.getSize() + ":" + clientEntities
 				+ ". Ships: " + shipEntities
