@@ -31,6 +31,7 @@ import shared.components.ObjectComponent;
 import shared.functionality.DataPacket;
 import shared.functionality.EventHandler;
 import shared.functionality.Globals;
+import shared.functionality.IntegerIdentifier;
 import shared.functionality.ShortIdentifier;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.UDPServer;
@@ -54,7 +55,7 @@ public class GameServer {
 	private EntityManager entityManager;
 	private ServerGameFactory serverGameFactory;
 
-	private ShortIdentifier tickIdentifier;
+	private IntegerIdentifier tickIdentifier;
 
 	private AIBotSystem aiBotSystem;
 	private PlayerSystem playerSystem;
@@ -82,7 +83,7 @@ public class GameServer {
 		tcpServer = new TCPServer(validationService);
 		udpServer = new UDPServer();
 		udpRequestHandler = new UDPRequestHandler(entityManager, clientManager, udpServer);
-		tickIdentifier = new ShortIdentifier();
+		tickIdentifier = new IntegerIdentifier();
 
 		aiBotSystem = new AIBotSystem(entityManager);
 		playerSystem = new PlayerSystem(entityManager, serverGameFactory);

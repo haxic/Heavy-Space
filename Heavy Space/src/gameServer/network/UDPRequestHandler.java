@@ -117,7 +117,7 @@ public class UDPRequestHandler {
 					DataPacket sendDataPacket = new DataPacket(new byte[6]);
 					sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_PING.ordinal()); // 0
 					sendDataPacket.addByte((byte) identifier); // 1
-					sendDataPacket.addShort(Globals.tick); // 2-3
+					sendDataPacket.addShort(Globals.snapshotTick); // 2-3
 					sendDataPacket.addByte((byte) 20); // 4
 					clientComponent.sendData(sendDataPacket.getData());
 					DatagramPacket sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.size(), datagramPacket.getAddress(), datagramPacket.getPort());

@@ -413,7 +413,7 @@ public class ConnectionManager {
 		dataPacket.addByte(requestType.asByte()); // 0
 		dataPacket.addString(uuid); // 1-64
 		dataPacket.addByte(identifier); // 65
-		dataPacket.addShort(Globals.tick); // 66-67
+		dataPacket.addShort((short) Globals.tick); // 66-67
 		dataPacket.addByte(BitConverter.byteFromBooleanArray(new boolean[] { shipControls.forwardThrust, shipControls.reverseThrust, shipControls.starboardThrust, shipControls.portThrust,
 				shipControls.ascend, shipControls.decend, shipControls.primary, shipControls.secondary })); // 68
 		dataPacket.addInteger((int) (shipControls.angularDirection.x * 1000)); // 69-72, Rotation x
@@ -432,7 +432,7 @@ public class ConnectionManager {
 		dataPacket.addByte(requestType.asByte()); // 0
 		dataPacket.addString(uuid); // 1-64
 		dataPacket.addByte(identifier); // 65
-		dataPacket.addShort(Globals.tick); // 66-67
+		dataPacket.addShort((short) Globals.tick); // 66-67
 		dataPacket.addByte((byte) 20); // 68
 		DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), gameServerData.getIP(), gameServerData.getPort());
 		udpServer.sendData(datagramPacket);

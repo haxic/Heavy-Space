@@ -113,7 +113,7 @@ public class ClientManager implements EntityContainer {
 					DataPacket sendDataPacket = new DataPacket(new byte[5]);
 					sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_PING.ordinal());
 					sendDataPacket.addByte((byte) identifier);
-					sendDataPacket.addShort(Globals.tick);
+					sendDataPacket.addShort((short) Globals.snapshotTick);
 					sendDataPacket.addByte((byte) 20);
 					clientComponent.sendData(sendDataPacket.getData());
 				}
