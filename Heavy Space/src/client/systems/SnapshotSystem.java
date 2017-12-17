@@ -58,6 +58,7 @@ public class SnapshotSystem {
 					latestPosition = latestSnapshot.getPosition();
 				unitComponent.getPosition().set(latestPosition);
 			}
+//			System.out.println(unitComponent.getPosition().x + " , " + Globals.tick + " , " + dt);
 		}
 	}
 

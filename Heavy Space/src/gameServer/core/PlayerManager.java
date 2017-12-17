@@ -22,13 +22,13 @@ public class PlayerManager implements EntityContainer {
 		players = new HashMap<>();
 	}
 
-	public Entity getPlayer(String uuid) {
-		return players.get(uuid);
+	public Entity getPlayer(String username) {
+		return players.get(username);
 	}
 
-	public Entity createPlayer(String uuid) {
+	public Entity createPlayer(String username) {
 		Entity player = entityManager.createEntity();
-		players.put(uuid, player);
+		players.put(username, player);
 		entityManager.addComponent(new PlayerComponent(++playerCounter), player);
 		player.attach(this);
 		return player;
@@ -36,5 +36,9 @@ public class PlayerManager implements EntityContainer {
 
 	@Override
 	public void detach(Entity entity) {
+	}
+
+	public int getSize() {
+		return players.size();
 	}
 }

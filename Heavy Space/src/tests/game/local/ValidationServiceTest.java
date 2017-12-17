@@ -23,7 +23,7 @@ import shared.Config;
 import tests.LocalConfig;
 import tests.dbsetup.OnlineUserData;
 import tests.implementations.ServerCommunicatorLocal;
-import tests.implementations.TestAgentManager;
+import tests.implementations.TestClientManager;
 import tests.implementations.TestPlayerManager;
 
 public class ValidationServiceTest {
@@ -42,7 +42,7 @@ public class ValidationServiceTest {
 			fail();
 		EntityManager entityManager = new EntityManager();
 		PlayerManager playerManager = new TestPlayerManager(entityManager);
-		ClientManager agentManager = new TestAgentManager(playerManager, entityManager);
+		ClientManager agentManager = new TestClientManager(playerManager, entityManager);
 		ValidationService validationService = new ValidationService(serverCommunicator, agentManager, 500);
 		TCPServer tcpServer = new TCPServer(validationService);
 		try {

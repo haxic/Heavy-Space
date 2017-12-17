@@ -5,8 +5,6 @@ import java.util.List;
 
 import hecs.Entity;
 import hecs.EntityManager;
-import shared.components.MovementComponent;
-import shared.components.ObjectComponent;
 import shared.components.ProjectileComponent;
 import shared.components.SpawnComponent;
 
@@ -28,11 +26,7 @@ public class ProjectileSystem {
 		for (Entity entity : entities) {
 			ProjectileComponent projectile = (ProjectileComponent) entityManager.getComponentInEntity(entity, ProjectileComponent.class);
 			SpawnComponent spawn = (SpawnComponent) entityManager.getComponentInEntity(entity, SpawnComponent.class);
-			
-			
-			ObjectComponent position = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
-			MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(entity, MovementComponent.class);
-			
+
 			if (spawn != null)
 				continue;
 			projectile.update(dt);

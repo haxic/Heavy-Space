@@ -32,10 +32,11 @@ public class GameServerHostAndJoinTester extends DBTestSetup {
 			// Get master server ip and authentication token from result
 			String[] splitResult = result.split("\\s+");
 			String masterServerIP = splitResult[0];
-			String token = splitResult[1];
+			String port = splitResult[1];
+			String token = splitResult[2];
 
 			// Host game server through master server
-			IMasterServerRMI masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerIP + "/master");
+			IMasterServerRMI masterServerRMI = (IMasterServerRMI) Naming.lookup("rmi://" + masterServerIP + ":" + port + "/master");
 			masterServerRMI.hostGameServer(token, OnlineUserData.USERNAME);
 
 			List<GameServerInfo> serverList = masterServerRMI.getGameServerList(token, OnlineUserData.USERNAME);

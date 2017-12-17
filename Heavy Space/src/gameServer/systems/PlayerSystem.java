@@ -36,7 +36,7 @@ public class PlayerSystem {
 			if (playerComponent.isRequestingSpawnShip() && shipEntity == null) {
 				shipEntity = serverGameFactory.createShip(new Vector3f(0, 0, 0), entity);
 				entityManager.addComponent(new HealthComponent(), entity);
-				entityManager.addComponent(new SpawnComponent((short) 0), shipEntity);
+				entityManager.addComponent(new SpawnComponent(), shipEntity);
 				playerComponent.controlShip(shipEntity);
 			} 
 			

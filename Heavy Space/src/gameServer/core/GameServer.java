@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 
 import gameServer.components.ClientComponent;
 import gameServer.components.ClientGameDataTransferComponent;
+import gameServer.components.ObstacleComponent;
 import gameServer.components.PlayerComponent;
 import gameServer.components.RemoveComponent;
 import gameServer.components.ShipComponent;
@@ -63,7 +64,7 @@ public class GameServer {
 	private ProjectileSystem projectileSystem;
 	private RemoveSystem removeSystem;
 	private SnapshotTransmitterSystem snapshotTransmitterSystem;
-	
+
 	private ServerConfig serverConfig;
 
 	public GameServer(ServerConfig serverConfig, String username, String password) {
@@ -97,10 +98,10 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-//		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
-//		 serverGameFactory.createBot(new Vector3f(200, -400, 0), 0.25f, 1);
-//		 serverGameFactory.createBot(new Vector3f(-300, 700, 0), 0.5f, 1);
-//		 serverGameFactory.createBot(new Vector3f(-500, -100, 0), 0.75f, 1);
+		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
+		 serverGameFactory.createBot(new Vector3f(200, -400, 0), 0.25f, 1);
+		 serverGameFactory.createBot(new Vector3f(-300, 700, 0), 0.5f, 1);
+		 serverGameFactory.createBot(new Vector3f(-500, -100, 0), 0.75f, 1);
 
 		serverGameFactory.createObstacle(new Vector3f(-1500, 0, 0));
 		serverGameFactory.createObstacle(new Vector3f(1500, 0, 0));
@@ -124,9 +125,9 @@ public class GameServer {
 	private final int timestep = 15;
 	private final float timestepDT = timestep / 1000.0f;
 
-
 	private void loop() {
 		long start = System.currentTimeMillis();
+		long logStart = start;
 		Globals.now = start;
 		long now;
 		boolean shouldStop = false;
@@ -138,6 +139,21 @@ public class GameServer {
 				Globals.now = now;
 				Globals.tick = tickIdentifier.get();
 				tick();
+			}
+			if (now - logStart > 1000) {
+				logStart += 1000;
+				int playerEntities = entityManager.sizeEntitiesContainingComponent(PlayerComponent.class);
+				int clientEntities = entityManager.sizeEntitiesContainingComponent(ClientComponent.class);
+				int shipEntities = entityManager.sizeEntitiesContainingComponent(ShipComponent.class);
+				int projectileEntities = entityManager.sizeEntitiesContainingComponent(ProjectileComponent.class);
+				int obstacleEntities = entityManager.sizeEntitiesContainingComponent(ObstacleComponent.class);
+				System.out.println("Tick: " + Globals.tick + ". Entities total: " + entityManager.getSize()
+				+ ". Players: " + playerManager.getSize() + ":" + playerEntities
+				+ ". Clients: " + clientManager.getSize() + ":" + clientEntities
+				+ ". Ships: " + shipEntities
+				+ ". Projectiles: " + projectileEntities
+				+ ". Obstacles: " + obstacleEntities
+				+ ".");
 			}
 			try {
 				Thread.sleep(1);
@@ -154,14 +170,13 @@ public class GameServer {
 		sendSnapshot();
 	}
 
-
 	private void processInputs() {
 		clientManager.process();
 		udpRequestHandler.process();
 	}
 
 	private void processAI() {
-		aiBotSystem.update();
+		aiBotSystem.update(Globals.dt);
 	}
 
 	private void updateGameState() {
@@ -172,7 +187,6 @@ public class GameServer {
 		collisionSystem.process();
 		projectileSystem.process(Globals.dt);
 	}
-
 
 	private void sendSnapshot() {
 		snapshotTransmitterSystem.process();

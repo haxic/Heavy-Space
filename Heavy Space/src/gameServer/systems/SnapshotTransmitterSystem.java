@@ -75,9 +75,6 @@ public class SnapshotTransmitterSystem {
 		}
 	}
 
-	private void sendGameSate() {
-
-	}
 
 	boolean[] tempBools = new boolean[8];
 

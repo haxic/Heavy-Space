@@ -112,7 +112,7 @@ public class MenuController implements IController {
 		// }
 		// create = !create;
 		// }
-		aiBotSystem.update();
+		aiBotSystem.update(Globals.dt);
 		shipSystem.process(Globals.dt);
 		movementSystem.process(Globals.dt);
 		collisionSystem.process();

@@ -18,9 +18,9 @@ public class ValidationService {
 	private int validationCounter;
 	private ClientManager clientManager;
 
-	public ValidationService(IServerCommunicator serverCommuicator, ClientManager agentManager, int timeout) {
+	public ValidationService(IServerCommunicator serverCommuicator, ClientManager clientManager, int timeout) {
 		this.serverCommuicator = serverCommuicator;
-		this.clientManager = agentManager;
+		this.clientManager = clientManager;
 		this.timeout = timeout;
 	}
 

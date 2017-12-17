@@ -45,6 +45,7 @@ public class MainController {
 		serverCommunicator = new ServerCommunicator(serverConfig);
 
 		connectionManager = new ConnectionManager(eventHandler);
+		connectionManager.setUser(username, null);
 		renderManager = new RenderManager(displayManager, loader, gameAssetLoader.particleAtlasTexture);
 		menuController = new MenuController(eventHandler, gameServerData, gameAssetLoader);
 		currentController = menuController;
@@ -150,7 +151,7 @@ public class MainController {
 			}
 			if (Globals.now - fpsTimer >= 1000) {
 				fpsTimer += 1000;
-				System.out.println("Fps: " + frames);
+//				System.out.println("Fps: " + frames + " " + connectionManager.tcpPinger + " " + connectionManager.udpPinger);
 				frames = 0;
 			}
 		}

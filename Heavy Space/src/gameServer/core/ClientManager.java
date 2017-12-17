@@ -44,6 +44,8 @@ public class ClientManager implements EntityContainer {
 		clientComponent.start();
 	}
 
+	int counter = 0;
+
 	public boolean udpAuthenticationRequest(String uuid, InetAddress address, int port) {
 		Entity client = clients.get(uuid);
 
@@ -93,7 +95,7 @@ public class ClientManager implements EntityContainer {
 			ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(entity, ClientComponent.class);
 			ClientValidatedComponent clientValidatedComponent = (ClientValidatedComponent) entityManager.getComponentInEntity(entity, ClientValidatedComponent.class);
 			ClientPendingComponent pendingValidationComponent = (ClientPendingComponent) entityManager.getComponentInEntity(entity, ClientPendingComponent.class);
-			
+
 			if (clientComponent.isDisconnected() || (pendingValidationComponent != null && Globals.now - pendingValidationComponent.getTimestamp() > 2000)) {
 				clientComponent.disconnect();
 				removed.add(entity);
@@ -148,5 +150,9 @@ public class ClientManager implements EntityContainer {
 		ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(entity, ClientComponent.class);
 		uuids.remove(entity);
 		clients.remove(clientComponent.getUuid());
+	}
+
+	public int getSize() {
+		return clients.size();
 	}
 }

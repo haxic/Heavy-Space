@@ -23,6 +23,14 @@ public class ObjectComponent extends EntityComponent {
 		up = new Vector3f(0, 1, 0);
 	}
 
+	public ObjectComponent(Vector3f position) {
+		this.position = position;
+		scale = new Vector3f(1, 1, 1);
+		forward = new Vector3f(0, 0, -1);
+		right = new Vector3f(1, 0, 0);
+		up = new Vector3f(0, 1, 0);
+	}
+
 	private static Vector3f tempVector1 = new Vector3f();
 	private static Vector3f tempVector2 = new Vector3f();
 

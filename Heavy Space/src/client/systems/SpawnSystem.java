@@ -6,8 +6,10 @@ import client.components.ActorComponent;
 import client.components.LightComponent;
 import client.components.ParticleComponent;
 import client.components.SnapshotComponent;
+import client.gameData.ClientGameFactory;
 import client.gameData.Scene;
 import client.network.ConnectionManager;
+import gameServer.components.ShipComponent;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.ObjectComponent;
@@ -24,12 +26,14 @@ public class SpawnSystem {
 	private Scene scene;
 	private ConnectionManager connectionManager;
 	private EventHandler eventHandler;
+	private ClientGameFactory clientGameFactory;
 
-	public SpawnSystem(EntityManager entityManager, Scene scene, ConnectionManager connectionManager, EventHandler eventHandler) {
+	public SpawnSystem(EntityManager entityManager, Scene scene, ConnectionManager connectionManager, EventHandler eventHandler, ClientGameFactory clientGameFactory) {
 		this.entityManager = entityManager;
 		this.scene = scene;
 		this.connectionManager = connectionManager;
 		this.eventHandler = eventHandler;
+		this.clientGameFactory = clientGameFactory;
 	}
 
 	public void process() {
@@ -40,10 +44,12 @@ public class SpawnSystem {
 			return;
 		for (Entity entity : entities) {
 			SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(entity, SpawnComponent.class);
-			if (Globals.tick >= spawnComponent.getTick() || spawnComponent.instant()) {
-				SnapshotComponent snapshot = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
-				if (snapshot != null && snapshot.getPlayerID() == connectionManager.getPlayerID()) {
-					System.out.println("SPAWN PLAYER SHIP");
+			if (Globals.tick >= spawnComponent.getTick()) {
+				clientGameFactory.spawnEntity(entity, spawnComponent);
+				ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(entity, ShipComponent.class);
+				
+				if (shipComponent != null && spawnComponent.getOwnerEntityID() == connectionManager.getPlayerID()) {
+					System.out.println("DONT RENDER OWN SHIP!");
 					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SPAWN_PLAYER_SHIP, entity));
 				} else {
 					ActorComponent actor = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
@@ -56,7 +62,6 @@ public class SpawnSystem {
 					if (light != null)
 						scene.addLightEntity(entity);
 				}
-				entityManager.removeComponentAll(SpawnComponent.class, entity);
 			}
 		}
 	}

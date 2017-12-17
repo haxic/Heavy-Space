@@ -63,7 +63,7 @@ public class GameController implements IController {
 		movementSystem = new MovementSystem(entityManager);
 		// collisionSystem = new CollisionSystem(entityManager);
 		projectileSystem = new ProjectileSystem(entityManager);
-		spawnSystem = new SpawnSystem(entityManager, scene, connectionManager, eventHandler);
+		spawnSystem = new SpawnSystem(entityManager, scene, connectionManager, eventHandler, clientGameFactory);
 		snapshotSystem = new SnapshotSystem(entityManager);
 		deathSystem = new DeathSystem(entityManager, gameModel);
 
@@ -111,9 +111,7 @@ public class GameController implements IController {
 			}
 			dt = timestepCounter / timestepDT;
 		}
-		float speeder = 1;
-		if (KeyboardHandler.kb_keyDown(TURBO))
-			speeder = 10;
+
 
 		// velocity.set(scene.camera.getForward().mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().z, tempVector));
 		// velocity.add(scene.camera.right.mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().x, tempVector));
@@ -229,7 +227,7 @@ public class GameController implements IController {
 				lastTick = tick;
 			int diff = lastTick - firstTick;
 			if (diff > 3) {
-				Globals.tick = (short) (lastTick - 2);
+				Globals.tick = (short) (lastTick -1);
 				running = true;
 				System.out.println("RUN");
 			} else {

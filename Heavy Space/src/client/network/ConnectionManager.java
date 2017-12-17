@@ -49,8 +49,8 @@ public class ConnectionManager {
 	private List<TCPRequest> tcpRequests;
 	private List<TCPRequest> tcpRequestsRemoved;
 
-	private Pinger udpPinger;
-	private Pinger tcpPinger;
+	public Pinger udpPinger;
+	public Pinger tcpPinger;
 
 	private TCPSocketHandler tcpSocketHandler;
 	private ByteIdentifier tcpIdentifier;

@@ -63,8 +63,9 @@ public class ClientCreateMultipleAccountsTester extends DBTestSetup {
 				String result = authenticationServerRMI.authenticate(username, password);
 				String[] splitResult = result.split("\\s+");
 				String ip = splitResult[0];
-				String token = splitResult[1];
-				String resultUsername = splitResult[2];
+				String port = splitResult[1];
+				String token = splitResult[2];
+				String resultUsername = splitResult[3];
 				assertEquals(username, resultUsername);
 				assertTrue(token != null);
 			} catch (RemoteException e) {

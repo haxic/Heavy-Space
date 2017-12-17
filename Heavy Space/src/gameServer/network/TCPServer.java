@@ -38,6 +38,7 @@ public class TCPServer implements Runnable {
 	public void startServer(InetAddress ip, int port) throws IOException {
 		InetSocketAddress serverAddress = new InetSocketAddress(ip, port);
 		serverSocket = new ServerSocket();
+		System.out.println(serverAddress);
 		serverSocket.bind(serverAddress);
 		acceptNewConnections();
 		thread = new Thread(this);

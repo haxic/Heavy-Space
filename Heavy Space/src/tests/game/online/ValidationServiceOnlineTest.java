@@ -3,7 +3,9 @@ package tests.game.online;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
 import org.junit.Test;
@@ -11,10 +13,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import gameServer.core.ClientManager;
+import gameServer.core.ServerConfig;
 import gameServer.network.IServerCommunicator;
 import gameServer.network.ServerCommunicator;
 import gameServer.network.TCPServer;
 import gameServer.network.ValidationService;
+import hecs.EntityManager;
 import shared.Config;
 import tests.LocalConfig;
 import tests.dbsetup.DBTestSetup;
@@ -28,18 +32,21 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 	Config config = new LocalConfig();
 
 	@Test
-	public void testValidationService() {
+	public void testValidationService() throws UnknownHostException {
 		LocalConfig localConfig = new LocalConfig();
-		serverCommunicator = new ServerCommunicator(localConfig.authenticationServerIP + ":" + localConfig.authenticationServerPort);
+		ServerConfig config = new ServerConfig();
+		config.authenticationServerIP = InetAddress.getByName(localConfig.authenticationServerIP);
+		config.authenticationServerPort = localConfig.authenticationServerPort;
+		serverCommunicator = new ServerCommunicator(config);
 		serverCommunicator.createAccount(OnlineUserData.USERNAME, OnlineUserData.PASSWORD);
 		if (!serverCommunicator.authenticate(OnlineUserData.USERNAME, OnlineUserData.PASSWORD))
 			fail();
-
-		ClientManager agentmanager = new ClientManager(null);
-		ValidationService validationService = new ValidationService(serverCommunicator, null, 500, false);
-		TCPServer tcpServer = new TCPServer("localhost", config.gameServerDefaultPort, validationService);
+		EntityManager entityManager = new EntityManager();
+		ClientManager clientManager = new ClientManager(entityManager, null);
+		ValidationService validationService = new ValidationService(serverCommunicator, clientManager, 500);
+		TCPServer tcpServer = new TCPServer(validationService);
 		try {
-			tcpServer.startServer();
+			tcpServer.startServer(InetAddress.getByName("localhost"), localConfig.gameServerDefaultPort);
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail();
@@ -167,8 +174,8 @@ public class ValidationServiceOnlineTest extends DBTestSetup {
 						fail();
 					}
 					String[] splitResult = result.split("\\s+");
-					token = splitResult[1];
-					assertEquals(username, splitResult[2]);
+					token = splitResult[2];
+					assertEquals(username, splitResult[3]);
 				}
 				try {
 					Socket clientSocket = new Socket("localhost", config.gameServerDefaultPort);

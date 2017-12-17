@@ -36,8 +36,8 @@ public class BasicServerTests extends DBTestSetup {
 		// Authenticate (and get authentication token)
 		String result = arh.authenticate(username, password, ip);
 		String[] splitResult = result.split("\\s+");
-		assertEquals(splitResult[0], localConfig.masterServerIP + ":" + localConfig.masterServerPort);
-		String token = splitResult[1];
+		assertEquals(splitResult[0] + ":" + splitResult[1], localConfig.masterServerIP + ":" + localConfig.masterServerPort);
+		String token = splitResult[2];
 
 		// Host game
 		msrh.hostGameServer(token, username);

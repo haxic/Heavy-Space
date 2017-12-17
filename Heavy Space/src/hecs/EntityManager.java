@@ -159,7 +159,6 @@ public class EntityManager {
 	 */
 	public List<Entity> getEntitiesContainingComponent(Class<? extends EntityComponent> componentClass) {
 		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
-
 		if (components != null) {
 			List<Entity> containingEntities = new ArrayList<Entity>();
 			for (Entry<Entity, EntityComponent> entry : components.entrySet()) {
@@ -169,6 +168,13 @@ public class EntityManager {
 		} else {
 			return null;
 		}
+	}
+
+	public int sizeEntitiesContainingComponent(Class<? extends EntityComponent> componentClass) {
+		HashMap<Entity, EntityComponent> components = dataStructure.get(componentClass);
+		if (components == null)
+			return -1;
+		return components.size();
 	}
 
 	/**
@@ -204,5 +210,9 @@ public class EntityManager {
 	 */
 	public EntityComponent getComponentOfClassOfEntityContainingDifferentComponentOfClass(Class<? extends EntityComponent> componentClass1, Class<? extends EntityComponent> componentClass2) {
 		return dataStructure.get(componentClass2).get(getEntityContainingComponentOfClass(componentClass1));
+	}
+
+	public int getSize() {
+		return entities.size();
 	}
 }
