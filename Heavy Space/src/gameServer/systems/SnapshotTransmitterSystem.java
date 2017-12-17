@@ -38,7 +38,7 @@ public class SnapshotTransmitterSystem {
 	public void process() {
 		short nextSnapshot = (short) ((Globals.tick % Short.MAX_VALUE) / 3);
 //		short nextSnapshot = (short) (Globals.tick  / 3);
-		if (nextSnapshot <= Globals.snapshotTick)
+		if (nextSnapshot == Globals.snapshotTick)
 			return;
 		Globals.snapshotTick = nextSnapshot;
 		List<Entity> clientEntities = entityManager.getEntitiesContainingComponent(ClientGameDataTransferComponent.class);

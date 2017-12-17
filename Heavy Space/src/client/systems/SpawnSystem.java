@@ -44,7 +44,7 @@ public class SpawnSystem {
 			return;
 		for (Entity entity : entities) {
 			SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(entity, SpawnComponent.class);
-			if (Globals.tick >= spawnComponent.getTick()) {
+			if (Globals.tick >= spawnComponent.getTick() || Globals.tick < 1000 && spawnComponent.getTick() > 8000) {
 				clientGameFactory.spawnEntity(entity, spawnComponent);
 				ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(entity, ShipComponent.class);
 				

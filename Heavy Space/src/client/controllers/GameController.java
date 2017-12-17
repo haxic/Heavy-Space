@@ -106,7 +106,7 @@ public class GameController implements IController {
 			timestepCounter += Globals.dt;
 			while (timestepCounter > timestepDT) {
 				timestepCounter -= timestepDT;
-				Globals.tick++;
+				Globals.tick = (short) (++Globals.tick % Short.MAX_VALUE);
 				ticked = true;
 			}
 			dt = timestepCounter / timestepDT;

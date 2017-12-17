@@ -32,10 +32,11 @@ public class SnapshotSystem {
 
 			Snapshot current = snapshotComponent.getCurrent();
 			Snapshot next = snapshotComponent.getNext();
+			
 			if (current.getTick() == Globals.tick) {
 				interpolate(dt, unitComponent, snapshotComponent);
-			} else if (current.getTick() < Globals.tick) {
-				if (next.getTick() > Globals.tick) {
+			} else if (current.getTick() < Globals.tick || (Globals.tick < 1000 && current.getTick() > 8000)) {
+				if (next.getTick() > Globals.tick || (next.getTick() < 1000 && Globals.tick > 8000)) {
 					interpolate(dt, unitComponent, snapshotComponent);
 				} else if (snapshotComponent.peekNext() != null) {
 					// Interpolating on next set
@@ -46,7 +47,7 @@ public class SnapshotSystem {
 				} else {
 					// Extrapolate using current and next
 				}
-			} else if (current.getTick() > Globals.tick) {
+			} else {
 				unitComponent.getPosition().set(current.getPosition());
 			}
 			if (!useSnapshotInterpolation) {
