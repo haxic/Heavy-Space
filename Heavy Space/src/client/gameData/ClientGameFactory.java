@@ -36,7 +36,7 @@ public class ClientGameFactory {
 	public Entity createDebris(Vector3f position, Vector3f scale) {
 		Entity entity = entityManager.createEntity();
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.iceAsteroidSmall), entity);
 		return entity;
 	}
 
@@ -52,7 +52,7 @@ public class ClientGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(200, 200, 200);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.iceAsteroid), entity);
 		return entity;
 	}
 
@@ -198,7 +198,7 @@ public class ClientGameFactory {
 		entityManager.addComponent(new HealthComponent(), entity);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
 		entityManager.addComponent(new ShipComponent(), entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.ship), entity);
 	}
 
 	private void spawnProjectile(Entity entity, int entityVariation, Vector3f position, Vector3f forward, Vector3f up, Vector3f right, Vector3f velocity) {
@@ -215,7 +215,7 @@ public class ClientGameFactory {
 	}
 
 	public Entity spawnCannonProjectile(Entity entity, Vector3f position, Vector3f velocity) {
-		Vector3f scale = new Vector3f(2, 2, 2);
+		Vector3f scale = new Vector3f(0.4f, 0.4f, 0.4f);
 
 		// TODO: ownerEntityID fix gameModel etc
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
@@ -223,7 +223,7 @@ public class ClientGameFactory {
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.cannonProjectile), entity);
 		return entity;
 	}
 
@@ -245,7 +245,7 @@ public class ClientGameFactory {
 	public Entity spawnObstacle(Entity entity, Vector3f position) {
 		Vector3f scale = new Vector3f(200, 200, 200);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.iceAsteroid), entity);
 		return entity;
 	}
 

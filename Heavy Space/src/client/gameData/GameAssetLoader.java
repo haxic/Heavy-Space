@@ -16,6 +16,10 @@ public class GameAssetLoader {
 	public Model skybox;
 	public Model cube;
 	public Model sphere;
+	public Model iceAsteroidSmall;
+	public Model iceAsteroid;
+	public Model ship;
+	public Model cannonProjectile;
 
 	public GameAssetLoader(Loader loader) {
 		dragon = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("dragon")), loader.loadTexture("dragon", 1, 1));
@@ -30,5 +34,11 @@ public class GameAssetLoader {
 		
 		cube = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("cube")), loader.loadTexture("texture", 1, 1));
 		sphere = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("sphere")), loader.loadTexture("texture", 1, 1));
+	
+		
+		iceAsteroidSmall = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("asteroids/iceSmall/model")), loader.loadTexture("asteroids/iceSmall/texture", 1, 1));
+		iceAsteroid = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("asteroids/ice/ice")), loader.loadTexture("asteroids/ice/iceTexture", 1, 1));
+		ship = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("ship/ApacheClass")), loader.loadTexture("ship/ApacheClassTexture", 1, 1));
+		cannonProjectile = new Model(loader.loadToVAO(OBJFileLoader.loadOBJ("cube")), loader.loadTexture("yellow", 1, 1));
 	}
 }

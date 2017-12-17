@@ -4,6 +4,8 @@ import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import gameServer.components.ClientComponent;
 import gameServer.components.ClientGameDataTransferComponent;
 import gameServer.components.ObstacleComponent;
@@ -73,6 +75,11 @@ public class SnapshotTransmitterSystem {
 				udpServer.sendData(datagramPacket);
 			}
 		}
+		List<Entity> spawnedEntities = entityManager.getEntitiesContainingComponent(SpawnComponent.class);
+		if (spawnedEntities != null)
+			for (Entity spawnedEntity : spawnedEntities) {
+				entityManager.removeComponentAll(SpawnComponent.class, spawnedEntity);
+			}
 	}
 
 
@@ -194,44 +201,57 @@ public class SnapshotTransmitterSystem {
 				}
 
 				ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(createEntity, ObjectComponent.class);
-
+				SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(createEntity, SpawnComponent.class);
+				Vector3f position;
+				Vector3f forward;
+				Vector3f up;
+				Vector3f right;
+				if (spawnComponent != null) {
+					position = spawnComponent.getPosition();
+					forward = spawnComponent.getForward();
+					up = spawnComponent.getUp();
+					right = spawnComponent.getRight();					
+				} else {
+					position = objectComponent.getPosition();
+					forward = objectComponent.getForward();
+					up = objectComponent.getUp();
+					right = objectComponent.getRight();	
+				}
+				
 				// 4 ints + 2 bytes = 18 bytes
 				dataPacket.addInteger((int) (createEntity.getEID())); // 5, Entity id
 				dataPacket.addByte(entityType); // 9, Entity type (ship, projectile, obstacle etc)
 				dataPacket.addByte(entityVariation); // 10, Entity variation (what variation of the type)
 				if (entityType != 2)
 					dataPacket.addShort(entityOwnerID); // 11-12, Player id
-				dataPacket.addFloat(objectComponent.getPosition().x); // 13-16, Position x
-				dataPacket.addFloat(objectComponent.getPosition().y); // 17-20, Position y
-				dataPacket.addFloat(objectComponent.getPosition().z); // 21-24, Position z
+				dataPacket.addFloat(position.x); // 13-16, Position x
+				dataPacket.addFloat(position.y); // 17-20, Position y
+				dataPacket.addFloat(position.z); // 21-24, Position z
 				if (entityType == 1) {
 					MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(createEntity, MovementComponent.class);
-					dataPacket.addFloat(movement.getLinearVel().x); // 25-28, Velocity x
-					dataPacket.addFloat(movement.getLinearVel().y); // 29-32, Velocity y
-					dataPacket.addFloat(movement.getLinearVel().z); // 33-36, Velocity z
+					Vector3f linearVel = movement.getLinearVel();
+					dataPacket.addFloat(linearVel.x); // 25-28, Velocity x
+					dataPacket.addFloat(linearVel.y); // 29-32, Velocity y
+					dataPacket.addFloat(linearVel.z); // 33-36, Velocity z
 				}
 				if (entityType != 1) {
-					dataPacket.addFloat(objectComponent.getForward().x); // 22-25, Forward x
-					dataPacket.addFloat(objectComponent.getForward().y); // 26-29, Forward y
-					dataPacket.addFloat(objectComponent.getForward().z); // 30-33, Forward z
+					dataPacket.addFloat(forward.x); // 22-25, Forward x
+					dataPacket.addFloat(forward.y); // 26-29, Forward y
+					dataPacket.addFloat(forward.z); // 30-33, Forward z
 
-					dataPacket.addFloat(objectComponent.getUp().x); // 34-29, Up x
-					dataPacket.addFloat(objectComponent.getUp().y); // 38-41, Up y
-					dataPacket.addFloat(objectComponent.getUp().z); // 42-45, Up z
+					dataPacket.addFloat(up.x); // 34-29, Up x
+					dataPacket.addFloat(up.y); // 38-41, Up y
+					dataPacket.addFloat(up.z); // 42-45, Up z
 
-					dataPacket.addFloat(objectComponent.getRight().x); // 46-49, Right x
-					dataPacket.addFloat(objectComponent.getRight().y); // 50-53, Right y
-					dataPacket.addFloat(objectComponent.getRight().z); // 54-57, Right z
+					dataPacket.addFloat(right.x); // 46-49, Right x
+					dataPacket.addFloat(right.y); // 50-53, Right y
+					dataPacket.addFloat(right.z); // 54-57, Right z
 				}
 
 				entityCounter++;
 			}
 			dataPackets.add(closeDataPacket(entityCounter, dataPacket));
 		}
-
-		if (createUnits != null && !createUnits.isEmpty())
-			for (Entity createdUnit : createUnits)
-				entityManager.removeComponentAll(SpawnComponent.class, createdUnit);
 	}
 
 	private DataPacket createDataPacket(byte requestType, short currentTick, byte packetNumber) {

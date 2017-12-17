@@ -68,9 +68,9 @@ public class GameController implements IController {
 		deathSystem = new DeathSystem(entityManager, gameModel);
 
 		clientGameFactory.setSkybox(scene);
-		Entity sun1 = clientGameFactory.createSun(new Vector3f(0, 5000, -10000), new Vector3f(1, 0.9f, 0.4f));
+		Entity sun1 = clientGameFactory.createSun(new Vector3f(0, 5000, -10000), new Vector3f(1, 1, 1));
 		scene.addLightEntity(sun1);
-		Entity sun2 = clientGameFactory.createSun(new Vector3f(-7000, -7000, 7000), new Vector3f(1, 0.7f, 0));
+		Entity sun2 = clientGameFactory.createSun(new Vector3f(-7000, -7000, 7000), new Vector3f(1, 1, 1));
 		scene.addLightEntity(sun2);
 		
 		clientGameFactory.createLotsOfDebris(scene, 1000);

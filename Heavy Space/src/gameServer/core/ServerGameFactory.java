@@ -13,6 +13,7 @@ import shared.components.HealthComponent;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
 import shared.components.ProjectileComponent;
+import shared.components.SpawnComponent;
 
 public class ServerGameFactory {
 	EntityManager entityManager;
@@ -30,7 +31,7 @@ public class ServerGameFactory {
 		System.out.println("CREATE OBSTACLE: " + entity.getEID());
 		return entity;
 	}
-	
+
 	public Entity createBot(Vector3f position, float speed, float direction) {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(1, 1, 1);
@@ -45,9 +46,11 @@ public class ServerGameFactory {
 
 	public Entity createShip(Vector3f position, Entity player) {
 		Entity entity = entityManager.createEntity();
+		System.out.println("CREATE SHIP: " + entity.getEID());
 		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new HealthComponent(), entity);
-		entityManager.addComponent(new ObjectComponent(position, scale), entity);
+		ObjectComponent objectComponent = new ObjectComponent(position, scale);
+		entityManager.addComponent(objectComponent, entity);
 		entityManager.addComponent(new MovementComponent(), entity);
 		entityManager.addComponent(new CollisionComponent(new Vector3f(position), 30f), entity);
 		ShipComponent shipComponent;
@@ -56,6 +59,7 @@ public class ServerGameFactory {
 		else
 			shipComponent = new ShipComponent(player);
 		entityManager.addComponent(shipComponent, entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), new Vector3f(objectComponent.getForward()), new Vector3f(objectComponent.getUp()), new Vector3f(objectComponent.getRight()), null), entity);
 		return entity;
 	}
 
@@ -63,12 +67,13 @@ public class ServerGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		ProjectileComponent projectile = new ProjectileComponent(shipEntity, (byte) 0, 1f, 400);
+		ProjectileComponent projectile = new ProjectileComponent(shipEntity, (byte) 0, 4f, 400);
 		entityManager.addComponent(new CollisionComponent(new Vector3f(position), 4f), entity);
 		entityManager.addComponent(projectile, entity);
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, null, null, new Vector3f(velocity)), entity);
 		return entity;
 	}
 
@@ -76,14 +81,14 @@ public class ServerGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		ProjectileComponent projectile = new ProjectileComponent(shipEntity, (byte) 1, 1f, 400);
+		ProjectileComponent projectile = new ProjectileComponent(shipEntity, (byte) 1, 4f, 400);
 		entityManager.addComponent(new CollisionComponent(new Vector3f(position), 8f), entity);
 		entityManager.addComponent(projectile, entity);
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, null, null, new Vector3f(velocity)), entity);
 		return entity;
 	}
-
 
 }

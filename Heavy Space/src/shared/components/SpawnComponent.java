@@ -29,9 +29,6 @@ public class SpawnComponent extends EntityComponent {
 		this.velocity = velocity;
 	}
 
-	public SpawnComponent() {
-	}
-
 	@Override
 	protected void removeComponent() {
 	}

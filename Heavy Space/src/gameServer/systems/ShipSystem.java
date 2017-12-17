@@ -39,14 +39,13 @@ public class ShipSystem {
 				shipComponent.firePrimary();
 				Vector3f forward = new Vector3f((float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f).add(objectComponent.getForward())
 						.normalize();
-				Entity plasmaProjectile = serverGameFactory.createCannonProjectile(entity, new Vector3f(objectComponent.getPosition()), forward.mul(1200).add(movementComponent.getLinearVel()));
-				entityManager.addComponent(new SpawnComponent(), plasmaProjectile);
+				serverGameFactory.createCannonProjectile(entity, new Vector3f(objectComponent.getPosition()), forward.mul(1200).add(movementComponent.getLinearVel()));
 			}
 			if (shipComponent.isRequestFireSecondary()) {
 				shipComponent.fireSecondary();
-				Entity plasmaProjectile = serverGameFactory.createPlasmaProjectile(entity, new Vector3f(objectComponent.getPosition()),
+				serverGameFactory.createPlasmaProjectile(entity, new Vector3f(objectComponent.getPosition()),
 						new Vector3f(objectComponent.getForward()).mul(750).add(movementComponent.getLinearVel()));
-				entityManager.addComponent(new SpawnComponent(), plasmaProjectile);
+
 			}
 
 			// HealthComponent healthComponent = (HealthComponent) entityManager.getComponentInEntity(entity, HealthComponent.class);
