@@ -99,7 +99,7 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-//		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
+		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
 //		 serverGameFactory.createBot(new Vector3f(200, -400, 0), 0.25f, 1);
 //		 serverGameFactory.createBot(new Vector3f(-300, 700, 0), 0.5f, 1);
 //		 serverGameFactory.createBot(new Vector3f(-500, -100, 0), 0.75f, 1);
