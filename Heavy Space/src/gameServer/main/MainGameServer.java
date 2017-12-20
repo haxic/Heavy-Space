@@ -14,7 +14,7 @@ public class MainGameServer {
 		ServerConfig config = new ServerConfig();
 		config.port = 6029;
 		config.ipType = IPType.LAN;
-		config.official = false;
+		config.official = true;
 
 		if (config.official) {
 			try {
