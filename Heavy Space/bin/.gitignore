@@ -1,4 +1,5 @@
 /config.txt
 /.gitignore
-/client/
-/gameServer/
+/shared/
+/tests/
+/utilities/
