@@ -148,7 +148,7 @@ public class SnapshotTransmitterSystem {
 
 				// If killed by another entity, add killing entity id
 				if (tempBools[2]) {
-					dataPacket.addInteger((int) (death.getKillingEntity().getEID())); // 22-25, Killing entity id
+					dataPacket.addInteger((int) (death.getKillingEntity().getEID())); // 58-61, Killing entity id
 				}
 				entityCounter++;
 			}
@@ -202,16 +202,16 @@ public class SnapshotTransmitterSystem {
 
 				ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(createEntity, ObjectComponent.class);
 				SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(createEntity, SpawnComponent.class);
-				Vector3f position;
-				Vector3f forward;
-				Vector3f up;
-				Vector3f right;
+				Vector3f position = new Vector3f(0,0,0);
+				Vector3f forward = new Vector3f(0,0,0);
+				Vector3f up = new Vector3f(0,0,0);
+				Vector3f right = new Vector3f(0,0,0);
 				if (spawnComponent != null) {
 					position = spawnComponent.getPosition();
 					forward = spawnComponent.getForward();
 					up = spawnComponent.getUp();
 					right = spawnComponent.getRight();
-				} else {
+				} else if (objectComponent != null) {
 					position = objectComponent.getPosition();
 					forward = objectComponent.getForward();
 					up = objectComponent.getUp();

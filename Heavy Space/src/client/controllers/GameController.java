@@ -86,28 +86,20 @@ public class GameController implements IController {
 			useSnapshotInterpolation = !useSnapshotInterpolation;
 	}
 
+	Entity shipEntity;
+	
 	private final int timestep = 15 * 3;
 	private final float timestepDT = timestep / 1000.0f;
 	private float timestepCounter;
 
-	float speed = 50f;
-	float currentSpeed = speed;
-	Vector3f tempVector = new Vector3f();
-
-	Vector3f velocity = new Vector3f();
-
-	Entity shipEntity;
-
 	@Override
 	public void update() {
-		boolean ticked = false;
 		float dt = 0;
 		if (running) {
 			timestepCounter += Globals.dt;
 			while (timestepCounter > timestepDT) {
 				timestepCounter -= timestepDT;
 				Globals.tick = (short) (++Globals.tick % Short.MAX_VALUE);
-				ticked = true;
 			}
 			dt = timestepCounter / timestepDT;
 		}
