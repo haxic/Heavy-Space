@@ -23,6 +23,7 @@ import gameServer.systems.ShipSystem;
 import gameServer.systems.SnapshotTransmitterSystem;
 import hecs.Entity;
 import hecs.EntityManager;
+import hevent.EventManager;
 import shared.components.DeathComponent;
 import shared.components.MovementComponent;
 import shared.components.ProjectileComponent;
@@ -49,9 +50,9 @@ public class GameServer {
 	private TCPServer tcpServer;
 	private UDPServer udpServer;
 	private UDPRequestHandler udpRequestHandler;
-	private EventHandler eventHandler;
 
 	private EntityManager entityManager;
+	private EventManager eventManager;
 	private ServerGameFactory serverGameFactory;
 
 	private IntegerIdentifier tickIdentifier;
@@ -70,7 +71,7 @@ public class GameServer {
 	public GameServer(ServerConfig serverConfig, String username, String password) {
 		this.serverConfig = serverConfig;
 		entityManager = new EntityManager();
-		eventHandler = new EventHandler();
+		eventManager = new EventManager();
 		playerManager = new PlayerManager(entityManager);
 		serverGameFactory = new ServerGameFactory(entityManager, null);
 		clientManager = new ClientManager(entityManager, playerManager);
@@ -81,11 +82,11 @@ public class GameServer {
 		validationService = new ValidationService(serverCommunicator, clientManager, 5000);
 		tcpServer = new TCPServer(validationService);
 		udpServer = new UDPServer();
-		udpRequestHandler = new UDPRequestHandler(entityManager, clientManager, udpServer);
+		udpRequestHandler = new UDPRequestHandler(entityManager, eventManager, clientManager, udpServer);
 		tickIdentifier = new IntegerIdentifier();
 
 		aiBotSystem = new AIBotSystem(entityManager);
-		playerSystem = new PlayerSystem(entityManager, serverGameFactory);
+		playerSystem = new PlayerSystem(entityManager, eventManager, serverGameFactory);
 		shipSystem = new ShipSystem(entityManager, serverGameFactory);
 		movementSystem = new MovementSystem(entityManager);
 		collisionSystem = new CollisionSystem(entityManager);

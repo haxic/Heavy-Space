@@ -24,6 +24,7 @@ import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
 import shared.functionality.Pinger;
+import shared.functionality.SnapshotSequenceType;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.TCPSocket;
 import shared.functionality.network.TCPSocketHandler;
@@ -74,7 +75,7 @@ public class ConnectionManager {
 		udpRequestsRemoved = new ArrayList<UDPRequest>();
 		tcpRequestsRemoved = new ArrayList<TCPRequest>();
 	}
-	
+
 	public void setUser(String username, String token) {
 		this.username = username;
 		this.token = token;
@@ -169,8 +170,8 @@ public class ConnectionManager {
 		DatagramPacket datagramPacket;
 		while ((datagramPacket = udpServer.getData()) != null) {
 			DataPacket dataPacket = new DataPacket(datagramPacket.getData());
-			byte type = dataPacket.getByte(); // 0, Request type
-			RequestType requestType = RequestType.values()[type & 0xFF];
+			byte requestTypeByte = dataPacket.getByte(); // 0, Request type
+			RequestType requestType = RequestType.values()[requestTypeByte & 0xFF];
 			switch (requestType) {
 			case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 				byte identifier = dataPacket.getByte(); // 1, Request identifier
@@ -200,75 +201,84 @@ public class ConnectionManager {
 				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_FAILED_TO_CONNECT, "Failed to authenticate UDP."));
 			}
 				break;
-			case SERVER_REPONSE_SPAWN_ENTITIES: {
-				short tick = dataPacket.getShort(); // 1-2, Tick
-				int packetNumber = dataPacket.getByte(); // 3, Packet number
-				int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
-				for (int i = 0; i < numberOfEntities; i++) {
-					int eeid = dataPacket.getInteger(); // 5, Entity id
-					int entityType = dataPacket.getByte(); // 9, Entity type (obstacle, ship, projectile etc)
-					int entityVariation = dataPacket.getByte(); // 10, Entity variation (what variation of the type)
-					short playerID = 0;
-					if (entityType != 2)
-						playerID = dataPacket.getShort(); // 11-12, Entity variation (what variation of the type)
-					float positionX = dataPacket.getFloat(); // 13-16, Position x
-					float positionY = dataPacket.getFloat(); // 17-20, Position y
-					float positionZ = dataPacket.getFloat(); // 21-24, Position z
-					Vector3f position = new Vector3f(positionX, positionY, positionZ);
-					Quaternionf orientation = null;
-					Vector3f velocity = null;
-					if (entityType == 1) {
-						float velocityX = dataPacket.getFloat(); // 25-28, Velocity x
-						float velocityY = dataPacket.getFloat(); // 29-32, Velocity y
-						float velocityZ = dataPacket.getFloat(); // 33-36, Velocity z
-						velocity = new Vector3f(velocityX, velocityY, velocityZ);
+			case SERVER_REPONSE_SNAPSHOT: {
+				short snapshotTick = dataPacket.getShort(); // 1-2, Tick
+				byte packetNumber = dataPacket.getByte(); // 3
+				boolean hasNext = false;
+				do {
+					byte snapshotSequenceTypeByte = dataPacket.getByte(); // 4
+					SnapshotSequenceType snapshotSequenceType = SnapshotSequenceType.values()[snapshotSequenceTypeByte & 0xFF];
+					switch (snapshotSequenceType) {
+					case CREATE: {
+						int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
+						for (int i = 0; i < numberOfEntities; i++) {
+							int eeid = dataPacket.getInteger(); // 5, Entity id
+							int entityType = dataPacket.getByte(); // 9, Entity type (obstacle, ship, projectile etc)
+							int entityVariation = dataPacket.getByte(); // 10, Entity variation (what variation of the type)
+							short playerID = 0;
+							if (entityType != 2)
+								playerID = dataPacket.getShort(); // 11-12, Entity variation (what variation of the type)
+							float positionX = dataPacket.getFloat(); // 13-16, Position x
+							float positionY = dataPacket.getFloat(); // 17-20, Position y
+							float positionZ = dataPacket.getFloat(); // 21-24, Position z
+							Vector3f position = new Vector3f(positionX, positionY, positionZ);
+							Quaternionf orientation = null;
+							Vector3f velocity = null;
+							if (entityType == 1) {
+								float velocityX = dataPacket.getFloat(); // 25-28, Velocity x
+								float velocityY = dataPacket.getFloat(); // 29-32, Velocity y
+								float velocityZ = dataPacket.getFloat(); // 33-36, Velocity z
+								velocity = new Vector3f(velocityX, velocityY, velocityZ);
+							}
+							if (entityType != 1) {
+								float orientationX = dataPacket.getFloat(); // 22-25, Forward x
+								float orientationY = dataPacket.getFloat(); // 26-29, Forward y
+								float orientationZ = dataPacket.getFloat(); // 30-33, Forward z
+								float orientationW = dataPacket.getFloat(); // 34-37, orientation z
+								orientation = new Quaternionf(orientationX, orientationY, orientationZ, orientationW);
+							}
+							eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SNAPSHOT_CREATE, snapshotTick, eeid, entityType, entityVariation, playerID, position, orientation, velocity));
+						}
 					}
-					if (entityType != 1) {
-						float orientationX = dataPacket.getFloat(); // 22-25, Forward x
-						float orientationY = dataPacket.getFloat(); // 26-29, Forward y
-						float orientationZ = dataPacket.getFloat(); // 30-33, Forward z
-						float orientationW = dataPacket.getFloat(); // 34-37, orientation z
-						orientation = new Quaternionf(orientationX, orientationY, orientationZ, orientationW);
-					}
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_UNIT, tick, eeid, entityType, entityVariation, playerID, position, orientation, velocity));
-				}
-			}
-				break;
-			case SERVER_REPONSE_UPDATE_ENTITIES: {
-				short tick = dataPacket.getShort(); // 1-2, Tick
-				int packetNumber = dataPacket.getByte(); // 3, Packet number
-				int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
-				for (int i = 0; i < numberOfEntities; i++) {
-					int eeid = dataPacket.getInteger(); // 5-8, Entity id
-					byte flagsByte = dataPacket.getByte(); // 9, Flags
+						hasNext = true;
+						break;
+					case UPDATE: {
+						int numberOfEntities = dataPacket.getByte(); // 4, Number of entities
+						for (int i = 0; i < numberOfEntities; i++) {
+							int eeid = dataPacket.getInteger(); // 5-8, Entity id
+							byte flagsByte = dataPacket.getByte(); // 9, Flags
 
-					boolean[] flags = BitConverter.booleanArrayFromByte(flagsByte);
-					Vector3f position = null;
-					Quaternionf orientation = null;
-					int killingEeid = 0;
+							boolean[] flags = BitConverter.booleanArrayFromByte(flagsByte);
+							Vector3f position = null;
+							Quaternionf orientation = null;
+							int killingEeid = 0;
 
-					if (flags[0]) {
-						float positionX = dataPacket.getFloat(); // 10-13, Position x
-						float positionY = dataPacket.getFloat(); // 14-17, Position y
-						float positionZ = dataPacket.getFloat(); // 18-21, Position z
-						position = new Vector3f(positionX, positionY, positionZ);
-						float orientationX = dataPacket.getFloat(); // 22-25, orientation x
-						float orientationY = dataPacket.getFloat(); // 26-29, orientation y
-						float orientationZ = dataPacket.getFloat(); // 30-33, orientation z
-						float orientationW = dataPacket.getFloat(); // 34-37, orientation z
-						orientation = new Quaternionf(orientationX, orientationY, orientationZ, orientationW);
+							if (flags[0]) {
+								float positionX = dataPacket.getFloat(); // 10-13, Position x
+								float positionY = dataPacket.getFloat(); // 14-17, Position y
+								float positionZ = dataPacket.getFloat(); // 18-21, Position z
+								position = new Vector3f(positionX, positionY, positionZ);
+								float orientationX = dataPacket.getFloat(); // 22-25, orientation x
+								float orientationY = dataPacket.getFloat(); // 26-29, orientation y
+								float orientationZ = dataPacket.getFloat(); // 30-33, orientation z
+								float orientationW = dataPacket.getFloat(); // 34-37, orientation z
+								orientation = new Quaternionf(orientationX, orientationY, orientationZ, orientationW);
+							}
+							if (flags[2]) {
+								killingEeid = dataPacket.getInteger(); // 22-25, Killing entity id
+							}
+							eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SNAPSHOT_UPDATE, snapshotTick, eeid, flags, position, orientation, killingEeid));
+						}
 					}
-					if (flags[2]) {
-						killingEeid = dataPacket.getInteger(); // 22-25, Killing entity id
+						hasNext = true;
+						break;
+					default:
+						if (!hasNext)
+							eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SNAPSHOT_END, snapshotTick));
+						hasNext = false;
+						break;
 					}
-					eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_UNIT, tick, eeid, flags, position, orientation, killingEeid));
-				}
-				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_SNAPSHOT, tick));
-			}
-				break;
-			case SERVER_REPONSE_UPDATE: {
-				short tick = dataPacket.getShort(); // 1-2, Tick
-				eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_UPDATE_SNAPSHOT, tick));
+				} while (hasNext);
 			}
 				break;
 			case CLIENT_REQUEST_PING: {
@@ -413,7 +423,6 @@ public class ConnectionManager {
 	public void requestSpawnShip(int tick, Vector3f position) {
 		RequestType requestType = RequestType.CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP;
 		byte identifier = udpIdentifier.get();
-
 		DataPacket dataPacket = new DataPacket(new byte[69]);
 		dataPacket.addByte(requestType.asByte()); // 0
 		dataPacket.addString(uuid); // 1-64

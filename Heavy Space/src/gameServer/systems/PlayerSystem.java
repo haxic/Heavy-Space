@@ -7,20 +7,31 @@ import org.joml.Vector3f;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import gameServer.core.ServerGameFactory;
+import gameServer.events.PlayerActionEvent;
+import gameServer.events.PlayerSpawnEvent;
 import hecs.Entity;
 import hecs.EntityManager;
+import hevent.Event;
+import hevent.EventListener;
+import hevent.EventManager;
 import shared.components.HealthComponent;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
 import shared.components.SpawnComponent;
+import tests.functional.AreaEnteredEvent;
+import tests.functional.DamageReceivedEvent;
 
-public class PlayerSystem {
+public class PlayerSystem implements EventListener {
 
 	private EntityManager entityManager;
+	private EventManager eventManager;
 	private ServerGameFactory serverGameFactory;
+	private Vector3f tempVector = new Vector3f();
 
-	public PlayerSystem(EntityManager entityManager, ServerGameFactory serverGameFactory) {
+	public PlayerSystem(EntityManager entityManager, EventManager eventManager, ServerGameFactory serverGameFactory) {
 		this.entityManager = entityManager;
+		this.eventManager = eventManager;
+		eventManager.subscribe(PlayerActionEvent.class, this);
 		this.serverGameFactory = serverGameFactory;
 	}
 
@@ -37,7 +48,7 @@ public class PlayerSystem {
 				Vector3f position;
 				int side = (int) (Math.random() * 6) + 1;
 				int offsetA = (int) (Math.random() * 1500) - 750;
-				int offsetB = (int) (Math.random() * 1500) -750;
+				int offsetB = (int) (Math.random() * 1500) - 750;
 				switch (side) {
 				case 1:
 					position = new Vector3f(-3000, offsetA, offsetB);
@@ -78,6 +89,68 @@ public class PlayerSystem {
 			// healthComponent.setCoreIntegrity(healthComponent.getCoreIntegrityMax());
 			// }
 			playerComponent.resetRequests();
+		}
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+		if (event instanceof PlayerActionEvent) {
+			PlayerActionEvent playerActionEvent = (PlayerActionEvent) event;
+			controlShip(playerActionEvent.player, playerActionEvent.actions, playerActionEvent.angularVelocity, playerActionEvent.angularVelocityDT, playerActionEvent.dt);
+		} else if (event instanceof PlayerSpawnEvent) {
+			PlayerSpawnEvent playerSpawnEvent = (PlayerSpawnEvent) event;
+			createShip(playerSpawnEvent.entity);
+		}
+	}
+	
+	private void createShip(Entity player) {
+		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
+		playerComponent.requestSpawnShip();
+	}
+	
+	private void controlShip(Entity player, boolean[] actions, Vector3f angularVelocity, float angularVelocityDT, float dt) {
+		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
+		Entity shipEntity = playerComponent.getShip();
+		if (shipEntity == null)
+			return;
+		ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(shipEntity, ShipComponent.class);
+		// Fire primary
+		if (actions[6])
+			shipComponent.requestFirePrimary();
+		if (actions[7])
+			shipComponent.requestFireSecondary();
+		try {
+			ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(shipEntity, ObjectComponent.class);
+			// System.out.println(
+			// "RECEIVE VELOCITY: " + shipComponent.getLinearThrust() + " " + objectComponent.getPosition() + " " + movementComponent.getLinearVel() +
+			// " " + movementComponent.getLinearAcc());
+
+			Vector3f linearDirection = new Vector3f();
+			if (actions[0])
+				linearDirection.z++;
+			if (actions[1])
+				linearDirection.z--;
+			if (actions[2])
+				linearDirection.x++;
+			if (actions[3])
+				linearDirection.x--;
+			if (actions[4])
+				linearDirection.y++;
+			if (actions[5])
+				linearDirection.y--;
+
+			shipComponent.getLinearThrust().add(objectComponent.getForward().mul(dt * 2 * linearDirection.z, tempVector ));
+			shipComponent.getLinearThrust().add(objectComponent.getRight().mul(dt * 2 * linearDirection.x, tempVector));
+			shipComponent.getLinearThrust().add(objectComponent.getUp().mul(dt * 2 * linearDirection.y, tempVector));
+
+			// objectComponent.yaw(dt * angularVelocity.y);
+			// objectComponent.pitch(dt * angularVelocity.x);
+			// objectComponent.roll(dt * angularVelocity.z);
+			objectComponent.rotate(angularVelocityDT * angularVelocity.x, angularVelocityDT * angularVelocity.y, angularVelocityDT * angularVelocity.z);
+
+			// System.out.println("UDP RE: " + shipComponent.getLinearThrust());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

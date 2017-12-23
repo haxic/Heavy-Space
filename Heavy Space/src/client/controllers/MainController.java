@@ -108,15 +108,15 @@ public class MainController {
 				currentController = menuController;
 				gameController = null;
 				break;
-			case CLIENT_EVENT_CREATE_UNIT:
+			case CLIENT_EVENT_SNAPSHOT_CREATE:
 				if (gameController != null)
 					gameController.createEntityFromEvent(event);
 				break;
-			case CLIENT_EVENT_UPDATE_UNIT:
+			case CLIENT_EVENT_SNAPSHOT_UPDATE:
 				if (gameController != null)
 					gameController.updateUnitFromEvent(event);
 				break;
-			case CLIENT_EVENT_UPDATE_SNAPSHOT:
+			case CLIENT_EVENT_SNAPSHOT_END:
 				if (gameController != null)
 					gameController.updateSnapshotFromEvent(event);
 				break;

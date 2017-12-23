@@ -8,8 +8,11 @@ import gameServer.components.ClientComponent;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import gameServer.core.ClientManager;
+import gameServer.events.PlayerActionEvent;
+import gameServer.events.PlayerSpawnEvent;
 import hecs.Entity;
 import hecs.EntityManager;
+import hevent.EventManager;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
 import shared.functionality.DataPacket;
@@ -19,12 +22,14 @@ import utilities.BitConverter;
 
 public class UDPRequestHandler {
 
+	private EntityManager entityManager;
+	private EventManager eventManager;
 	private ClientManager clientManager;
 	private UDPServer udpServer;
-	private EntityManager entityManager;
 
-	public UDPRequestHandler(EntityManager entityManager, ClientManager clientManager, UDPServer udpServer) {
+	public UDPRequestHandler(EntityManager entityManager, EventManager eventManager, ClientManager clientManager, UDPServer udpServer) {
 		this.entityManager = entityManager;
+		this.eventManager = eventManager;
 		this.clientManager = clientManager;
 		this.udpServer = udpServer;
 	}
@@ -37,8 +42,6 @@ public class UDPRequestHandler {
 				DataPacket dataPacket = new DataPacket(datagramPacket.getData());
 				byte type = dataPacket.getByte(); // 0
 				RequestType requestType = RequestType.values()[type & 0xFF];
-				if (!requestType.equals(RequestType.CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP))
-					System.out.println("UDPREQUESTHANDLER: " + requestType);
 				switch (requestType) {
 				case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 					String uuid = dataPacket.getString(32); // 1-65
@@ -86,10 +89,11 @@ public class UDPRequestHandler {
 					Vector3f angularVelocity = new Vector3f(angularVelocityX, angularVelocityY, angularVelocityZ);
 					float angularVelocityDT = dataPacket.getFloat();
 					Entity player = clientComponent.getPlayer();
-					controlShip(player, actions, angularVelocity, angularVelocityDT, dt);
+					eventManager.createEvent(new PlayerActionEvent(player, actions, angularVelocity, angularVelocityDT, dt));
 				}
 					break;
 				case CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP: {
+					System.out.println("SPAWN SHIP FFS");
 					String uuid = dataPacket.getString(32);
 					byte identifier = dataPacket.getByte(); // 66, Request identifier - used for response
 					Entity client = clientManager.getClient(uuid);
@@ -102,7 +106,8 @@ public class UDPRequestHandler {
 					Entity player = clientComponent.getPlayer();
 					if (player == null)
 						break;
-					createShip(player);
+					
+					eventManager.createEvent(new PlayerSpawnEvent(player));
 				}
 					break;
 				case CLIENT_REQUEST_PING: {
@@ -134,56 +139,6 @@ public class UDPRequestHandler {
 
 	private Vector3f tempVector = new Vector3f();
 
-	private void controlShip(Entity player, boolean[] actions, Vector3f angularVelocity, float angularVelocityDT, float dt) {
-		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
-		Entity shipEntity = playerComponent.getShip();
-		if (shipEntity == null)
-			return;
-		ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(shipEntity, ShipComponent.class);
-		// Fire primary
-		if (actions[6])
-			shipComponent.requestFirePrimary();
-		if (actions[7])
-			shipComponent.requestFireSecondary();
-		try {
-			ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(shipEntity, ObjectComponent.class);
-			// System.out.println(
-			// "RECEIVE VELOCITY: " + shipComponent.getLinearThrust() + " " + objectComponent.getPosition() + " " + movementComponent.getLinearVel() +
-			// " " + movementComponent.getLinearAcc());
 
-			Vector3f linearDirection = new Vector3f();
-			if (actions[0])
-				linearDirection.z++;
-			if (actions[1])
-				linearDirection.z--;
-			if (actions[2])
-				linearDirection.x++;
-			if (actions[3])
-				linearDirection.x--;
-			if (actions[4])
-				linearDirection.y++;
-			if (actions[5])
-				linearDirection.y--;
-
-			shipComponent.getLinearThrust().add(objectComponent.getForward().mul(dt * 2 * linearDirection.z, tempVector));
-			shipComponent.getLinearThrust().add(objectComponent.getRight().mul(dt * 2 * linearDirection.x, tempVector));
-			shipComponent.getLinearThrust().add(objectComponent.getUp().mul(dt * 2 * linearDirection.y, tempVector));
-
-			// objectComponent.yaw(dt * angularVelocity.y);
-			// objectComponent.pitch(dt * angularVelocity.x);
-			// objectComponent.roll(dt * angularVelocity.z);
-			objectComponent.rotate(angularVelocityDT * angularVelocity.x, angularVelocityDT * angularVelocity.y, angularVelocityDT * angularVelocity.z);
-
-			// System.out.println("UDP RE: " + shipComponent.getLinearThrust());
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
-
-	private void createShip(Entity player) {
-		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
-		playerComponent.requestSpawnShip();
-	}
 
 }
