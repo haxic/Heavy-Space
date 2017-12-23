@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import client.components.LightComponent;
+import client.display.DisplayManager;
 import client.gameData.ClientGameFactory;
 import client.gameData.GameAssetLoader;
 import client.gameData.Scene;
@@ -13,10 +14,10 @@ import client.network.GameServerData;
 import gameServer.systems.ShipSystem;
 import hecs.Entity;
 import hecs.EntityManager;
+import shared.components.ObjectComponent;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
-import shared.functionality.Globals;
 import shared.systems.AIBotSystem;
 import shared.systems.CollisionSystem;
 import shared.systems.MovementSystem;
@@ -32,6 +33,7 @@ public class MenuController implements IController {
 
 	private static final int KEY_DISCONNECT = GLFW.GLFW_KEY_ESCAPE;
 	private static final int KEY_JOIN = GLFW.GLFW_KEY_C;
+	private static final int KEY_TOGGLE_MOUSE = GLFW.GLFW_KEY_M;
 
 	private ShipControls shipControls;
 
@@ -41,6 +43,7 @@ public class MenuController implements IController {
 	private ShipSystem shipSystem;
 	private MovementSystem movementSystem;
 	private CollisionSystem collisionSystem;
+	ShipControls controls = new ShipControls();
 
 	public MenuController(EventHandler eventHandler, GameServerData gameServerData, GameAssetLoader gameAssetLoader) {
 		this.eventHandler = eventHandler;
@@ -66,9 +69,10 @@ public class MenuController implements IController {
 		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 0, 0), 10f, 1f));
 		// scene.addEntity(gameFactory.createBot(new Vector3f(0, 20, 10), 15f, -1f));
 		scene.addActorEntity(clientGameFactory.createBot(new Vector3f(50, 50, 20), 1f, 1f));
-		scene.addActorEntity(clientGameFactory.createBox(new Vector3f(0, 0, -50)));
+		test = clientGameFactory.createBox(new Vector3f(0, 0, -8));
+		scene.addActorEntity(test);
 	}
-
+	Entity test;
 	@Override
 	public void processInputs() {
 		// if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_LEFT_ALT))
@@ -82,7 +86,16 @@ public class MenuController implements IController {
 		if (KeyboardHandler.kb_keyDownOnce(KEY_DISCONNECT)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_SERVER_DISCONNECT));
 		}
+		if (KeyboardHandler.kb_keyDownOnce(KEY_TOGGLE_MOUSE)) {
+			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_TOGGLE_MOUSE));
+		}
 		shipControls.process();
+		scene.getCamera().yaw(shipControls.angularDirection.y * 0.1f);
+		scene.getCamera().pitch(shipControls.angularDirection.x * 0.1f);
+		ObjectComponent object = (ObjectComponent) entityManager.getComponentInEntity(test, ObjectComponent.class);
+//		object.rotate(0.01f, 0.02f, 0.03f);
+//		object.rotate(shipControls.angularDirection.y * Globals.dt, shipControls.angularDirection.x * Globals.dt, 0.0000f);
+		
 	}
 
 	long timer = System.currentTimeMillis();
@@ -94,7 +107,7 @@ public class MenuController implements IController {
 	Vector3f tempVector = new Vector3f();
 
 	@Override
-	public void update() {
+	public void update(float dt) {
 		// scene.camera.position.add(scene.camera.getForward().mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().z, tempVector));
 		// scene.camera.position.add(scene.camera.right.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().x, tempVector));
 		// scene.camera.position.add(scene.camera.up.mul(Globals.dt * currentSpeed * shipControls.getLinearDirection().y, tempVector));
@@ -112,9 +125,9 @@ public class MenuController implements IController {
 		// }
 		// create = !create;
 		// }
-		aiBotSystem.update(Globals.dt);
-		shipSystem.process(Globals.dt);
-		movementSystem.process(Globals.dt);
+		aiBotSystem.update(dt);
+		shipSystem.process(dt);
+		movementSystem.process(dt);
 		collisionSystem.process();
 	}
 
@@ -125,6 +138,11 @@ public class MenuController implements IController {
 
 	@Override
 	public void close() {
+	}
+
+	@Override
+	public int getTick() {
+		return 0;
 	}
 
 }

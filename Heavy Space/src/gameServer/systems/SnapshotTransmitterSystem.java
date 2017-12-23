@@ -20,7 +20,6 @@ import shared.components.ObjectComponent;
 import shared.components.ProjectileComponent;
 import shared.components.SpawnComponent;
 import shared.functionality.DataPacket;
-import shared.functionality.Globals;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.UDPServer;
 import utilities.BitConverter;
@@ -29,18 +28,19 @@ public class SnapshotTransmitterSystem {
 
 	private EntityManager entityManager;
 	private UDPServer udpServer;
+	private short sstick;
 
 	public SnapshotTransmitterSystem(EntityManager entityManager, UDPServer udpServer) {
 		this.entityManager = entityManager;
 		this.udpServer = udpServer;
 	}
 
-	public void process() {
-		short nextSnapshot = (short) (((Globals.tick / 3) % Short.MAX_VALUE));
+	public void process(int tick) {
+		short nextSnapshot = (short) (((tick / 3) % Short.MAX_VALUE));
 		// short nextSnapshot = (short) (Globals.tick / 3);
-		if (nextSnapshot == Globals.snapshotTick)
+		if (nextSnapshot == sstick)
 			return;
-		Globals.snapshotTick = nextSnapshot;
+		sstick = nextSnapshot;
 		List<Entity> clientEntities = entityManager.getEntitiesContainingComponent(ClientGameDataTransferComponent.class);
 		if (clientEntities == null)
 			return;
@@ -63,13 +63,13 @@ public class SnapshotTransmitterSystem {
 			if (dataPackets.isEmpty()) {
 				DataPacket dataPacket = new DataPacket(new byte[4]);
 				dataPacket.addByte((byte) RequestType.SERVER_REPONSE_UPDATE.ordinal()); // 0, Request type
-				dataPacket.addShort(Globals.snapshotTick); // 1-2, Current game state
+				dataPacket.addShort(sstick); // 1-2, Current game state
 				dataPacket.addByte((byte) 20); // End of data
 				dataPackets.add(dataPacket);
 			}
 
 			cgdtComponent.clear();
-			// System.out.println("SEND DATA " + Globals.snapshotTick);
+			// System.out.println("SEND DATA " + sstick);
 			for (DataPacket dataPacket : dataPackets) {
 				DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), clientComponent.getUDPAddress(), clientComponent.getUDPPort());
 				// System.out.println(datagramPacket.getLength());
@@ -92,7 +92,7 @@ public class SnapshotTransmitterSystem {
 		if (updateUnits != null && !updateUnits.isEmpty())
 			cgdtComponent.updateUnits(updateUnits);
 		if (!cgdtComponent.getUpdateEntities().isEmpty()) {
-			DataPacket dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), Globals.snapshotTick, (byte) dataPackets.size());
+			DataPacket dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), sstick, (byte) dataPackets.size());
 
 			byte entityCounter = 0;
 			for (Entity updateEntity : cgdtComponent.getUpdateEntities()) {
@@ -110,7 +110,7 @@ public class SnapshotTransmitterSystem {
 
 					// New data packet
 					entityCounter = 0;
-					dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), Globals.snapshotTick, (byte) dataPackets.size());
+					dataPacket = createDataPacket((byte) RequestType.SERVER_REPONSE_UPDATE_ENTITIES.ordinal(), sstick, (byte) dataPackets.size());
 				}
 
 				ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(updateEntity, ObjectComponent.class);
@@ -133,17 +133,22 @@ public class SnapshotTransmitterSystem {
 					dataPacket.addFloat(objectComponent.getPosition().y); // 14-17, Position y
 					dataPacket.addFloat(objectComponent.getPosition().z); // 18-21, Position z
 
-					dataPacket.addFloat(objectComponent.getForward().x); // 22-25, Forward x
-					dataPacket.addFloat(objectComponent.getForward().y); // 26-29, Forward y
-					dataPacket.addFloat(objectComponent.getForward().z); // 30-33, Forward z
-
-					dataPacket.addFloat(objectComponent.getUp().x); // 34-29, Up x
-					dataPacket.addFloat(objectComponent.getUp().y); // 38-41, Up y
-					dataPacket.addFloat(objectComponent.getUp().z); // 42-45, Up z
-
-					dataPacket.addFloat(objectComponent.getRight().x); // 46-49, Right x
-					dataPacket.addFloat(objectComponent.getRight().y); // 50-53, Right y
-					dataPacket.addFloat(objectComponent.getRight().z); // 54-57, Right z
+					dataPacket.addFloat(objectComponent.getOrientation().x); // 22-25, Orientation x
+					dataPacket.addFloat(objectComponent.getOrientation().y); // 26-29, Orientation y
+					dataPacket.addFloat(objectComponent.getOrientation().z); // 30-33, Orientation z
+					dataPacket.addFloat(objectComponent.getOrientation().w); // 34-37, Orientation z
+					
+					// dataPacket.addFloat(objectComponent.getForward().x); // 22-25, Forward x
+					// dataPacket.addFloat(objectComponent.getForward().y); // 26-29, Forward y
+					// dataPacket.addFloat(objectComponent.getForward().z); // 30-33, Forward z
+					//
+					// dataPacket.addFloat(objectComponent.getUp().x); // 34-29, Up x
+					// dataPacket.addFloat(objectComponent.getUp().y); // 38-41, Up y
+					// dataPacket.addFloat(objectComponent.getUp().z); // 42-45, Up z
+					//
+					// dataPacket.addFloat(objectComponent.getRight().x); // 46-49, Right x
+					// dataPacket.addFloat(objectComponent.getRight().y); // 50-53, Right y
+					// dataPacket.addFloat(objectComponent.getRight().z); // 54-57, Right z
 				}
 
 				// If killed by another entity, add killing entity id
@@ -162,7 +167,7 @@ public class SnapshotTransmitterSystem {
 		if (createUnits != null && !createUnits.isEmpty())
 			cgdtComponent.createUnits(createUnits);
 		if (!cgdtComponent.getCreateEntities().isEmpty()) {
-			DataPacket dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), Globals.snapshotTick, (byte) dataPackets.size());
+			DataPacket dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), sstick, (byte) dataPackets.size());
 
 			byte entityCounter = 0;
 			for (Entity createEntity : cgdtComponent.getCreateEntities()) {
@@ -171,7 +176,7 @@ public class SnapshotTransmitterSystem {
 
 					// New data packet
 					entityCounter = 0;
-					dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), Globals.snapshotTick, (byte) dataPackets.size());
+					dataPacket = createDataPacket(RequestType.SERVER_REPONSE_SPAWN_ENTITIES.asByte(), sstick, (byte) dataPackets.size());
 				}
 				byte entityType;
 
@@ -202,20 +207,11 @@ public class SnapshotTransmitterSystem {
 
 				ObjectComponent objectComponent = (ObjectComponent) entityManager.getComponentInEntity(createEntity, ObjectComponent.class);
 				SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(createEntity, SpawnComponent.class);
-				Vector3f position = new Vector3f(0,0,0);
-				Vector3f forward = new Vector3f(0,0,0);
-				Vector3f up = new Vector3f(0,0,0);
-				Vector3f right = new Vector3f(0,0,0);
+				Vector3f position = new Vector3f(0, 0, 0);
 				if (spawnComponent != null) {
 					position = spawnComponent.getPosition();
-					forward = spawnComponent.getForward();
-					up = spawnComponent.getUp();
-					right = spawnComponent.getRight();
 				} else if (objectComponent != null) {
 					position = objectComponent.getPosition();
-					forward = objectComponent.getForward();
-					up = objectComponent.getUp();
-					right = objectComponent.getRight();
 				}
 
 				// 4 ints + 2 bytes = 18 bytes
@@ -235,17 +231,10 @@ public class SnapshotTransmitterSystem {
 					dataPacket.addFloat(linearVel.z); // 33-36, Velocity z
 				}
 				if (entityType != 1) {
-					dataPacket.addFloat(forward.x); // 22-25, Forward x
-					dataPacket.addFloat(forward.y); // 26-29, Forward y
-					dataPacket.addFloat(forward.z); // 30-33, Forward z
-
-					dataPacket.addFloat(up.x); // 34-29, Up x
-					dataPacket.addFloat(up.y); // 38-41, Up y
-					dataPacket.addFloat(up.z); // 42-45, Up z
-
-					dataPacket.addFloat(right.x); // 46-49, Right x
-					dataPacket.addFloat(right.y); // 50-53, Right y
-					dataPacket.addFloat(right.z); // 54-57, Right z
+					dataPacket.addFloat(objectComponent.getOrientation().x); // 22-25, Orientation x
+					dataPacket.addFloat(objectComponent.getOrientation().y); // 26-29, Orientation y
+					dataPacket.addFloat(objectComponent.getOrientation().z); // 30-33, Orientation z
+					dataPacket.addFloat(objectComponent.getOrientation().w); // 34-37, Orientation z
 				}
 
 				entityCounter++;
@@ -269,6 +258,10 @@ public class SnapshotTransmitterSystem {
 			dataPacket.setByteAt(numberOfEntities, 4); // 3, Set number of entities.
 		dataPacket.addByte((byte) 20); // End of data
 		return dataPacket;
+	}
+
+	public short getTick() {
+		return sstick;
 	}
 
 }

@@ -3,12 +3,12 @@ package client.components;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import client.gameData.Snapshot;
 import hecs.EntityComponent;
-import shared.functionality.Globals;
 
 public class SnapshotComponent extends EntityComponent {
 
@@ -17,10 +17,12 @@ public class SnapshotComponent extends EntityComponent {
 	Snapshot current;
 	Snapshot next;
 
-	public SnapshotComponent(short playerID, short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
+//	public SnapshotComponent(short playerID, short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
+	public SnapshotComponent(short playerID, short tick, Vector3f position, Quaternionf orientation) {
 		this.playerID = playerID;
 		snapshots = new LinkedList();
-		current = new Snapshot(tick, position, forward, up, right);
+		current = new Snapshot(tick, position, orientation);
+//		current = new Snapshot(tick, position, forward, up, right);
 		next = current;
 	}
 
@@ -42,11 +44,13 @@ public class SnapshotComponent extends EntityComponent {
 		return snapshots.peekFirst();
 	}
 
-	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
+//	public void add(short tick, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
+	public void add(short tick, Vector3f position, Quaternionf orientation) {
 		Snapshot last = snapshots.peekLast();
 		// Add snapshot if new tick is after latest tick or if new tick is in minimum bracket while latest tick is in maximum bracket
 		if (isAfter(tick, next.getTick()) && (last == null || last != null && isAfter(tick, last.getTick()))) {
-			snapshots.addLast(new Snapshot(tick, position, forward, up, right));
+			snapshots.addLast(new Snapshot(tick, position, orientation));
+//			snapshots.addLast(new Snapshot(tick, position, forward, up, right));
 		}
 	}
 

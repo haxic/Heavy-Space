@@ -10,7 +10,6 @@ import hecs.EntityManager;
 import shared.components.AIBotComponent;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
-import shared.functionality.Globals;
 
 public class AIBotSystem {
 	private EntityManager entityManager;
@@ -33,7 +32,7 @@ public class AIBotSystem {
 			ObjectComponent unit = (ObjectComponent) entityManager.getComponentInEntity(entity, ObjectComponent.class);
 			MovementComponent movement = (MovementComponent) entityManager.getComponentInEntity(entity, MovementComponent.class);
 
-			Vector3f angularThrust = new Vector3f(0, 0, 1.0f);
+			Vector3f angularThrust = new Vector3f(0.01f, 0.02f, 0.03f);
 
 			movement.getAngularAcc().fma(dt, angularThrust);
 

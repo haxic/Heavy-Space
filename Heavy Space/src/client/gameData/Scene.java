@@ -55,7 +55,7 @@ public class Scene implements EntityContainer {
 		this.skybox = skybox;
 	}
 
-	public void addActorEntity(Entity entity) {
+	public Entity addActorEntity(Entity entity) {
 		ActorComponent actorComponent = (ActorComponent) entityManager.getComponentInEntity(entity, ActorComponent.class);
 		Model model = actorComponent.getModel();
 		List<Entity> batch = actors.get(model);
@@ -67,6 +67,7 @@ public class Scene implements EntityContainer {
 			actors.put(model, newBatch);
 		}
 		entity.attach(this);
+		return entity;
 	}
 	
 	public void removeActorEntity(Entity entity) {

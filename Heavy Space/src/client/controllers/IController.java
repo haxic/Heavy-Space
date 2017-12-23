@@ -6,9 +6,12 @@ public interface IController {
 
 	public void processInputs();
 
-	public void update();
+	public void update(float dt);
 
 	public Scene getScene();
 
 	public void close();
+
+	public int getTick();
+
 }

@@ -30,7 +30,6 @@ import shared.components.SpawnComponent;
 import shared.components.ObjectComponent;
 import shared.functionality.DataPacket;
 import shared.functionality.EventHandler;
-import shared.functionality.Globals;
 import shared.functionality.IntegerIdentifier;
 import shared.functionality.ShortIdentifier;
 import shared.functionality.network.RequestType;
@@ -99,7 +98,7 @@ public class GameServer {
 	}
 
 	private void initializeWorld() {
-		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
+//		 serverGameFactory.createBot(new Vector3f(600, 200, 0), 0.1f, 1);
 //		 serverGameFactory.createBot(new Vector3f(200, -400, 0), 0.25f, 1);
 //		 serverGameFactory.createBot(new Vector3f(-300, 700, 0), 0.5f, 1);
 //		 serverGameFactory.createBot(new Vector3f(-500, -100, 0), 0.75f, 1);
@@ -129,17 +128,19 @@ public class GameServer {
 	private void loop() {
 		long start = System.currentTimeMillis();
 		long logStart = start;
-		Globals.now = start;
+		long currentTime = start;
 		long now;
+		float dt;
+		int tick = 0;
 		boolean shouldStop = false;
 		while (!shouldStop) {
 			now = System.currentTimeMillis();
 			if (now - start > timestep) {
 				start += timestep;
-				Globals.dt = timestepDT;
-				Globals.now = now;
-				Globals.tick = tickIdentifier.get();
-				tick();
+				dt = timestepDT;
+				currentTime = now;
+				tick = tickIdentifier.get();
+				tick(dt, tick, snapshotTransmitterSystem.getTick());
 			}
 			if (now - logStart > 1000) {
 				logStart += 1000;
@@ -148,14 +149,14 @@ public class GameServer {
 				int shipEntities = entityManager.sizeEntitiesContainingComponent(ShipComponent.class);
 				int projectileEntities = entityManager.sizeEntitiesContainingComponent(ProjectileComponent.class);
 				int obstacleEntities = entityManager.sizeEntitiesContainingComponent(ObstacleComponent.class);
-				System.out.println("Tick: " + Globals.tick + ". Snapshot tick: " + Globals.snapshotTick
-				+ ". Entities total: " + entityManager.getSize()
-				+ ". Players: " + playerManager.getSize() + ":" + playerEntities
-				+ ". Clients: " + clientManager.getSize() + ":" + clientEntities
-				+ ". Ships: " + shipEntities
-				+ ". Projectiles: " + projectileEntities
-				+ ". Obstacles: " + obstacleEntities
-				+ ".");
+//				System.out.println("Tick: " + tick + ". SSTick total: " + snapshotTransmitterSystem.getTick()
+//				+ ". Entities total: " + entityManager.getSize()
+//				+ ". Players: " + playerManager.getSize() + ":" + playerEntities
+//				+ ". Clients: " + clientManager.getSize() + ":" + clientEntities
+//				+ ". Ships: " + shipEntities
+//				+ ". Projectiles: " + projectileEntities
+//				+ ". Obstacles: " + obstacleEntities
+//				+ ".");
 			}
 			try {
 				Thread.sleep(1);
@@ -165,33 +166,33 @@ public class GameServer {
 		}
 	}
 
-	private void tick() {
-		processInputs();
-		processAI();
-		updateGameState();
-		sendSnapshot();
+	private void tick(float dt, int tick, short sstick) {
+		processInputs(dt, sstick);
+		processAI(dt);
+		updateGameState(dt);
+		sendSnapshot(tick);
 	}
 
-	private void processInputs() {
-		clientManager.process();
-		udpRequestHandler.process();
+	private void processInputs(float dt, short sstick) {
+		clientManager.process(dt, sstick);
+		udpRequestHandler.process(dt, sstick);
 	}
 
-	private void processAI() {
-		aiBotSystem.update(Globals.dt);
+	private void processAI(float dt) {
+		aiBotSystem.update(dt);
 	}
 
-	private void updateGameState() {
+	private void updateGameState(float dt) {
 		removeSystem.process();
 		playerSystem.process();
-		shipSystem.process(Globals.dt);
-		movementSystem.process(Globals.dt);
+		shipSystem.process(dt);
+		movementSystem.process(dt);
 		collisionSystem.process();
-		projectileSystem.process(Globals.dt);
+		projectileSystem.process(dt);
 	}
 
-	private void sendSnapshot() {
-		snapshotTransmitterSystem.process();
+	private void sendSnapshot(int tick) {
+		snapshotTransmitterSystem.process(tick);
 	}
 
 }

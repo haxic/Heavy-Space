@@ -1,5 +1,6 @@
 package gameServer.core;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import client.gameData.GameAssetLoader;
@@ -59,7 +60,8 @@ public class ServerGameFactory {
 		else
 			shipComponent = new ShipComponent(player);
 		entityManager.addComponent(shipComponent, entity);
-		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), new Vector3f(objectComponent.getForward()), new Vector3f(objectComponent.getUp()), new Vector3f(objectComponent.getRight()), null), entity);
+//		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), new Vector3f(objectComponent.getForward()), new Vector3f(objectComponent.getUp()), new Vector3f(objectComponent.getRight()), null), entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), new Quaternionf(objectComponent.getOrientation()), null), entity);
 		return entity;
 	}
 
@@ -73,7 +75,7 @@ public class ServerGameFactory {
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
-		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, null, null, new Vector3f(velocity)), entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, new Vector3f(velocity)), entity);
 		return entity;
 	}
 
@@ -87,7 +89,7 @@ public class ServerGameFactory {
 		MovementComponent movementComponent = new MovementComponent();
 		movementComponent.getLinearVel().set(velocity);
 		entityManager.addComponent(movementComponent, entity);
-		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, null, null, new Vector3f(velocity)), entity);
+		entityManager.addComponent(new SpawnComponent((short) 0, 0, 0, (short) 0, new Vector3f(position), null, new Vector3f(velocity)), entity);
 		return entity;
 	}
 

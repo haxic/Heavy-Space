@@ -8,6 +8,9 @@ import org.joml.Vector3f;
 import hecs.EntityComponent;
 
 public class ObjectComponent extends EntityComponent {
+	private static final Vector3f FORWARD = new Vector3f(0, 0, -1);
+	private static final Vector3f UP = new Vector3f(0, 1, 0);
+	private static final Vector3f RIGHT = new Vector3f(1, 0, 0);
 	private Vector3f position;
 	private Vector3f scale;
 
@@ -15,81 +18,75 @@ public class ObjectComponent extends EntityComponent {
 	private Vector3f up;
 	private Vector3f right;
 
+	private Quaternionf orientation;
+
 	public ObjectComponent(Vector3f position, Vector3f scale) {
 		this.position = position;
 		this.scale = scale;
-		forward = new Vector3f(0, 0, -1);
-		right = new Vector3f(1, 0, 0);
-		up = new Vector3f(0, 1, 0);
+		orientation = new Quaternionf();
+		forward = new Vector3f(FORWARD);
+		right = new Vector3f(RIGHT);
+		up = new Vector3f(UP);
+
 	}
 
 	public ObjectComponent(Vector3f position) {
 		this.position = position;
+		orientation = new Quaternionf();
 		scale = new Vector3f(1, 1, 1);
-		forward = new Vector3f(0, 0, -1);
-		right = new Vector3f(1, 0, 0);
-		up = new Vector3f(0, 1, 0);
+		forward = new Vector3f(FORWARD);
+		right = new Vector3f(RIGHT);
+		up = new Vector3f(UP);
 	}
 
-	private static Vector3f tempVector1 = new Vector3f();
-	private static Vector3f tempVector2 = new Vector3f();
-
-	public void pitch(double angle) {
-		// D = normalize(D * cos a + up * sin a)
-		forward.mul((float) Math.cos(angle), tempVector1).add(up.mul((float) Math.sin(angle), tempVector2)).normalize(forward);
-		// up = cross(R, direction);
-		right.cross(forward, up);
+	public void rotate(float pitch, float yaw, float roll) {
+		orientation.rotate(pitch, yaw, roll);
+		forward.set(FORWARD).rotate(orientation);
+		right.set(RIGHT).rotate(orientation);
+		up.set(UP).rotate(orientation);
+	}
+	
+	public void updateOrientation() {
+		forward.set(FORWARD).rotate(orientation);
+		right.set(RIGHT).rotate(orientation);
+		up.set(UP).rotate(orientation);
 	}
 
-	public void roll(double angle) {
-		// right = normalize(right * cos a + up * sin a)
-		right.mul((float) Math.cos(angle), tempVector1).add(up.mul((float) Math.sin(angle), tempVector2)).normalize(right);
-		// up = cross(right, direction);
-		right.cross(forward, up);
-	}
-
-	public void yaw(double angle) {
-		// right = right * cos a + direction * sin a
-		right.mul((float) Math.cos(angle), tempVector1).add(forward.mul((float) Math.sin(angle), tempVector2), right);
-		// direction = cross(up, right)
-		up.cross(right, forward);
-	}
-
-	public Vector3f getPosition(Vector3f dest) {
-		return dest.set(position);
-	}
+	// public Vector3f getPosition(Vector3f dest) {
+	// return dest.set(position);
+	// }
 
 	public Vector3f getPosition() {
 		return position;
 	}
 
-	public Vector3f getForward(Vector3f dest) {
-		return dest.set(forward);
-	}
+	// public Vector3f getForward(Vector3f dest) {
+	// return dest.set(forward);
+	// }
 
 	public Vector3f getForward() {
 		return forward;
 	}
 
-	public Vector3f getUp(Vector3f dest) {
-		return dest.set(up);
-	}
+	// public Vector3f getUp(Vector3f dest) {
+	// return dest.set(up);
+	// }
 
 	public Vector3f getUp() {
 		return up;
 	}
 
-	public Vector3f getRight(Vector3f dest) {
-		return dest.set(right);
-	}
+	// public Vector3f getRight(Vector3f dest) {
+	// return dest.set(right);
+	// }
 
 	public Vector3f getRight() {
 		return right;
 	}
 
-	public Vector3f getScale(Vector3f dest) {
-		return dest.set(scale);
-	}
+	// public Vector3f getScale(Vector3f dest) {
+	// return dest.set(scale);
+	// }
 
 	public Vector3f getScale() {
 		return scale;
@@ -102,5 +99,9 @@ public class ObjectComponent extends EntityComponent {
 
 	@Override
 	protected void removeComponent() {
+	}
+
+	public Quaternionf getOrientation() {
+		return orientation;
 	}
 }

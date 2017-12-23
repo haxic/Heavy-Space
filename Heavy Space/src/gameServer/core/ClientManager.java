@@ -15,7 +15,6 @@ import hecs.EntityContainer;
 import hecs.EntityManager;
 import shared.components.ObjectComponent;
 import shared.functionality.DataPacket;
-import shared.functionality.Globals;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.TCPSocket;
 
@@ -35,7 +34,7 @@ public class ClientManager implements EntityContainer {
 	public void handleValidatedTCPConnection(TCPSocket socketHandler, String uuid, String username, String token) {
 		Entity client = entityManager.createEntity();
 		ClientComponent clientComponent = new ClientComponent(socketHandler, uuid, username, token);
-		ClientPendingComponent pendingValidationComponent = new ClientPendingComponent();
+		ClientPendingComponent pendingValidationComponent = new ClientPendingComponent(2);
 		entityManager.addComponent(clientComponent, client);
 		entityManager.addComponent(pendingValidationComponent, client);
 		clients.put(uuid, client);
@@ -84,7 +83,7 @@ public class ClientManager implements EntityContainer {
 		return clients.get(uuid);
 	}
 
-	public void process() {
+	public void process(float dt, short sstick) {
 		List<Entity> entities = entityManager.getEntitiesContainingComponent(ClientComponent.class);
 		if (entities == null)
 			return;
@@ -95,8 +94,10 @@ public class ClientManager implements EntityContainer {
 			ClientComponent clientComponent = (ClientComponent) entityManager.getComponentInEntity(entity, ClientComponent.class);
 			ClientValidatedComponent clientValidatedComponent = (ClientValidatedComponent) entityManager.getComponentInEntity(entity, ClientValidatedComponent.class);
 			ClientPendingComponent pendingValidationComponent = (ClientPendingComponent) entityManager.getComponentInEntity(entity, ClientPendingComponent.class);
-
-			if (clientComponent.isDisconnected() || (pendingValidationComponent != null && Globals.now - pendingValidationComponent.getTimestamp() > 2000)) {
+			if (pendingValidationComponent != null)
+				pendingValidationComponent.update(dt);
+			if (clientComponent.isDisconnected() || (pendingValidationComponent != null && pendingValidationComponent.overDue())) {
+				System.out.println("CLIENTMANAGER DISCONNECT PLAYER");
 				clientComponent.disconnect();
 				removed.add(entity);
 				continue;
@@ -113,12 +114,13 @@ public class ClientManager implements EntityContainer {
 					DataPacket sendDataPacket = new DataPacket(new byte[5]);
 					sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_PING.ordinal());
 					sendDataPacket.addByte((byte) identifier);
-					sendDataPacket.addShort((short) Globals.snapshotTick);
+					sendDataPacket.addShort((short) sstick);
 					sendDataPacket.addByte((byte) 20);
 					clientComponent.sendData(sendDataPacket.getData());
 				}
 					break;
 				case CLIENT_REQUEST_READY: {
+					System.out.println("CLIENTMANAGER: " + requestType);
 					if (pendingValidationComponent != null) {
 						if (pendingValidationComponent.isValidated()) {
 							entityManager.removeComponentAll(ClientPendingComponent.class, entity);

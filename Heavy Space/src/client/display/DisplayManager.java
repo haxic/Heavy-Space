@@ -22,7 +22,6 @@ import client.inputs.KeyboardHandler;
 import client.inputs.MouseHandler;
 //import client.inputs.MousePositionHandler;
 import client.inputs.MouseScrollHandler;
-import shared.functionality.Globals;
 
 public class DisplayManager {
 	private static boolean cursorEnabled = true;
@@ -32,6 +31,8 @@ public class DisplayManager {
 	private double lastTime;
 
 	private float deltaTime;
+	private float dt;
+	private double now;
 	private static Vector2f mousePosition = new Vector2f();
 	private static Vector2f mousePositionDelta = new Vector2f();
 
@@ -78,9 +79,9 @@ public class DisplayManager {
 	}
 
 	public void pollInputs() {
-		double currentTime = GLFW.glfwGetTime();
-		Globals.dt = (float) (GLFW.glfwGetTime() - lastTime);
-		lastTime = currentTime;
+		now = GLFW.glfwGetTime();
+		dt = (float) (GLFW.glfwGetTime() - lastTime);
+		lastTime = now;
 		DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
 		DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
 		GLFW.glfwGetCursorPos(windowID, x, y);
@@ -177,6 +178,14 @@ public class DisplayManager {
 
 	public static boolean isCursorEnabled() {
 		return cursorEnabled;
+	}
+
+	public float getDeltaTime() {
+		return dt;
+	}
+
+	public double getNow() {
+		return now;
 	}
 
 }

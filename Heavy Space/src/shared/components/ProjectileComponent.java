@@ -3,7 +3,6 @@ package shared.components;
 import hecs.Entity;
 import hecs.EntityComponent;
 import hecs.EntityContainer;
-import shared.functionality.Globals;
 
 public class ProjectileComponent extends EntityComponent implements EntityContainer {
 	private float length;

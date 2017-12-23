@@ -1,5 +1,6 @@
 package client.controllers;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
@@ -21,7 +22,6 @@ import shared.components.ObjectComponent;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
-import shared.functionality.Globals;
 import shared.systems.MovementSystem;
 import shared.systems.ProjectileSystem;
 
@@ -87,21 +87,23 @@ public class GameController implements IController {
 	}
 
 	Entity shipEntity;
-	
+
 	private final int timestep = 15 * 3;
 	private final float timestepDT = timestep / 1000.0f;
 	private float timestepCounter;
 
+	int tick;
+
 	@Override
-	public void update() {
-		float dt = 0;
+	public void update(float dt) {
+		float ssdt = 0;
 		if (running) {
-			timestepCounter += Globals.dt;
+			timestepCounter += dt;
 			while (timestepCounter > timestepDT) {
 				timestepCounter -= timestepDT;
-				Globals.tick = (short) (++Globals.tick % Short.MAX_VALUE);
+				tick = (short) (++tick % Short.MAX_VALUE);
 			}
-			dt = timestepCounter / timestepDT;
+			ssdt = timestepCounter / timestepDT;
 		}
 
 		// velocity.set(scene.camera.getForward().mul(Globals.dt * currentSpeed * speeder * shipControls.getLinearDirection().z, tempVector));
@@ -117,14 +119,15 @@ public class GameController implements IController {
 		if (running) {
 
 			if (KeyboardHandler.kb_keyDownOnce(SPAWN_SHIP))
-				connectionManager.requestSpawnShip(scene.getCamera().position);
-			connectionManager.sendShipActions(shipControls);
+				connectionManager.requestSpawnShip(tick, scene.getCamera().position);
+			if (shipEntity != null)
+				connectionManager.sendShipActions(tick, dt, shipControls);
 
-			spawnSystem.process();
-			snapshotSystem.process(dt, useSnapshotInterpolation);
-			movementSystem.process(Globals.dt);
+			spawnSystem.process(tick);
+			snapshotSystem.process(ssdt, tick, useSnapshotInterpolation);
+			movementSystem.process(dt);
 			deathSystem.process();
-			projectileSystem.process(Globals.dt);
+			projectileSystem.process(dt);
 		}
 
 		// if (shipEntity != null) {
@@ -132,10 +135,11 @@ public class GameController implements IController {
 		// }
 		ObjectComponent object = (ObjectComponent) entityManager.getComponentInEntity(shipEntity, ObjectComponent.class);
 		if (object != null) {
+			// System.out.println("GameControl: " + object.getForward().x + " " + object.getForward().y + " " + object.getForward().z);
 			scene.getCamera().getPosition().set(object.getPosition());
 			scene.getCamera().getForward().set(object.getForward());
 			scene.getCamera().getUp().set(object.getUp());
-			scene.getCamera().getRight().set(object.getForward().cross(object.getUp(), scene.getCamera().getRight()));
+			scene.getCamera().getRight().set(object.getRight());
 		}
 	}
 
@@ -171,18 +175,16 @@ public class GameController implements IController {
 		boolean[] flags = (boolean[]) event.data[2];
 		if (flags[0]) {
 			Vector3f position = (Vector3f) event.data[3];
-			Vector3f forward = (Vector3f) event.data[4];
-			Vector3f up = (Vector3f) event.data[5];
-			Vector3f right = (Vector3f) event.data[6];
+			Quaternionf orientation = (Quaternionf) event.data[4];
 			SnapshotComponent snapshotComponent = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
-			snapshotComponent.add(tick, position, forward, up, right);
+			snapshotComponent.add(tick, position, orientation);
 		} else {
 			// System.out.println("UPDATE WITHOUT SNAPSHOT " + eeid);
 		}
 		if (flags[1]) {
 			DeathComponent deathComponent = null;
 			if (flags[2]) {
-				int killingEEID = (int) event.data[7];
+				int killingEEID = (int) event.data[5];
 				Entity killingEntity = gameModel.getEntity(killingEEID);
 				if (killingEntity != null) {
 					deathComponent = new DeathComponent(tick, killingEntity);
@@ -206,30 +208,30 @@ public class GameController implements IController {
 	Short firstTick = null;
 	Short lastTick = null;
 
-	private boolean checkTick(short tick) {
+	private boolean checkTick(short checkedTick) {
 		if (!running) {
 			if (firstTick == null)
-				firstTick = tick;
-			else if (tick < firstTick)
-				firstTick = tick;
+				firstTick = checkedTick;
+			else if (checkedTick < firstTick)
+				firstTick = checkedTick;
 			if (lastTick == null)
-				lastTick = tick;
-			else if (tick > lastTick)
-				lastTick = tick;
+				lastTick = checkedTick;
+			else if (checkedTick > lastTick)
+				lastTick = checkedTick;
 			int diff = lastTick - firstTick;
 			if (diff > 3) {
-				Globals.tick = (short) (lastTick - 2);
+				tick = (short) (lastTick - 2);
 				running = true;
 				System.out.println("RUN");
 			} else {
-				Globals.tick = lastTick;
+				tick = lastTick;
 			}
 		}
 
 		int tickDiff;
 		// || (newTick < 1000 && latestTick > 8000
-		if (tick > Globals.tick && !(tick > 8000 && Globals.tick < 1000) || Globals.tick > tick  && !(Globals.tick  > 8000 && tick < 1000))
-			tickDiff = Globals.tick - tick;
+		if (checkedTick > tick && !(checkedTick > 8000 && tick < 1000) || tick > checkedTick  && !(tick  > 8000 && checkedTick < 1000))
+			tickDiff = tick - checkedTick;
 		else
 			tickDiff = 0;
 
@@ -238,6 +240,11 @@ public class GameController implements IController {
 			return false;
 
 		return true;
+	}
+
+	@Override
+	public int getTick() {
+		return tick;
 	}
 
 }

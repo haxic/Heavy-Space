@@ -13,7 +13,6 @@ import hecs.EntityManager;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
 import shared.functionality.DataPacket;
-import shared.functionality.Globals;
 import shared.functionality.network.RequestType;
 import shared.functionality.network.UDPServer;
 import utilities.BitConverter;
@@ -24,14 +23,13 @@ public class UDPRequestHandler {
 	private UDPServer udpServer;
 	private EntityManager entityManager;
 
-
 	public UDPRequestHandler(EntityManager entityManager, ClientManager clientManager, UDPServer udpServer) {
 		this.entityManager = entityManager;
 		this.clientManager = clientManager;
 		this.udpServer = udpServer;
 	}
 
-	public void process() {
+	public void process(float dt, short sstick) {
 		DatagramPacket datagramPacket;
 		while ((datagramPacket = udpServer.getData()) != null) {
 			// Pretend that this is the message reader
@@ -39,6 +37,8 @@ public class UDPRequestHandler {
 				DataPacket dataPacket = new DataPacket(datagramPacket.getData());
 				byte type = dataPacket.getByte(); // 0
 				RequestType requestType = RequestType.values()[type & 0xFF];
+				if (!requestType.equals(RequestType.CLIENT_REQUEST_GAME_ACTION_CONTROL_SHIP))
+					System.out.println("UDPREQUESTHANDLER: " + requestType);
 				switch (requestType) {
 				case CLIENT_REQUEST_AUTHENTICATE_UDP: {
 					String uuid = dataPacket.getString(32); // 1-65
@@ -50,7 +50,7 @@ public class UDPRequestHandler {
 						sendDataPacket.addByte(type); // 0, requestType
 						sendDataPacket.addByte(identifier); // 1, Request identifier
 						sendDataPacket.addByte((byte) 1); // 2, Response, 1 = authenticated
-						sendDataPacket.addShort(Globals.snapshotTick); // 3-4, Request identifier
+						sendDataPacket.addShort(sstick); // 3-4, Request identifier
 						Entity clientEntity = clientManager.getClient(uuid);
 						ClientComponent client = (ClientComponent) entityManager.getComponentInEntity(clientEntity, ClientComponent.class);
 						Entity playerEntity = client.getPlayer();
@@ -80,14 +80,13 @@ public class UDPRequestHandler {
 					short tick = dataPacket.getShort(); // 66-67
 					byte actionsBinary = dataPacket.getByte(); // 68
 					boolean[] actions = BitConverter.booleanArrayFromByte(actionsBinary);
-					int intX = dataPacket.getInteger();
-					int intY = dataPacket.getInteger();
-					int intZ = dataPacket.getInteger();
-					Vector3f angularVelocity = new Vector3f(intX / 1000.0f, intY / 1000.0f, intZ / 1000.0f);
-					int intDt = dataPacket.getInteger();
-					float dt = intDt / 10000.0f;
+					float angularVelocityX = dataPacket.getFloat();
+					float angularVelocityY = dataPacket.getFloat();
+					float angularVelocityZ = dataPacket.getFloat();
+					Vector3f angularVelocity = new Vector3f(angularVelocityX, angularVelocityY, angularVelocityZ);
+					float angularVelocityDT = dataPacket.getFloat();
 					Entity player = clientComponent.getPlayer();
-					controlShip(player, actions, angularVelocity, dt);
+					controlShip(player, actions, angularVelocity, angularVelocityDT, dt);
 				}
 					break;
 				case CLIENT_REQUEST_GAME_ACTION_SPAWN_SHIP: {
@@ -117,7 +116,7 @@ public class UDPRequestHandler {
 					DataPacket sendDataPacket = new DataPacket(new byte[6]);
 					sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_PING.ordinal()); // 0
 					sendDataPacket.addByte((byte) identifier); // 1
-					sendDataPacket.addShort(Globals.snapshotTick); // 2-3
+					sendDataPacket.addShort(sstick); // 2-3
 					sendDataPacket.addByte((byte) 20); // 4
 					clientComponent.sendData(sendDataPacket.getData());
 					DatagramPacket sendDatagramPacket = new DatagramPacket(sendDataPacket.getData(), sendDataPacket.size(), datagramPacket.getAddress(), datagramPacket.getPort());
@@ -133,10 +132,9 @@ public class UDPRequestHandler {
 		}
 	}
 
-
-	
 	private Vector3f tempVector = new Vector3f();
-	private void controlShip(Entity player, boolean[] actions, Vector3f angularVelocity, float dt) {
+
+	private void controlShip(Entity player, boolean[] actions, Vector3f angularVelocity, float angularVelocityDT, float dt) {
 		PlayerComponent playerComponent = (PlayerComponent) entityManager.getComponentInEntity(player, PlayerComponent.class);
 		Entity shipEntity = playerComponent.getShip();
 		if (shipEntity == null)
@@ -171,11 +169,12 @@ public class UDPRequestHandler {
 			shipComponent.getLinearThrust().add(objectComponent.getRight().mul(dt * 2 * linearDirection.x, tempVector));
 			shipComponent.getLinearThrust().add(objectComponent.getUp().mul(dt * 2 * linearDirection.y, tempVector));
 
-			objectComponent.yaw(dt * angularVelocity.y);
-			objectComponent.pitch(dt * angularVelocity.x);
-			objectComponent.roll(dt * angularVelocity.z);
-			
-//			System.out.println("UDP RE: "  + shipComponent.getLinearThrust());
+			// objectComponent.yaw(dt * angularVelocity.y);
+			// objectComponent.pitch(dt * angularVelocity.x);
+			// objectComponent.roll(dt * angularVelocity.z);
+			objectComponent.rotate(angularVelocityDT * angularVelocity.x, angularVelocityDT * angularVelocity.y, angularVelocityDT * angularVelocity.z);
+
+			// System.out.println("UDP RE: " + shipComponent.getLinearThrust());
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);

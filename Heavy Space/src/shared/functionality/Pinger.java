@@ -9,8 +9,8 @@ public class Pinger {
 	short latestTick;
 	short averageMS;
 
-	public void handlePing(long timeSent, short receivedTick) {
-		short ms = (short) (Globals.now - timeSent);
+	public void handlePing(float dt, short receivedTick) {
+		short ms = (short) (dt*1000);
 		latestMS = ms;
 		latestTick = receivedTick;
 		pingAcc -= ping[pingPos];

@@ -12,7 +12,6 @@ import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
 import shared.components.ProjectileComponent;
 import shared.components.SpawnComponent;
-import shared.functionality.Globals;
 
 public class MovementSystem {
 
@@ -44,9 +43,8 @@ public class MovementSystem {
 
 		movement.getAngularVel().fma(dt, movement.getAngularAcc());
 		movement.getAngularAcc().zero();
-		object.pitch(dt * movement.getAngularVel().x);
-		object.yaw(dt * movement.getAngularVel().y);
-		object.roll(dt * movement.getAngularVel().z);
+
+		object.rotate(dt * movement.getAngularVel().x, dt * movement.getAngularVel().y, dt * movement.getAngularVel().z);
 
 		movement.getLinearVel().fma(dt, movement.getLinearAcc());
 		movement.getLinearAcc().zero();
@@ -54,7 +52,8 @@ public class MovementSystem {
 		if (collision != null)
 			collision.getPreviousPosition().set(object.getPosition());
 		object.getPosition().fma(dt, movement.getLinearVel());
-		
+//		System.out.println(dt + " " + object.getPosition().x + " " +object.getPosition().y + " "+ object.getPosition().z);
+//		System.out.println(dt + " " + movement.getLinearVel().x + " " +movement.getLinearVel().y + " "+ movement.getLinearVel().z);
 //		
 //		ProjectileComponent projectile = (ProjectileComponent) entityManager.getComponentInEntity(entity, ProjectileComponent.class);
 //		if (projectile != null)

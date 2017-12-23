@@ -3,7 +3,6 @@ package client.controllers;
 import org.lwjgl.glfw.GLFW;
 
 import client.display.DisplayManager;
-import client.gameData.ClientGameFactory;
 import client.gameData.GameAssetLoader;
 import client.inputs.KeyboardHandler;
 import client.network.ConnectionManager;
@@ -11,11 +10,9 @@ import client.network.GameServerData;
 import client.renderers.RenderManager;
 import gameServer.core.ServerConfig;
 import gameServer.network.ServerCommunicator;
-import hecs.EntityManager;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
-import shared.functionality.Globals;
 import utilities.Loader;
 
 public class MainController {
@@ -52,18 +49,22 @@ public class MainController {
 		loop();
 	}
 
-	public void handleEvents() {
+	public void handleEvents(float dt) {
 		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_X)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_CREATE_ACCOUNT, username, password));
 		}
 		if (KeyboardHandler.kb_keyDownOnce(GLFW.GLFW_KEY_Z)) {
 			eventHandler.addEvent(new Event(EventType.CLIENT_EVENT_AUTHENTICATE, username, password));
 		}
-		connectionManager.handleUDPRequests();
-		connectionManager.handleTCPRequests();
+		connectionManager.handleUDPRequests(dt);
+		connectionManager.handleTCPRequests(dt);
 		Event event;
 		while ((event = eventHandler.poll()) != null) {
 			switch (event.type) {
+			case CLIENT_EVENT_TOGGLE_MOUSE: {
+				displayManager.toggleCursor();
+			}
+				break;
 			case CLIENT_EVENT_AUTHENTICATE: {
 				String username = (String) event.data[0];
 				String password = (String) event.data[1];
@@ -137,21 +138,21 @@ public class MainController {
 		int frames = 0;
 		while (!displayManager.shouldClose()) {
 			displayManager.pollInputs();
-			Globals.now = System.currentTimeMillis();
+			Long now = System.currentTimeMillis();
 			currentController.processInputs();
-			handleEvents();
-			currentController.update();
-			currentController.getScene().update(Globals.dt);
+			handleEvents(displayManager.getDeltaTime());
+			currentController.update(displayManager.getDeltaTime());
+			currentController.getScene().update(displayManager.getDeltaTime());
 			renderManager.render(currentController.getScene());
 			displayManager.updateDisplay();
 			frames++;
-			if (Globals.now - pingTimer >= 500) {
+			if (now - pingTimer >= 500) {
 				connectionManager.ping();
 				pingTimer += 500;
 			}
-			if (Globals.now - fpsTimer >= 1000) {
+			if (now - fpsTimer >= 1000) {
 				fpsTimer += 1000;
-				System.out.println("Fps: " + frames + " Snapshot tick:" + Globals.tick + " TCP " + connectionManager.tcpPinger + " UDP " + connectionManager.udpPinger);
+//				System.out.println("Fps: " + frames + " Snapshot tick:" + currentController.getTick() + " TCP " + connectionManager.tcpPinger + " UDP " + connectionManager.udpPinger);
 				frames = 0;
 			}
 		}

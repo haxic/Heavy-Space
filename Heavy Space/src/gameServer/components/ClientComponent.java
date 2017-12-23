@@ -90,6 +90,7 @@ public class ClientComponent extends EntityComponent implements EntityContainer 
 	}
 
 	public void disconnect() {
+		System.out.println("DISCONNECT PLAYER");
 		tcpSocketHandler.disconnect();
 	}
 	

@@ -18,7 +18,6 @@ import shared.components.SpawnComponent;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
 import shared.functionality.EventType;
-import shared.functionality.Globals;
 
 public class SpawnSystem {
 
@@ -36,7 +35,7 @@ public class SpawnSystem {
 		this.clientGameFactory = clientGameFactory;
 	}
 
-	public void process() {
+	public void process(int tick) {
 		List<Entity> entities = entityManager.getEntitiesContainingComponent(SpawnComponent.class);
 		if (entities == null)
 			return;
@@ -44,7 +43,7 @@ public class SpawnSystem {
 			return;
 		for (Entity entity : entities) {
 			SpawnComponent spawnComponent = (SpawnComponent) entityManager.getComponentInEntity(entity, SpawnComponent.class);
-			if (Globals.tick >= spawnComponent.getTick() || Globals.tick < 1000 && spawnComponent.getTick() > 8000) {
+			if (tick >= spawnComponent.getTick() || tick < 1000 && spawnComponent.getTick() > 8000) {
 				clientGameFactory.spawnEntity(entity, spawnComponent);
 				ShipComponent shipComponent = (ShipComponent) entityManager.getComponentInEntity(entity, ShipComponent.class);
 				

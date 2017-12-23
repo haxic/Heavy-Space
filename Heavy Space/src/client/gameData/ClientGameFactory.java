@@ -1,5 +1,6 @@
 package client.gameData;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import client.components.ActorComponent;
@@ -44,7 +45,7 @@ public class ClientGameFactory {
 		Entity entity = entityManager.createEntity();
 		Vector3f scale = new Vector3f(1, 1, 1);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
-		entityManager.addComponent(new ActorComponent(gameAssetLoader.sphere), entity);
+		entityManager.addComponent(new ActorComponent(gameAssetLoader.ship), entity);
 		return entity;
 	}
 
@@ -127,22 +128,27 @@ public class ClientGameFactory {
 		int entityVariation = (int) event.data[3];
 		short ownerEntityID = (short) event.data[4];
 		Vector3f position = (Vector3f) event.data[5];
-		Vector3f forward = (Vector3f) event.data[6];
-		Vector3f up = (Vector3f) event.data[7];
-		Vector3f right = (Vector3f) event.data[8];
-		Vector3f velocity = (Vector3f) event.data[9];
-		entity = prepareSpawnEntity(tick, entityType, entityVariation, ownerEntityID, position, forward, up, right, velocity);
+		Quaternionf orientation = (Quaternionf) event.data[6];
+//		Vector3f forward = (Vector3f) event.data[6];
+//		Vector3f up = (Vector3f) event.data[7];
+//		Vector3f right = (Vector3f) event.data[8];
+		Vector3f velocity = (Vector3f) event.data[7];
+//		entity = prepareSpawnEntity(tick, entityType, entityVariation, ownerEntityID, position, forward, up, right, velocity);
+		entity = prepareSpawnEntity(tick, entityType, entityVariation, ownerEntityID, position, orientation, velocity);
 		entityManager.addComponent(new ObjectComponent(position), entity);
 		gameModel.addEntity(eeid, entity);
 		return tick;
 	}
 
-	private Entity prepareSpawnEntity(short tick, int entityType, int entityVariation, short ownerEntityID, Vector3f position, Vector3f forward, Vector3f up, Vector3f right, Vector3f velocity) {
+//	private Entity prepareSpawnEntity(short tick, int entityType, int entityVariation, short ownerEntityID, Vector3f position, Vector3f forward, Vector3f up, Vector3f right, Vector3f velocity) {
+	private Entity prepareSpawnEntity(short tick, int entityType, int entityVariation, short ownerEntityID, Vector3f position, Quaternionf orientation, Vector3f velocity) {
 		Entity entity = entityManager.createEntity();
-		entityManager.addComponent(new SpawnComponent(tick, entityType, entityVariation, ownerEntityID, position, forward, up, right, velocity), entity);
+//		entityManager.addComponent(new SpawnComponent(tick, entityType, entityVariation, ownerEntityID, position, forward, up, right, velocity), entity);
+		entityManager.addComponent(new SpawnComponent(tick, entityType, entityVariation, ownerEntityID, position, orientation, velocity), entity);
 		switch (entityType) {
 		case 0: {
-			entityManager.addComponent(new SnapshotComponent(ownerEntityID, tick, position, forward, up, right), entity);
+//			entityManager.addComponent(new SnapshotComponent(ownerEntityID, tick, position, forward, up, right), entity);
+			entityManager.addComponent(new SnapshotComponent(ownerEntityID, tick, position, orientation), entity);
 		}
 			break;
 		default:
@@ -164,12 +170,13 @@ public class ClientGameFactory {
 		switch (spawnComponent.getEntityType()) {
 		case 0: {
 			SnapshotComponent snapshot = (SnapshotComponent) entityManager.getComponentInEntity(entity, SnapshotComponent.class);
-			spawnShip(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getForward(), spawnComponent.getUp(), spawnComponent.getRight());
+//			spawnShip(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getForward(), spawnComponent.getUp(), spawnComponent.getRight());
+			spawnShip(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getOrientation());
 		}
 			break;
 		case 1: {
-			spawnProjectile(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getForward(), spawnComponent.getUp(), spawnComponent.getRight(),
-					spawnComponent.getVelocity());
+//			spawnProjectile(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getForward(), spawnComponent.getUp(), spawnComponent.getRight(),
+			spawnProjectile(entity, spawnComponent.getEntityVariation(), spawnComponent.getPosition(), spawnComponent.getOrientation(),	spawnComponent.getVelocity());
 			switch (spawnComponent.getEntityVariation()) {
 			case 0:
 				spawnCannonProjectile(entity, spawnComponent.getPosition(), spawnComponent.getVelocity());
@@ -193,7 +200,7 @@ public class ClientGameFactory {
 		entityManager.removeComponentAll(SpawnComponent.class, entity);
 	}
 
-	private void spawnShip(Entity entity, int entityVariation, Vector3f position, Vector3f forward, Vector3f up, Vector3f right) {
+	private void spawnShip(Entity entity, int entityVariation, Vector3f position, Quaternionf orientation) {
 		Vector3f scale = new Vector3f(30, 30, 30);
 		entityManager.addComponent(new HealthComponent(), entity);
 		entityManager.addComponent(new ObjectComponent(position, scale), entity);
@@ -201,7 +208,7 @@ public class ClientGameFactory {
 		entityManager.addComponent(new ActorComponent(gameAssetLoader.ship), entity);
 	}
 
-	private void spawnProjectile(Entity entity, int entityVariation, Vector3f position, Vector3f forward, Vector3f up, Vector3f right, Vector3f velocity) {
+	private void spawnProjectile(Entity entity, int entityVariation, Vector3f position, Quaternionf orientation, Vector3f velocity) {
 		switch (entityVariation) {
 		case 0:
 			spawnCannonProjectile(entity, position, velocity);

@@ -1,24 +1,20 @@
 package gameServer.components;
 
 import hecs.EntityComponent;
-import shared.functionality.Globals;
 
 public class ClientPendingComponent extends EntityComponent {
-	
-	private long timestamp;
-	private boolean validated;
 
-	public ClientPendingComponent() {
-		timestamp = Globals.now;
+	private boolean validated;
+	private float elapsed;
+	private float length;
+
+	public ClientPendingComponent(float length) {
+		this.length = length;
 	}
 
 	@Override
 	protected void removeComponent() {
 		System.out.println("REMOVE ME");
-	}
-
-	public long getTimestamp() {
-		return timestamp;
 	}
 
 	public boolean isValidated() {
@@ -27,6 +23,13 @@ public class ClientPendingComponent extends EntityComponent {
 
 	public void validate() {
 		validated = true;
-		timestamp = Globals.now;
+	}
+
+	public void update(float dt) {
+		elapsed += dt;
+	}
+
+	public boolean overDue() {
+		return elapsed > length;
 	}
 }

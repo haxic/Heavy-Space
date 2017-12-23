@@ -1,7 +1,7 @@
 /config.txt
 /.gitignore
-/shared/
-/tests/
 /utilities/
+/client/
 /gameServer/
-/bin
+/tests/
+/shared/

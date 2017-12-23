@@ -2,6 +2,7 @@ package client.systems;
 
 import java.util.List;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import client.components.SnapshotComponent;
@@ -9,7 +10,6 @@ import client.gameData.Snapshot;
 import hecs.Entity;
 import hecs.EntityManager;
 import shared.components.ObjectComponent;
-import shared.functionality.Globals;
 
 public class SnapshotSystem {
 
@@ -20,7 +20,7 @@ public class SnapshotSystem {
 		this.entityManager = entityManager;
 	}
 
-	public void process(float dt, boolean useSnapshotInterpolation) {
+	public void process(float dt, int tick, boolean useSnapshotInterpolation) {
 		List<Entity> entities = entityManager.getEntitiesContainingComponent(SnapshotComponent.class);
 		if (entities == null)
 			return;
@@ -33,10 +33,10 @@ public class SnapshotSystem {
 			Snapshot current = snapshotComponent.getCurrent();
 			Snapshot next = snapshotComponent.getNext();
 
-			if (current.getTick() == Globals.tick) {
+			if (current.getTick() == tick) {
 				interpolate(dt, unitComponent, snapshotComponent);
-			} else if (current.getTick() < Globals.tick || (Globals.tick < 1000 && current.getTick() > 8000)) {
-				if ((next.getTick() > Globals.tick && !(next.getTick() > 8000 && Globals.tick < 1000)) || (next.getTick() < 1000 && Globals.tick > 8000)) {
+			} else if (current.getTick() < tick || (tick < 1000 && current.getTick() > 8000)) {
+				if ((next.getTick() > tick && !(next.getTick() > 8000 && tick < 1000)) || (next.getTick() < 1000 && tick > 8000)) {
 					interpolate(dt, unitComponent, snapshotComponent);
 				} else if (snapshotComponent.peekNext() != null) {
 					// Interpolating on next set
@@ -62,20 +62,15 @@ public class SnapshotSystem {
 		}
 	}
 
+	Quaternionf tempQuaternion = new Quaternionf();
 	private void interpolate(float dt, ObjectComponent unitComponent, SnapshotComponent snapshotComponent) {
 		// TODO: figure out why this is here?
 		snapshotComponent.getDifference();
 		snapshotComponent.getNext().getPosition().sub(snapshotComponent.getCurrent().getPosition(), tempVector);
 		unitComponent.getPosition().set(snapshotComponent.getCurrent().getPosition()).fma(dt, tempVector);
 
-		snapshotComponent.getNext().getForward().sub(snapshotComponent.getCurrent().getForward(), tempVector);
-		unitComponent.getForward().set(snapshotComponent.getCurrent().getForward()).fma(dt, tempVector);
-
-		snapshotComponent.getNext().getUp().sub(snapshotComponent.getCurrent().getUp(), tempVector);
-		unitComponent.getUp().set(snapshotComponent.getCurrent().getUp()).fma(dt, tempVector);
-
-		snapshotComponent.getNext().getRight().sub(snapshotComponent.getCurrent().getRight(), tempVector);
-		unitComponent.getRight().set(snapshotComponent.getCurrent().getRight()).fma(dt, tempVector);
+		snapshotComponent.getCurrent().getOrientation().slerp(snapshotComponent.getNext().getOrientation(), dt, unitComponent.getOrientation());
+		unitComponent.updateOrientation();
 	}
 
 }
