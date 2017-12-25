@@ -7,8 +7,9 @@ import org.joml.Vector3f;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import gameServer.core.ServerGameFactory;
+import gameServer.events.EntityCreatedEvent;
 import gameServer.events.PlayerActionEvent;
-import gameServer.events.PlayerSpawnEvent;
+import gameServer.events.SpawnShipRequestEvent;
 import hecs.Entity;
 import hecs.EntityManager;
 import hevent.Event;
@@ -73,8 +74,8 @@ public class PlayerSystem implements EventListener {
 					break;
 				}
 				shipEntity = serverGameFactory.createShip(position, entity);
-				entityManager.addComponent(new HealthComponent(), entity);
 				playerComponent.controlShip(shipEntity);
+				eventManager.createEvent(new EntityCreatedEvent(shipEntity));
 			}
 
 			// else if (shipEntity != null) {
@@ -97,8 +98,8 @@ public class PlayerSystem implements EventListener {
 		if (event instanceof PlayerActionEvent) {
 			PlayerActionEvent playerActionEvent = (PlayerActionEvent) event;
 			controlShip(playerActionEvent.player, playerActionEvent.actions, playerActionEvent.angularVelocity, playerActionEvent.angularVelocityDT, playerActionEvent.dt);
-		} else if (event instanceof PlayerSpawnEvent) {
-			PlayerSpawnEvent playerSpawnEvent = (PlayerSpawnEvent) event;
+		} else if (event instanceof SpawnShipRequestEvent) {
+			SpawnShipRequestEvent playerSpawnEvent = (SpawnShipRequestEvent) event;
 			createShip(playerSpawnEvent.entity);
 		}
 	}

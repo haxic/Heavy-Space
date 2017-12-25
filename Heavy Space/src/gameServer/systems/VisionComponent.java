@@ -1,4 +1,4 @@
-package gameServer.components;
+package gameServer.systems;
 
 import java.util.HashSet;
 import java.util.List;
@@ -8,12 +8,11 @@ import hecs.Entity;
 import hecs.EntityComponent;
 import hecs.EntityContainer;
 
-public class ClientGameDataTransferComponent extends EntityComponent implements EntityContainer {
-
+public class VisionComponent extends EntityComponent implements EntityContainer {
 	private Set<Entity> createEntities;
 	private Set<Entity> updateEntities;
 
-	public ClientGameDataTransferComponent() {
+	public VisionComponent() {
 		createEntities = new HashSet();
 		updateEntities = new HashSet();
 	}
@@ -24,11 +23,6 @@ public class ClientGameDataTransferComponent extends EntityComponent implements 
 	}
 
 	public void createEntities(List<Entity> entities) {
-		for (Entity entity : entities)
-			createEntity(entity);
-	}
-	
-	public void createEntities(Set<Entity> entities) {
 		for (Entity entity : entities)
 			createEntity(entity);
 	}
@@ -74,6 +68,5 @@ public class ClientGameDataTransferComponent extends EntityComponent implements 
 		updateEntities.remove(entity);
 		createEntities.remove(entity);
 	}
-
 
 }

@@ -64,11 +64,9 @@ public class SnapshotTransmitterSystem {
 			sendEntities(cgdtComponent.getUpdateEntities(), 36, SnapshotSequenceType.UPDATE);
 			endPacket();
 
-			cgdtComponent.clear();
 			// System.out.println("SEND DATA " + sstick);
 			for (DataPacket dataPacket : dataPackets) {
 				DatagramPacket datagramPacket = new DatagramPacket(dataPacket.getData(), dataPacket.size(), clientComponent.getUDPAddress(), clientComponent.getUDPPort());
-				System.out.println(datagramPacket.getLength());
 				udpServer.sendData(datagramPacket);
 			}
 			dataPackets.clear();
@@ -192,6 +190,7 @@ public class SnapshotTransmitterSystem {
 			dataPacket.addFloat(linearVel.y); // 29-32, Velocity y
 			dataPacket.addFloat(linearVel.z); // 33-36, Velocity z
 		}
+		System.out.println("SEND CREATE ENTITY: " + entity);
 		if (entityType != 1) {
 			dataPacket.addFloat(objectComponent.getOrientation().x); // 22-25, Orientation x
 			dataPacket.addFloat(objectComponent.getOrientation().y); // 26-29, Orientation y

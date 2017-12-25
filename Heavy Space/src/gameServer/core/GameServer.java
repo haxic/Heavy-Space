@@ -21,6 +21,7 @@ import gameServer.systems.RemoveSystem;
 import gameServer.systems.PlayerSystem;
 import gameServer.systems.ShipSystem;
 import gameServer.systems.SnapshotTransmitterSystem;
+import gameServer.systems.VisionSystem;
 import hecs.Entity;
 import hecs.EntityManager;
 import hevent.EventManager;
@@ -67,6 +68,7 @@ public class GameServer {
 	private SnapshotTransmitterSystem snapshotTransmitterSystem;
 
 	private ServerConfig serverConfig;
+	private VisionSystem visionSystem;
 
 	public GameServer(ServerConfig serverConfig, String username, String password) {
 		this.serverConfig = serverConfig;
@@ -87,11 +89,12 @@ public class GameServer {
 
 		aiBotSystem = new AIBotSystem(entityManager);
 		playerSystem = new PlayerSystem(entityManager, eventManager, serverGameFactory);
-		shipSystem = new ShipSystem(entityManager, serverGameFactory);
+		shipSystem = new ShipSystem(entityManager, eventManager, serverGameFactory);
 		movementSystem = new MovementSystem(entityManager);
 		collisionSystem = new CollisionSystem(entityManager);
 		projectileSystem = new ProjectileSystem(entityManager);
 		removeSystem = new RemoveSystem(entityManager);
+		visionSystem = new VisionSystem(entityManager, eventManager);
 		snapshotTransmitterSystem = new SnapshotTransmitterSystem(entityManager, udpServer);
 		initializeWorld();
 		initializeServer();
@@ -104,12 +107,13 @@ public class GameServer {
 //		 serverGameFactory.createBot(new Vector3f(-300, 700, 0), 0.5f, 1);
 //		 serverGameFactory.createBot(new Vector3f(-500, -100, 0), 0.75f, 1);
 
-		serverGameFactory.createObstacle(new Vector3f(-1500, 0, 0));
-		serverGameFactory.createObstacle(new Vector3f(1500, 0, 0));
-		serverGameFactory.createObstacle(new Vector3f(0, 1500, 0));
-		serverGameFactory.createObstacle(new Vector3f(0, -1500, 0));
-		serverGameFactory.createObstacle(new Vector3f(0, 0, 1500));
-		serverGameFactory.createObstacle(new Vector3f(0, 0, -1500));
+		System.out.println(serverGameFactory.createObstacle(new Vector3f(-1500, 0, 0)));
+//		serverGameFactory.createObstacle(new Vector3f(-1500, 0, 0));
+//		serverGameFactory.createObstacle(new Vector3f(1500, 0, 0));
+//		serverGameFactory.createObstacle(new Vector3f(0, 1500, 0));
+//		serverGameFactory.createObstacle(new Vector3f(0, -1500, 0));
+//		serverGameFactory.createObstacle(new Vector3f(0, 0, 1500));
+//		serverGameFactory.createObstacle(new Vector3f(0, 0, -1500));
 
 	}
 
@@ -190,6 +194,7 @@ public class GameServer {
 		movementSystem.process(dt);
 		collisionSystem.process();
 		projectileSystem.process(dt);
+		visionSystem.process();
 	}
 
 	private void sendSnapshot(int tick) {

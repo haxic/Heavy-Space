@@ -14,6 +14,7 @@ import client.network.GameServerData;
 import gameServer.systems.ShipSystem;
 import hecs.Entity;
 import hecs.EntityManager;
+import hevent.EventManager;
 import shared.components.ObjectComponent;
 import shared.functionality.Event;
 import shared.functionality.EventHandler;
@@ -44,7 +45,7 @@ public class MenuController implements IController {
 	private MovementSystem movementSystem;
 	private CollisionSystem collisionSystem;
 	ShipControls controls = new ShipControls();
-
+	EventManager eventManager;
 	public MenuController(EventHandler eventHandler, GameServerData gameServerData, GameAssetLoader gameAssetLoader) {
 		this.eventHandler = eventHandler;
 		this.gameServerData = gameServerData;
@@ -52,9 +53,9 @@ public class MenuController implements IController {
 		clientGameFactory = new ClientGameFactory(entityManager, gameAssetLoader);
 
 		shipControls = new ShipControls();
-
+		eventManager = new EventManager();
 		aiBotSystem = new AIBotSystem(entityManager);
-		shipSystem = new ShipSystem(entityManager, null);
+		shipSystem = new ShipSystem(entityManager, null, null);
 		movementSystem = new MovementSystem(entityManager);
 		collisionSystem = new CollisionSystem(entityManager);
 

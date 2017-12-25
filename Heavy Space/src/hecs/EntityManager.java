@@ -2,6 +2,7 @@ package hecs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,13 +103,11 @@ public class EntityManager {
 			return;
 		// Detach entity from all containers
 		// TODO: Improve this. LOL!
-		EntityContainer[] containers = new EntityContainer[entity.references.size()];
-		for (int i = 0; i < containers.length; i++) {
-			containers[i] = entity.references.get(i);
+		for (Iterator<EntityContainer> iterator = entity.references.iterator(); iterator.hasNext();) {
+			EntityContainer entityContainer = (EntityContainer) iterator.next();
+			entityContainer.detach(entity);
 		}
-		for (int i = 0; i < containers.length; i++) {
-			containers[i].detach(entity);
-		}
+		
 		// Remove all components belonging to the entity
 		for (Entry<Class<? extends EntityComponent>, HashMap<Entity, EntityComponent>> entry : dataStructure.entrySet()) {
 			HashMap<Entity, EntityComponent> value = entry.getValue();

@@ -10,6 +10,7 @@ import gameServer.components.ClientComponent;
 import gameServer.components.ClientGameDataTransferComponent;
 import gameServer.components.ClientPendingComponent;
 import gameServer.components.ClientValidatedComponent;
+import gameServer.systems.VisionComponent;
 import hecs.Entity;
 import hecs.EntityContainer;
 import hecs.EntityManager;
@@ -126,8 +127,9 @@ public class ClientManager implements EntityContainer {
 							entityManager.removeComponentAll(ClientPendingComponent.class, entity);
 							entityManager.addComponent(new ClientValidatedComponent(), entity);
 							ClientGameDataTransferComponent cgdtComponent = (ClientGameDataTransferComponent) entityManager.addComponent(new ClientGameDataTransferComponent(), entity);
+							VisionComponent visionComponent = (VisionComponent) entityManager.addComponent(new VisionComponent(), entity);
 							List<Entity> units = entityManager.getEntitiesContainingComponent(ObjectComponent.class);
-							cgdtComponent.createUnits(units);
+							visionComponent.createEntities(units);
 						} else {
 							DataPacket sendDataPacket = new DataPacket(new byte[3]);
 							sendDataPacket.addByte((byte) RequestType.CLIENT_REQUEST_READY.ordinal());

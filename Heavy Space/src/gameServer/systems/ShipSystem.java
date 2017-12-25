@@ -7,8 +7,10 @@ import org.joml.Vector3f;
 import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import gameServer.core.ServerGameFactory;
+import gameServer.events.EntityCreatedEvent;
 import hecs.Entity;
 import hecs.EntityManager;
+import hevent.EventManager;
 import shared.components.HealthComponent;
 import shared.components.MovementComponent;
 import shared.components.ObjectComponent;
@@ -18,9 +20,11 @@ public class ShipSystem {
 
 	private EntityManager entityManager;
 	private ServerGameFactory serverGameFactory;
+	private EventManager eventManager;
 
-	public ShipSystem(EntityManager entityManager, ServerGameFactory serverGameFactory) {
+	public ShipSystem(EntityManager entityManager, EventManager eventManager, ServerGameFactory serverGameFactory) {
 		this.entityManager = entityManager;
+		this.eventManager = eventManager;
 		this.serverGameFactory = serverGameFactory;
 	}
 
@@ -39,13 +43,14 @@ public class ShipSystem {
 				shipComponent.firePrimary();
 				Vector3f forward = new Vector3f((float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f, (float) Math.random() * 0.04f - 0.02f).add(objectComponent.getForward())
 						.normalize();
-				serverGameFactory.createCannonProjectile(entity, new Vector3f(objectComponent.getPosition()), forward.mul(1200).add(movementComponent.getLinearVel()));
+				Entity projectileEntity = serverGameFactory.createCannonProjectile(entity, new Vector3f(objectComponent.getPosition()), forward.mul(1200).add(movementComponent.getLinearVel()));
+				eventManager.createEvent(new EntityCreatedEvent(projectileEntity));
 			}
 			if (shipComponent.isRequestFireSecondary()) {
 				shipComponent.fireSecondary();
-				serverGameFactory.createPlasmaProjectile(entity, new Vector3f(objectComponent.getPosition()),
+				Entity projectileEntity = serverGameFactory.createPlasmaProjectile(entity, new Vector3f(objectComponent.getPosition()),
 						new Vector3f(objectComponent.getForward()).mul(750).add(movementComponent.getLinearVel()));
-
+				eventManager.createEvent(new EntityCreatedEvent(projectileEntity));
 			}
 
 			// HealthComponent healthComponent = (HealthComponent) entityManager.getComponentInEntity(entity, HealthComponent.class);

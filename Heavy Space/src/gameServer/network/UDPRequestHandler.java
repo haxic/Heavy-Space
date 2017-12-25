@@ -9,7 +9,7 @@ import gameServer.components.PlayerComponent;
 import gameServer.components.ShipComponent;
 import gameServer.core.ClientManager;
 import gameServer.events.PlayerActionEvent;
-import gameServer.events.PlayerSpawnEvent;
+import gameServer.events.SpawnShipRequestEvent;
 import hecs.Entity;
 import hecs.EntityManager;
 import hevent.EventManager;
@@ -107,7 +107,7 @@ public class UDPRequestHandler {
 					if (player == null)
 						break;
 					
-					eventManager.createEvent(new PlayerSpawnEvent(player));
+					eventManager.createEvent(new SpawnShipRequestEvent(player));
 				}
 					break;
 				case CLIENT_REQUEST_PING: {

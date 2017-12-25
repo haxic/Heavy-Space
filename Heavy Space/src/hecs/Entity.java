@@ -1,9 +1,10 @@
 package hecs;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Entity {
-	protected ArrayList<EntityContainer> references = new ArrayList<EntityContainer>();
+	protected Set<EntityContainer> references = new HashSet<>();
 	private long eid;
 
 	public Entity(long eid) {

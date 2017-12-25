@@ -1,7 +1,5 @@
 /config.txt
 /.gitignore
 /gameServer/
-/tests/
-/hevent/
+/hecs/
 /client/
-/shared/
